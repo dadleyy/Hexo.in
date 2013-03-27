@@ -1,0 +1,127 @@
+section.main-content{ margin-top: 20px; }
+section.main-content > section,
+section.main-content > article{ min-height: 700px; }
+section.main-content article.player-name{
+    width: 139px; overflow: hidden; 
+}
+section.main-content article.player-name.challenger{ 
+    padding: 0 10px 0px 0; 
+    text-align: right;
+}
+section.main-content article.player-name.visitor{ 
+    padding: 0 0px 0px 10px; 
+}
+section.main-content section.game-zone{ width: 580px; }
+section.main-content article.player-name h4.position{
+    color: #a0a0a0;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 10px;
+    text-transform: lowercase;
+    line-height: 14px;
+}
+section.main-content article.player-name h1.name{
+    font-size: 16px;
+    line-height: 14px;
+    text-transform: uppercase;
+    text-shadow: 1px 1px rgba(255,255,255,0.75);
+}
+section.main-content article.player-name div.stats{ margin-top: 10px; }
+section.main-content article.player-name div.stats dl{ 
+    width: 69px;
+    text-align: left;
+    font-size: 12px;
+    font-family: 'Open Sans', sans-serif; 
+    font-weight: 400;
+    color: #333;
+}
+section.main-content article.player-name.challenger div.stats dl{ text-align: right; }
+section.main-content article.player-name div.stats dl dd,
+section.main-content article.player-name div.stats dl dt{ 
+    width: 69px;
+    font-size: 12px;
+    font-family: 'Open Sans', sans-serif; 
+    font-weight: 400;
+    color: #555;
+    margin: 0px; padding: 0px;
+    display: block;
+}
+section.main-content article.player-name div.stats dl dd{ font-weight: 700; color: #333; font-size: 14px; }
+
+section.main-content section.game-zone{ 
+    padding-top: 20px; 
+    box-shadow: 0px 0px 1px 1px rgba(0,0,0,0.15),
+                inset 0px 1px 1px rgba(255,255,255,0.75);
+}
+section.main-content section.game-zone div.inner{
+    position: relative;
+    margin: 0px 20px 20px 20px;
+    background-color: rgba(0,0,0,0.03);
+    border-radius: 2px;
+    position: relative;
+    box-shadow: 0px 0px 1px rgba(255,255,255,0.75),
+                inset 0px 0px 1px rgba(0,0,0,0.3);
+}
+
+section.main-content section.game-zone section.chat-window,
+section.main-content section.game-zone section.game-board{
+    position: relative;
+    width: 540px;
+    height: 440px;
+}
+section.main-content section.game-zone section.chat-window{ overflow: hidden; height: 200px; padding: 10px 0px; }
+
+#svghelper{ position: fixed; left: -100%; top: -100%; overflow: hidden; }
+#chat-zone{ position: absolute; left: -5%; top: 10px; height: 200px; width: 100%; padding: 0 5%; overflow-y: scroll; }
+#render-zone{ position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; }
+
+#chat-zone dl.message{
+    font-family: 'Open Sans', sans-serif; 
+    font-weight: 400;
+    color: #555;
+    font-size: 14px;
+    width: 500px;
+    margin: 0px 20px 20px;
+    display: block;
+}
+#chat-zone dl.message dt,
+#chat-zone dl.message dd{ display: block; padding: 0px; margin: 0px; }
+
+#chat-zone dl.message dt{ width: 100px; font-weight: 600; }
+#chat-zone dl.message dd{ width: 400px; text-align: justify; }
+
+#chat-zone dl.message.visitor dt{ float: right; text-align: right; }
+#chat-zone dl.message.visitor dd{ float: right; }
+
+section.ingame-menu{ margin-top: 10px; }
+section.ingame-menu a.slick{ 
+    display: block;
+    font-size: 10px;
+    line-height: 20px;
+    margin: 0px 0px 10px;
+    width: 75px;
+    text-align: center;
+    height: 20px;
+    text-transform: uppercase;
+    font-family: 'Raleway', sans-serif;
+    font-weight: 700;
+    clear: both;
+}
+section.main-content article.player-name.challenger section.ingame-menu a.slick{ float: right; }
+section.main-content section.chat-control{ padding: 0px 10px; height: 35px; }
+section.main-content section.chat-control input[type="text"]{
+
+    background: transparent;
+    display: block;
+    height: 35px;
+    width: 520px;
+    display: block;
+    background-color: transparent;
+    color: #aaa;
+    font-family: 'Raleway', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 9;
+    text-shadow: 1px 1px rgba(255,255,255,0.1);
+}

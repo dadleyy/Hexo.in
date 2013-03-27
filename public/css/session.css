@@ -1,0 +1,102 @@
+article.login-form{
+    width: 500px;
+    background: rgba(0,0,0,0.1);
+    box-shadow: inset 0px 0px 1px rgba(0,0,0,0.55),
+                0px 0px 1px rgba(255,255,255,0.6);
+    padding: 10px 0px 10px;
+    text-align: center;
+}
+
+article.login-form h1{ margin: 10px 0 10px; color: #666; font-size: 34px; font-weight: 300; font-family: 'Raleway', sans-serif; }
+article.login-form p{ color: #aaa; font-size: 12px; font-weight: 700; font-family: 'Raleway', sans-serif; }
+article.login-form form{ margin-top: 10px; }
+article.login-form div.errors { margin-top: 30px; }
+article.login-form div.errors h1{
+    font-size: 14px;
+    font-weight: 400;
+    font-family: 'Open Sans', sans-serif;
+}
+article.login-form span.plain-logo{
+    margin: 20px auto; 
+}
+article.login-form form div.input{ position: relative; }
+article.login-form form div.input span.placeholder,
+article.login-form form input[type="password"],
+article.login-form form input[type="text"]{
+    width: 400px;
+    display: block;
+    background-color: transparent;
+    border-bottom: 1px solid #aaa;
+    color: #aaa;
+    height: 35px;
+    margin: 10px auto 10px;
+    font-family: 'Raleway', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 9;
+    text-shadow: 1px 1px rgba(255,255,255,0.1);
+}
+article.login-form form div.input.errored span.placeholder,
+article.login-form form input[type="password"].errored,
+article.login-form form input[type="text"].errored{
+    color: #ce334c;
+}
+
+article.login-form form div.input span.placeholder{ 
+    position: absolute; 
+    top: 0px; 
+    left: 50%; 
+    margin-left: -200px; 
+    text-align: left;
+    line-height: 35px;
+    z-index: 8;
+}
+
+article.login-form form input[type="password"]:focus,
+article.login-form form input[type="text"]:focus{
+    color: #666;
+}
+
+article.login-form form div.actions {
+    width: 260px;
+    margin: 40px auto 20px;
+}
+
+article.login-form form div.actions a,
+article.login-form form div.actions input[type="submit"]{
+    display: block;
+    margin: 0 5px 0;
+    font-size: 12px;
+    width: 120px;
+    text-align: center;
+    line-height: 12px;
+    font-weight: 300; 
+    font-family: 'Raleway', sans-serif;
+    padding: 10px 0px;
+    border-radius: 3px;
+    
+    -webkit-transition-property: box-shadow;
+    -moz-transition-property: box-shadow;
+    -o-transition-property: box-shadow;
+    transition-property: box-shadow;
+    
+    color: #aaa;
+    text-transform: uppercase;
+    box-shadow: 0px 0px 0px #00ccff,
+                0px 0px 1px 1px rgba(0,0,0,0.9),
+                inset 0px 1px 0px 1px rgba(255,255,255,0.1);
+}
+article.login-form form div.actions a:hover,
+article.login-form form div.actions input[type="submit"]:hover{ 
+    box-shadow: 0px 0px 10px #00ccff,
+                0px 0px 1px 1px rgba(0,0,0,0.9),
+                inset 0px 1px 0px 1px rgba(255,255,255,0.1);
+}
+
+article.login-form form div.actions.register a,
+article.login-form form div.actions.register input[type="submit"]{
+    margin: 0px auto; 
+    float: none;
+}

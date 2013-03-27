@@ -1,0 +1,12 @@
+/* ****************** */
+/* !error page styles */
+section.error article.dark{ text-align: center; }
+section.error article.dark div.inner{ 
+    padding: 20px 20px 80px 20px; 
+    background-color: rgba(0,0,0,0.1); 
+    box-shadow: inset 0px 0px 1px rgba(0,0,0,0.5);
+}
+section.error article.dark h1{ 
+    font-size: 24px;
+    font-weight: 300;
+}

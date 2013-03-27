@@ -1,0 +1,79 @@
+section.main-content{ /* margin-top: 20px; */ }
+section.main-content p{
+    color: #6e6e6e;
+    margin-bottom: 20px;
+    font-family: 'Open Sans', sans-serif;
+}
+section.main-content p.big{
+    font-size: 25px;
+    margin-bottom: 10px;
+}
+section.main-content p.big em.rale{ font-family: 'Righteous', cursive; font-style: normal; }
+section.main-content p.reg{
+    font-size: 16px;
+}
+section.main-content ul.reviews{
+    list-style: none;
+    font-size: 14px;
+    font-weight: 400;
+    font-family: 'Open Sans', sans-serif;
+    color: #555;
+}
+section.main-content ul.reviews li{
+    line-height: 1.5em;
+    margin: 0px 0px 20px 0px;
+}
+section.main-content a.icon{
+    background-image: url(/img/button_bg.png);
+    width: 40px;
+    height: 40px;
+    display: block;
+    position: relative;
+    margin-right: 5px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+section.main-content div.socials{ margin-top: -5px; }
+section.main-content a.icon span.logo,
+section.main-content a.icon span.fg{
+    background-image: url(/img/button_fg.png);
+    width: 40px;
+    height: 40px;
+    display: block;
+    position: relative;
+    margin-right: 5px;
+    position: absolute;
+    background-repeat: no-repeat;
+    background-position: center center;
+    top: 1px;
+}
+section.main-content a.icon:hover span.logo,
+section.main-content a.icon:hover span.fg{
+    top: 0px;
+}
+
+section.main-content a.icon span.logo{ opacity: 0.9; }
+section.main-content a.icon:hover span.logo{ opacity: 1.0; }
+
+section.main-content a.icon.twitter span.logo{
+    background-image: url(/img/twitter.png);   
+}
+section.main-content a.icon.facebook span.logo{
+    background-image: url(/img/facebook.png);
+}
+section.main-content a.icon.twitter span.logo{ background-image: url(/img/twitter.png); }
+section.main-content a.icon.facebook span.logo{ background-image: url(/img/facebook.png); }
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,62 @@
+section.main-content{ }
+section.main-content section.posts{ }
+section.main-content section.posts article.post{ width: 420px; }
+section.main-content section.posts article.post div.inner{ 
+    padding: 20px; 
+    box-shadow: 0px 0px 1px rgba(0,0,0,0.6),    
+                inset 0px 0px 1px rgba(255,255,255,0.5);
+}
+
+section.main-content section.posts h3,
+section.main-content section.posts h1{ 
+    font-size: 24px;
+    font-weight: 700;
+    color: #353535;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding: 0px 0px 5px 0px;
+    margin: 0px 0px 5px 0px;
+}
+
+section.main-content.single article.top h3,
+section.main-content section.posts h3{
+    font-size: 14px;
+    font-weight: 400;
+    color: #666;
+    border: 0px;
+    font-family: 'Open Sans', sans-serif; 
+}
+
+section.main-content section.posts p{
+    line-height: 1.5em;
+    font-size: 14px;
+    font-family: 'Open Sans', sans-serif; 
+    font-weight: 400;
+    color: #454545;
+    margin-bottom: 5px;
+}
+section.main-content section.posts a{
+    font-size: 12px;
+    font-weight: 700;
+    color: #858585;
+    text-transform: uppercase;
+}
+section.main-content section.posts a:hover{ color: #333; } 
+
+section.main-content.single article.top{ margin: 0px 0px 20px 0px; }
+section.main-content.single article.top h1{ font-size: 34px; text-transform: uppercase; border: 0px; }
+section.main-content.single article.top > h3{ 
+    line-height: 14px;
+    font-size: 14px;
+    font-family: 'Open Sans', sans-serif; 
+    font-weight: 400;
+    color: #454545;
+}
+section.main-content.single article.top > h3 em{ font-style: normal; font-weight: 600; }
+section.main-content.single article.post-content p{ 
+    line-height: 1.5em;
+    font-size: 14px;
+    font-family: 'Open Sans', sans-serif; 
+    font-weight: 400;
+    color: #666;
+}
+
