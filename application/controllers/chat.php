@@ -56,64 +56,59 @@ class Chat_Controller extends Base_Controller {
         while ( !$changed ) { 
                     
             $c_time = time( );
-            /* time out - the loop has been going on for wayy too long */
-            if( ($c_time - $s_time) > 20 || $loops > 10000 ){
-                
+            
+            /* ************************************************** *
+             * SOCKET STATE - socket timeout                      *
+             * This socket loop has been going on for too long,   *
+             * it is time to let the client know to make a new rq *
+             * ************************************************** */
+            if( ($c_time - $s_time) > 10 || $loops > 10000 ){
                 $output = array(
                     "success" => true,
-                    "code" => 2,
-                    "timeout" => $loops,
-                    "type" => "chat [2]",
-                    "rest" => true
-                );
-                
-                return Response::make( json_encode($output), 202, $headers );
+                    "code" => 2
+                );        
+                return Response::make( json_encode($output), 200, $headers );
             }
             
-            if( $chat_obj == null ) {
-            
+            /* ************************************************** *
+             * SOCKET STATE - chat closed                         *
+             * ************************************************** */
+            if( $chat_obj == null || $chat_obj->isClosed( ) ) {
                 $output = array(
                     "success" => false,
-                    "code" => 4,
-                    "timeout" => $loops,
-                    "type" => "chat [4]",
-                    "rest" => true
+                    "new_flag" => "dead",
+                    "code" => 4
                 );
-                
-                return Response::make( json_encode($output), 202, $headers );
+                return Response::make( json_encode($output), 200, $headers );
             }
             
+            /* ************************************************** *
+             * SOCKET STATE - updated needed                      *
+             * There has been a change since the last time the    *
+             * socket hit this iteration, send the update to the  *
+             * client.                                            *
+             * ************************************************** */
             if( $chat_obj->getFlag( ) !== $original_flag ) {
-                
                 $package = $chat_obj->mostRecentMessages( );
                 $output = array( 
                     "success" => true,
                     "code" => 1,
-                    "type" => "chat [1]",
-                    "timeout" => $loops,
-                    "old_flag" => $original_flag,
                     "new_flag" => $chat_obj->getFlag( ),
-                    "package" => $package,
-                    "request" => Request::forged( )
+                    "package" => $package
                 );
-                
                 return Response::make( json_encode($output), 200, $headers );
-                
             }
             
             
             $loops++;
-            time_nanosleep( 0, 900000 );
+            time_nanosleep( 0, 9000000 );
         
         }
         
         $output = array(
             "success" => true,
-            "code" => 2,
-            "type" => "chat",
-            "timeout" => $loops
+            "code" => 2
         );
-        
         return Response::make( json_encode($output), 202, array() );
         
     }

@@ -5,12 +5,16 @@ class Game extends Tokened {
     public static $table = 'games';
     public static $timestamps = true;
     
-    public function visitor( ){
-        return User::find( $this->visitor_id );
+    public function visitor( ){ 
+        return User::find( $this->visitor_id ); 
     }
     
-    public function challenger( ){
-        return User::find( $this->challenger_id );
+    public function challenger( ){ 
+        return User::find( $this->challenger_id ); 
+    }
+    
+    public function isOver( ) { 
+        return !file_exists( $this->gamefile( ) ); 
     }
     
     public function gamefile( ){
@@ -23,7 +27,7 @@ class Game extends Tokened {
     
     public function getFlag( ) {
         
-        if( !file_exists( $this->gamefile( ) ) ) {
+        if( !file_exists( $this->gamefile() ) ) {
             return "dead";
         }
         
@@ -47,6 +51,7 @@ class Game extends Tokened {
         $public['token'] = $this->encodeToken( $token );
     
         $public['state'] = $info['state'];
+        $public['turn'] = $info['turn'];
         $public['tiles'] = $info['tiles'];
         $public['flag'] = $info['flag'];
         
