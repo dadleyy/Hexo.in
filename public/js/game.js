@@ -10,8 +10,8 @@ var /* entry point */
     domEntry,
 
     /* public: */
-    Game = function( conf ){ return new Game.ns.rig(conf); },
-    Tile = function( game, opts ){ return new Tile.ns.rig(game, opts); },
+    Game,
+    Tile,
     
     /* private: */
     _games = { },      // hash of game instances
@@ -20,6 +20,7 @@ var /* entry point */
     _chatZone,         // the chat zone
     _defaults, _d,     // default settings       
     _layerInits = { }, // layer prep functions
+    _userTurn = 1,     // the turn associated with the current user
     
     /* _prepDom
      * Gets some DOM references, creates the needed
@@ -33,10 +34,24 @@ var /* entry point */
         /* add the helper svg element */
         var _helper = d3.select(document.body).append("svg"),
             _defs   = _helper.append("defs"),
-            _hexo   = _defs.append("polygon");
-            
+            _hexo   = _defs.append("polygon"),
+            _mbgrad = _defs.append("linearGradient");
+        
+        _mbgrad.append("stop").attr( _d["msgboxgradstops"][0] );
+        _mbgrad.append("stop").attr( _d["msgboxgradstops"][1] );
+        
+        /*
+            <linearGradient id="g864" gradientUnits="userSpaceOnUse" x1="100%" y1="100%" x2="100%" y2="0%">
+                <stop stop-color="#726D5D" offset="0"/>
+                <stop stop-color="#807A69" offset="1"/>
+            </linearGradient>
+        */    
+        
         _hexo.attr( _d['hexo'] );
         _helper.attr( _d['helpersvg'] );
+        _mbgrad.attr( _d['msgboxgrad'] );
+        
+        
         
     },
     
@@ -57,11 +72,21 @@ var /* entry point */
         /* set the two users */
         game.challenger = User(conf.challenger);
         game.visitor = ( conf.visitor ) ? User(conf.visitor) : false;
-        
+            
+        if( game.visitor && game.visitor.active && !game.challenger.active ) {
+            _userTurn = 2;
+            U.l("you are the visitor of this game");
+        } 
+        else if ( !game.visitor || ( !game.visitor.active && game.challenger.active) ) {
+            _userTurn = 1;
+            U.l("you are the challenger of this game");
+        }
+    
         /* set the rest of the stuff */
         game.state = conf.state;
         game.tiles = conf.tiles;
-        
+        game.turn  = conf.turn || 0;
+    
         game.chatroom = ( conf.chatroom ) ? Chat(conf.chatroom) : false;
         
         /* make a new socket */
@@ -135,31 +160,62 @@ _layerInits = {
         U.l("rendering game layer");
         
         var x = 100, y = 130, row = 0, order = [3,4,5,6,5,4,3],
-            set = 0, inc = -1, nx, ny;
-        
-        for( var i = 0; i < 37; i++ ) {
+            set = 0, inc = -1, nx, ny, sum = 0, val = 0, _tiles = [ ],
+            info;
             
+        for( var i in this.tiles ) {
+            /* prevent prototyping of tiles array */
+            if( !this.tiles.hasOwnProperty(i) ) { continue; } 
+            
+            // save the info and parse the index
+            info = this.tiles[i];        
+            i    = U.pint(i);   
+            
+            /* make sure we have a hole in the middle */
+            if( i == 19 ) {
+                set++;    
+            }
+            /* move on to the next row order if necessary */
             if( set > order[row] ) {
                 row++;
                 set = 0;
                 y += inc * 30;
             }
+            /* if halfway done with the hexagon, start moving down */
             if( row >= Math.floor(order.length * 0.5) ){
                 inc = 1;
             }
             
+            /* get positions */
             nx = x + ( row * 54 ); 
             ny = y + ( set * 60 );
             set ++;
             
-            if( i == 18 ){ continue; }
-            
-            var t = Tile({id:(i>18)?i-1:i}, this );
-            t.render( layer, nx, ny );
-            this.tiles[i] = t;
+            /* make the tile, render and push */    
+            var t = Tile( info , this );
+            _tiles.push( t.render( layer, nx, ny ) );
         }
         
-    } 
+        
+        this.tiles = _tiles;
+    },
+    
+    /* _layerInits.ui
+     * sets up the ui layer in the svg
+     * @param {{object}} layer The ui layer
+    */ 
+    ui : function ( layer ) {
+        var msgbox = layer.append("g").attr( _d['msgbox'] ),
+            msginn = msgbox.append("g").attr("transform","translate(0,0)"),
+            msgrect = msginn.append("rect").attr( _d['msgrect'] ),
+            msgtxt = msginn.append("text").attr( _d['hexotext'] );
+            
+        this.dom.msgbox = {
+            container : msginn,
+            rect : msgrect,
+            text : msgtxt   
+        };
+    }
 
 };
     
@@ -175,13 +231,42 @@ _defaults = _d = {
         width : "540px",
         height : "440px"
     },
+    msgbox : {
+        transform : "translate(270,-100)",
+        "data-name" : "msgbox"
+    },
+    msgrect : {
+        width : 320,
+        height : 120,
+        fill : "url(#msgboxgrad)",
+        ry : 4,
+        rx : 4,
+        x : -160,
+        y : -60
+    },
+    msgtxt : { },
+    msgboxgrad : {
+        id : "msgboxgrad",
+        gradientUnit : "userSpaceOnUse",
+        x1 : "100%",
+        y1 : "100%",
+        x2 : "100%",
+        y2 : "0%"
+    },
+    msgboxgradstops : [{
+        "stop-color" : "#807a69",
+        "offset"  : "1" 
+    },{
+        "stop-color" : "#726D5D",
+        "offset"  : "0" 
+    }],
     gamesocket : { url : "/game/socket" },
     helpersvg : {
         width : "0px",
         height : "0px",
         id : "svghelper"
     },
-    layers : [ "ui", "game" ],
+    layers : [ "game", "ui" ],
     hexo : {
         "points" : "16.326,28.101 -16.174,28.188 -32.5,0.086 -16.326,-28.101 16.174,-28.188 32.5,-0.086",
         "id" : "hexo"
@@ -201,9 +286,10 @@ _defaults = _d = {
     }
 };
 
-/* ********** *
- * Tile Class *
- * ********** */
+////////////////////////
+// NAMESPACE : Tile   //
+////////////////////////
+Tile = function( game, opts ){ return new Tile.ns.rig(game, opts); };
 Tile.ns = Tile.prototype = (function ( ){
     
     var _ns = {
@@ -219,8 +305,12 @@ Tile.ns = Tile.prototype = (function ( ){
         _offHover;
         
     _onClick = function ( ) {
-        
-    }
+        /* check to make sure it's the right turn */
+        if( this.game.turn !== _userTurn ) {
+            this.game.notify("its not your turn!");
+            return false;
+        }
+    };
         
     _onHover = function( ) {
         this.dom.tile
@@ -242,22 +332,25 @@ Tile.ns = Tile.prototype = (function ( ){
         if( !game ) { this.errored = true; return false; }
         this.game = game;    
         
+        this.uid = U.uid( );
+        
         this.state = opts.state || 0;
-        this.id = opts.id || 0;
+        this.value = opts.value || 0;
     };
 
     _ns.render = function( layer, xpos, ypos ){
-        var group = layer.append("g").attr("data-id", this.id ),
+        var group = layer.append("g").attr("data-uid", this.uid ),
             tile  = group.append("use"),
             text  = group.append("text");
         
-        text.attr( _d['hexotext'] ).text( this.id + 1 );
+        text.attr( _d['hexotext'] ).text( this.value );
         group.attr("transform", U.tsm(xpos,ypos) );
         tile.attr( _d['gamehexo'] );
         
         group
             .on("mouseover", _onHover.bind( this ) )
-            .on("mouseout", _offHover.bind( this ) );
+            .on("mouseout", _offHover.bind( this ) )
+            .on("click", _onClick.bind( this ) );
             
         this.dom = { group : group, tile : tile };
             
@@ -267,74 +360,108 @@ Tile.ns = Tile.prototype = (function ( ){
     return _ns;
     
 })( );
+Tile.ns.rig.prototype = Tile.prototype;
 
     
     
-/* ********** *
- * Game Class *
- * ********** */
-Game.ns = Game.prototype =  {
+////////////////////////
+// NAMESPACE : Game   //
+////////////////////////
+Game = function( conf ){ return new Game.ns.rig(conf); };
+Game.ns = Game.prototype =  (function ( ) {
     
-    version : "1.0",
-    constructor : Game,
-    errored : false,
-    dom : { }
+    var _ns = {
     
-};  
+        version : "1.0",
+        constructor : Game,
+        errored : false,
+        dom : { }
+        
+    };  
 
-/* Game.rig 
- * @param {object} conf Intial information about the game
-*/
-Game.ns.rig = function( conf ) {
-    if( conf === undefined || !conf ){ this.errored = true; return false; }  
-    U.l("Preparing game for document.ready");
-    return _set( conf, this );
-};
-
-Game.ns.end = function( ) {
-    U.l("game over");
-    this.socket.close( );
-};
-Game.ns.update = function( data ) {
-    if( !data || data.state === null ){ this.end( ); }
-    if( data.state === 1 && this.state === 0 ){
-        this.socket.reset( true );
-        this.state = 1;
-    } 
-    if( this.visitor === false && data.visitor != false ){
-        U.l("The visitor has joined");
-        var visitor = User( data.visitor ),
-            $domInfo = $("#visitor-info");
+    /* Game.rig 
+     * @param {object} conf Intial information about the game
+    */
+    _ns.rig = function( conf ) {
+        if( conf === undefined || !conf ){ this.errored = true; return false; }  
+        U.l("Preparing game for document.ready");
+        return _set( conf, this );
+    };
+    
+    /* Game.end
+    */
+    _ns.end = function( ) {
+        U.l("game over");
+        this.socket.close( );
+    };
+    
+    /* Game.update
+     * The callback from the socket. deals with the data
+     * send back from the long poll
+     * @param {{object}} data Data object returned from server
+    */
+    _ns.update = function( data ) {
+        if( !data || data.state === null ){ this.end( ); }
+        if( data.state === 1 && this.state === 0 ){
+            this.socket.reset( true );
+            this.state = 1;
+        } 
+        if( this.visitor === false && data.visitor != false ){
+            U.l("The visitor has joined");
+            var visitor = User( data.visitor ),
+                $domInfo = $("#visitor-info");
+                
+            $domInfo.find("h1.name").text( visitor.username );
+            $domInfo.find("dl.wins dd").text( visitor.wins );
+            $domInfo.find("dl.losses dd").text( visitor.losses );
             
-        $domInfo.find("h1.name").text( visitor.username );
-        $domInfo.find("dl.wins dd").text( visitor.wins );
-        $domInfo.find("dl.losses dd").text( visitor.losses );
+            this.visitor = visitor;
+        }
         
-        this.visitor = visitor;
-    }
+        this.draw( );
+    };
     
-    this.draw( );
-};
-
-Game.ns.draw = function ( ) {
-    
-};
-
-Game.ns.updateChat = function ( messages ) { 
-    U.l("updating game chat");
-    $(_chatZone).html('');
-    for( var i = 0; i < messages.length; i++ ){
-        var msg = messages[i],
-            author = msg.user || "",
-            text = msg.message || "",
-            html = _d.chattemplate.replace(/{{ user }}/g, author )
-                                  .replace(/{{ text }}/g, text );
+    /* Game.draw
+     * Called after a game update. Checks every tile for 
+     * new states
+    */
+    _ns.draw = function ( ) {
         
-        _chatZone.innerHTML += html;
-    }
-    $( _chatZone ).scrollTop( $( _chatZone ).height( ) + 1000 );
-};
+    };
+    
+    /* Game.notify
+     * Takes a message and displays it to the user 
+     * @param {{string}} message The message to display
+    */
+    _ns.notify = function ( message ) {
+    
+        this.dom.msgbox
+            .container.transition().duration(800).attr("transform", U.tsm(0,300) );
+    };
+    
+    /* Game.updateChat
+     * Updates the chat window after the game's chat socket has needed an update
+     * @param {{array}} messages The array of messages from the socket
+    */
+    _ns.updateChat = function ( messages ) { 
+        U.l("updating game chat");
+        $(_chatZone).html('');
+        for( var i = 0; i < messages.length; i++ ){
+            var msg = messages[i],
+                author = msg.user || "",
+                text = msg.message || "",
+                html = _d.chattemplate.replace(/{{ user }}/g, author )
+                                      .replace(/{{ text }}/g, text );
+            
+            _chatZone.innerHTML += html;
+        }
+        $( _chatZone ).scrollTop( $( _chatZone ).height( ) + 1000 );
+    };
 
+    return _ns;
+
+})( );
+Game.ns.rig.prototype = Game.prototype
 
 /* domEntry
  * Called once the page is ready to render
@@ -351,10 +478,6 @@ domEntry = function( ) {
 };
 
 $(document).ready( domEntry );
-
-/* Finalize classes */
-Game.ns.rig.prototype = Game.prototype;
-Tile.ns.rig.prototype = Tile.prototype;
 
 /* expose the game to the window */
 w.Game = Game;

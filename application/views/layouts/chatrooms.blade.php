@@ -7,7 +7,7 @@
         <div class="bottom cf">
             <ul class="listing">
             <?php
-            $rooms = Chatroom::all();
+            $rooms = Chatroom::where("game_id","=","0")->get();
             foreach( $rooms as $room ) {
             $users = $room->users( )->get( );
             ?>

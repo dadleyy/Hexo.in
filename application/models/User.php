@@ -44,6 +44,7 @@ class User extends Tokened {
         $token = sha1( $this->id . $this->username );
 
         $public['username'] = $this->username;
+        $public['active']   = false;
         if( $this->id === Auth::user()->id ){ 
             $public['active'] = true;
             $public['token'] = $this->encodeToken( $token );

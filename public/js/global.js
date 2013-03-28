@@ -17,7 +17,8 @@ var /* global entry point */
     _j   = _w.$,        // ref: jQuery
     
     _time = new Date( ).getTime( ), // the current timestamp
-    _csrf = "", // reference to the crsf token
+    _csrf = "",                     // reference to the crsf token
+    _cusr,                          // reference to the current user
     
     _Menu, // Basic menu rigger
     _efn = function ( ) { }, // empty function
@@ -69,11 +70,14 @@ Socket.prototype = (function( ) {
         if( data !== undefined && U.type(data) === "object" ) { 
             if( this.raw ){ this.raw = false; } 
             
+            /* the socket died */
             if( data.new_flag && data.new_flag == "dead" ) {
                 this.close( );
                 this.ready = false;
                 U.l("Socket #" + this.uid + ": was terminated on the server end");
-            } else if( !data.success ) { 
+            } 
+            /* something traumatic happened */
+            else if( !data.success ) { 
                 U.l("Socket #" + this.uid + ": the socket was unsuccessful", "err"); 
                 this.ready = false;
             }
@@ -88,7 +92,7 @@ Socket.prototype = (function( ) {
         }
         
         /* make the xhr call */
-        if( this.looping === true && this.ready == true ) {
+        if( this.looping === true && this.ready === true ) {
             _socketXHRs[this.uid] = $.post( this.url, _data.call( this ), _loop.bind( this ), "json" );
         }
     };
@@ -177,6 +181,8 @@ User.ns = User.prototype = (function( ) {
         this.wins = ( U.pint( conf.wins ) ) ? U.pint( conf.wins ) : 0;
         this.losses = ( U.pint( conf.losses ) ) ? U.pint( conf.losses ) : 0;
         
+        this.active = conf.active || false;
+        this.token  = conf.token || false;  
     };
 
     return _ns;
@@ -306,7 +312,7 @@ Utils = U = {
      */ 
     uid : (function ( ) {
         var _id = 0,
-            _rn = function() { return Math.floor( Math.random() * 10e2 ).toString(36).substring(0,5); };
+            _rn = function() { return Math.floor( Math.random() * 10e4 ).toString(36).substring(0,5); };
             
         return function ( ) { return _rn( ) + (++_id); };
     })( ),
@@ -340,7 +346,8 @@ Utils = U = {
                 "[object Function]" : "function",
                 "[object Object]"   : "object",
                 "[object Number]"   : "number",
-                "[object String]"   : "string"
+                "[object String]"   : "string",
+                "[object Boolean]"   : "boolean"
             },
             _type = function (obj) {
                 var str = _ts.call(obj);

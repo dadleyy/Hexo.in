@@ -8,6 +8,10 @@ class Chatroom extends Tokened {
         return $this->has_many_and_belongs_to('User');
     }
     
+    public function isClosed( ) {
+        return !file_exists( $this->chatfile( ) );   
+    }
+    
     public function getFlag( ) {
         if( !file_exists( $this->chatfile( ) ) ) {
             return "dead";

@@ -17,6 +17,7 @@ class Create_Games_Table {
 
 	public function down( ) {  
     	Schema::drop('games');
+    	exec( "rm -fr " . path('storage') . 'games/*' );
 	}
 
 }

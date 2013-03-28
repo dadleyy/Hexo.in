@@ -107,20 +107,22 @@ class Game_Controller extends Base_Controller {
             return Response::make( json_encode( array("success"=>false,"csrf"=>true) ), 204, $headers );
         }
         
-        if( Input::get("raw") && Input::get("raw") == "raw" ) {
-        
+        /* ************************************************** *
+         * SOCKET STATE - raw update required                 *
+         * The client has specifically asked for an update    *
+         * ************************************************** */
+        if( Input::get("raw") && Input::get("raw") == "raw" ) {  
             $package = json_decode( $current_game->publicJSON( ), true );        
             $output = array( 
                 "success" => true,
                 "code" => 1,
-                "timeout" => false,
-                "old_flag" => false,
-                "new_flag" => false,
+                "new_flag" => $current_game->getFlag( ),
                 "request" => Request::forged( ),
                 "package" => $package
             );
             return Response::make( json_encode($output), 200, $headers );
         }
+        
         
         $changed = false;
         $loops   = 0;
@@ -131,53 +133,58 @@ class Game_Controller extends Base_Controller {
         
         while ( !$changed ) {
             $c_time = time( );
-            /* time out - the loop has been going on for wayy too long */
-            if( ($c_time - $s_time) >  20 || $loops > 10000 ){
-                
+            
+            /* ************************************************** *
+             * SOCKET STATE - game over                           *
+             * The game is over if the game reference is null, or *
+             * the file for it doesnt exist anymore               *
+             * ************************************************** */
+            if( $current_game == null || $current_game->isOver( ) ) {
+                $output = array(
+                    "success" => true,
+                    "code" => 4,
+                    "new_flag" => $current_game->getFlag( ),
+                    "type" => "game"
+                );
+                return Response::make( json_encode($output), 200, $headers );
+            }
+            
+            /* ************************************************** *
+             * SOCKET STATE - socket timeout                      *
+             * This socket loop has been going on for too long,   *
+             * it is time to let the client know to make a new rq *
+             * ************************************************** */
+            if( ($c_time - $s_time) >  10 || $loops > 10000 ){     
                 $output = array(
                     "success" => true,
                     "code" => 2,
-                    "timeout" => $loops,
                     "type" => "game"
                 );
-                
-                return Response::make( json_encode($output), 202, $headers );
+                return Response::make( json_encode($output), 200, $headers );
             }
             
-            if( $current_game == null ) {
-            
-                $output = array(
-                    "success" => false,
-                    "code" => 4,
-                    "timeout" => $loops,
-                    "type" => "chat",
-                    "rest" => true
-                );
-                
-                return Response::make( json_encode($output), 202, $headers );
-            }
-            
+            /* ************************************************** *
+             * SOCKET STATE - updated needed                      *
+             * There has been a change since the last time the    *
+             * socket hit this iteration, send the update to the  *
+             * client.                                            *
+             * ************************************************** */
             if( $current_game->getFlag( ) !== $original_flag ){
-                
                 $package = json_decode( $current_game->publicJSON( ), true );
-                
                 $output = array( 
                     "success" => true,
                     "code" => 1,
-                    "timeout" => $loops,
-                    "old_flag" => $original_flag,
                     "new_flag" => $current_game->getFlag( ),
                     "package" => $package,
                     "request" => Request::forged( )
                 );
-                
                 return Response::make( json_encode($output), 200, array() );
             }
             
-            time_nanosleep( 0, 900000 );
+            /* loop and sleep */
             $loops++;
+            time_nanosleep( 0, 9000000 );
         }
-        
         
         return Response::make( json_encode( array("success"=>false,"csrf"=>true) ), 404, array() );
     }
@@ -242,12 +249,15 @@ class Game_Controller extends Base_Controller {
         
         /* initialize the tiles array */
         $tiles = array();
-        for( $i = 0; $i < 18; $i++ ){
-            $tiles[$i.""] = array( "id" => $i, "state" => 0 );
+        for( $i = 0; $i < 37; $i++ ){
+            if( $i == 18 ) { continue; }
+            $value = ( $i > 18 ) ? $i : $i + 1;
+            $tiles[ $i ] = array( "id" => $i, "state" => 0, "value" => $value );
         }
         
         $file_contents = array( 
             "state" => 0, 
+            "turn"  => 1,
             "flag"  => rand( 0, 100000 ),
             "tiles" => $tiles, 
             "token" => $game->token, 
