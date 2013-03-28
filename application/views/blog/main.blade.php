@@ -12,7 +12,7 @@
      <section class="posts cf">
      <?php $posts = Blogpost::all( ); ?>
      @foreach( $posts as $post )
-        <article class="post">
+        <article class="post f">
             <div class="inner">
                 <div class="cf">
                     <h3 class="date f">{{ $post->posted( ) }}</h3>

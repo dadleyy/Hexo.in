@@ -49,17 +49,17 @@ section.main-content article.player-name div.stats dl dd{ font-weight: 700; colo
 
 section.main-content section.game-zone{ 
     padding-top: 20px; 
-    box-shadow: 0px 0px 1px 1px rgba(0,0,0,0.15),
-                inset 0px 1px 1px rgba(255,255,255,0.75);
+    box-shadow: 0px 0px 3px rgba(0,0,0,0.75),    
+                inset 0px 0px 3px rgba(255,255,255,0.75);
 }
 section.main-content section.game-zone div.inner{
     position: relative;
     margin: 0px 20px 20px 20px;
-    background-color: rgba(0,0,0,0.03);
+    background-color: rgba(0,0,0,0.1);
     border-radius: 2px;
     position: relative;
-    box-shadow: 0px 0px 1px rgba(255,255,255,0.75),
-                inset 0px 0px 1px rgba(0,0,0,0.3);
+    box-shadow: inset 0px 0px 3px rgba(0,0,0,0.75),    
+                0px 0px 3px rgba(255,255,255,0.75);
 }
 
 section.main-content section.game-zone section.chat-window,
