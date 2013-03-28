@@ -1,10 +1,10 @@
 section.main-content{ }
 section.main-content section.posts{ }
-section.main-content section.posts article.post{ width: 420px; }
+section.main-content section.posts article.post{ width: 410px; margin: 0px 5px 20px; }
 section.main-content section.posts article.post div.inner{ 
     padding: 20px; 
-    box-shadow: 0px 0px 1px rgba(0,0,0,0.6),    
-                inset 0px 0px 1px rgba(255,255,255,0.5);
+    box-shadow: 0px 0px 3px rgba(0,0,0,0.75),    
+                inset 0px 0px 3px rgba(255,255,255,0.75);
 }
 
 section.main-content section.posts h3,
