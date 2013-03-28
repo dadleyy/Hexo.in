@@ -18,6 +18,14 @@
 .darkg.c{ color: #404040; }
 .rale{ font-family: 'Raleway', sans-serif; }
 .righteous{ font-family: 'Righteous', cursive; }
+.addt{ 
+    font-size: 20px;
+    color: #444;
+    font-weight: 300;
+    font-family: 'Raleway', sans-serif;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
 
 a{ text-decoration: none; }
 span.plain-logo{
@@ -459,12 +467,13 @@ section.main-content section.basic article.block div.etc dl dt{
 
 /* generic form styles */
 section.main-content article.form-container{ 
-    margin: 40px 0 60px -10px; 
+    margin: 0px 0 60px -10px; 
     position: relative; 
-    padding: 0 0 10px 10px; 
+    padding: 0 0px 10px 0px; 
     overflow: hidden; 
-    
+    border-right: 1px solid #aaa;
 }
+section.main-content article.form-container div.inner{ padding-right: 20px; padding-left: 0px; }
 section.main-content article.form-container article.success{
     position: absolute;
     left: 0px;
@@ -494,7 +503,7 @@ section.main-content article.form-container form div.input span.placeholder,
 section.main-content article.form-container form input[type="password"],
 section.main-content article.form-container form input[type="text"],
 section.main-content article.form-container form textarea{
-    width: 400px;
+    width: 100%;
     display: block;
     background-color: transparent;
     border-bottom: 1px solid #aaa;
@@ -508,7 +517,8 @@ section.main-content article.form-container form textarea{
     position: relative;
     z-index: 9;
     text-shadow: 1px 1px rgba(255,255,255,0.1);
-    padding: 0px 10px;
+    padding: 0px 0px;
+    text-indent: 10px;
 }
 section.main-content article.form-container form div.input span.placeholder.errored,
 section.main-content article.form-container form input[type="password"].errored,
@@ -524,13 +534,14 @@ section.main-content article.form-container form textarea:focus{
     color: #666;
 }
 
-
 section.main-content article.form-container form textarea{ 
     border: 1px solid #aaa;
     max-height: 140px;
     min-height: 140px;
     padding: 10px;
     line-height: 35px;
+    width: 620px;
+    text-indent: 0px;
 }
 section.main-content article.form-container form input[type="submit"]{
     width: 424px;
@@ -552,6 +563,8 @@ section.main-content article.form-container form input[type="submit"]:hover{
 
 footer{
     height: 28px;
+    position: relative;
+    z-index: 100;
     line-height: 28px;
     color: #aaa;
     box-shadow: 0px 0px 2px rgba(0,0,0,0.9),
@@ -564,5 +577,13 @@ footer p.cpy{
     font-weight: 300;
     text-transform: uppercase;
 }
+article.other-contact{ margin-right: -1px; }
+article.other-contact > div.inner{ padding-left: 20px; padding-right: 0px; }
+article.other-contact dl{ display: block; }
+article.other-contact dl dd, 
+article.other-contact dl dt{ display: inline-block; margin: 0px; padding: 0px; }
+article.other-contact dl dt{ color: #aaa; margin-right: 5px; }
 
 
+#to-top{ color: black; height: 28px; line-height: 28px; font-family: 'Open Sans', sans-serif; font-weight: 300; padding: 0px 10px; font-size: 10px; text-transform: uppercase; margin-top: -1px; box-shadow: 0px 0px 5px rgba(0,0,0,0.55); }
+#to-top:hover{ box-shadow: 0px 0px 10px rgba(100,100,250,0.95); }
