@@ -87,6 +87,10 @@
 .spw > .two > .f { width: 440px; }
 .spw > .two > .f.right .inner{ padding: 0px 0px 0px 20px; }
 .spw > .two > .f.left .inner{ padding: 0px 20px 0px 0px; }
+.fourth > .three{ width: 75%; }
+.fourth > .one{ width: 25%; }
+.fourth > .three div.inner,
+.fourth > .one div.inner{ padding: 0px 10px 0px 10px; }
 .pw .third{ width: 33.33%; }
 
 /* fixes */

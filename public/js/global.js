@@ -12,23 +12,40 @@ var /* global entry point */
     domReady,
     
     /* private: */
+    
+    /* shortcuts */
     _w   = w,           // ref: window
     _doc = _w.document, // ref: document
     _j   = _w.$,        // ref: jQuery
     
+    /* variables */
     _time = new Date( ).getTime( ), // the current timestamp
     _csrf = "",                     // reference to the crsf token
     _cusr,                          // reference to the current user
     
-    _Menu, // Basic menu rigger
-    _efn = function ( ) { }, // empty function
+    /* functions */
+    _toTop, // scrolls window to top
+    _Menu,  // basic menu rigger
+    _efn,   // empty function
     
     /* Public: */
     U, Utils,
     Socket,
     C, Chat,
     User;
-    
+
+_efn = function( ) { };    
+
+
+/* _toTop
+ * scrolls window to top when the to-top button
+ * is clicked
+*/
+_toTop = function ( ) {
+    $("html, body").stop( ).animate({scrollTop:"0px"}, 600);
+};
+
+
 ////////////////////////
 // NAMESPACE : Socket //
 ////////////////////////
@@ -406,6 +423,7 @@ _Menu = (function ( ) {
         
         /* variables */
         _menuDiv,
+        _cb,
         
         _ready = false,
         _menu;
@@ -436,8 +454,9 @@ _Menu = (function ( ) {
     
     _init = function ( id ) {
         _menuDiv = _j( id );
-        if( _menuDiv.length < 1 ) { return false; }
-        _menuDiv.on("click", "button.toggle", _toggle.bind( _menuDiv ) );
+        if( _menuDiv.length < 1 ) { return false; } 
+        _cb = (function( _m ){ return function( ){ _toggle.call(_m); };  })( _menuDiv );
+        _menuDiv.on("click", "button.toggle", _cb );
         _ready = true; 
     };
     
@@ -460,7 +479,10 @@ domReady = function ( ) {
     
     if( _doc.getElementById("chatist-menu") !== null )
         _Menu.init("#chatist-menu");
-      
+    
+    if( _doc.getElementById("to-top") !== null ) 
+        $("#to-top").click( _toTop ); 
+    
     if( _doc.getElementById( String(_time ).substring( 0, 5 ) ) !== null ) 
         _csrf = $("#"+String(_time ).substring( 0, 5 )).find('input[type="hidden"]').val( );
 };

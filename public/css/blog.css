@@ -52,6 +52,10 @@ section.main-content.single article.top > h3{
     color: #454545;
 }
 section.main-content.single article.top > h3 em{ font-style: normal; font-weight: 600; }
+section.main-content.single article.post-content div.inner{
+    border-right:1px solid #c3c3c3;
+    padding-left: 0px; padding-right: 20px;
+}
 section.main-content.single article.post-content p{ 
     line-height: 1.5em;
     font-size: 14px;
@@ -59,4 +63,52 @@ section.main-content.single article.post-content p{
     font-weight: 400;
     color: #666;
 }
+section.main-content.single article.other-posts{ margin-right: -1px; }
+section.main-content.single article.other-posts > div.inner{ padding-right: 0px; padding-left: 20px; }
+section.main-content.single article.other-posts ul{ list-style: none; display: block; padding: 0px; margin: 0px; }
 
+section.main-content.single article.other-posts ul li{ 
+    display: block; 
+    margin: 0px 0px 20px 0px; 
+    height: 20px;
+    line-height: 20px;
+    font-size: 14px;
+    text-transform: lowercase;
+    font-family: 'Open Sans', sans-serif; 
+    font-weight: 400;
+}
+section.main-content.single article.other-posts ul li a{ color: #aaa; }
+section.main-content.single article.other-posts ul li a:hover{ color: #444; }
+
+div.social { margin: 10px 0px 10px 0px; }
+div.social > div{ width: 80px; height: 22px; overflow: hidden; position: relative; }
+div.social > div span.icon{ 
+    position: relative;
+    margin: 0px auto;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: left center;
+    width: 30px;
+    margin-bottom: 2px;
+    height: 22px;
+}
+div.social > div.twitter span.icon{ background-image: url(/img/social/twitter.png); }
+div.social > div.facebook span.icon{ background-image: url(/img/social/facebook.png); }
+div.social > div.google span.icon{ background-image: url(/img/social/googleplus.png); }
+div.social > div:hover{ width: 80px; }
+div.social > div:hover span.icon{ margin-top: -22px; }
+
+div.back-to-blog{ margin: 20px 0px; }
+div.back-to-blog a{ 
+    line-height: 20px;
+    font-size: 10px;
+    text-transform: uppercase;
+    font-family: 'Open Sans', sans-serif; 
+    font-weight: 400;
+    border-radius: 3px;
+    padding: 0px 10px;
+    display: inline-block;
+    color: white;
+    box-shadow: 0px 0px 3px rgba(0,0,0,0.75),
+                inset 0px 1px 2px rgba(0,0,0,0.35);
+}

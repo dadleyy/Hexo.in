@@ -14,7 +14,7 @@ class Create_Blog_Table {
             $table->timestamps();
         });
         
-        $date = new DateTime( );
+        $date = new DateTime("3/20/2013");
         
         DB::table('blogpost')->insert( array(
             'title'      => "The birth of Hexo.in",
