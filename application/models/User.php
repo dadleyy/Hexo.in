@@ -4,6 +4,31 @@ class User extends Tokened {
 
     public static $table = 'users';
     
+    public static function online( ) {
+        
+        $all_users = User::all( );
+        $online = array( );
+        $current_time = time( );
+        
+        foreach( $all_users as $user ) {
+            
+            if ( $user->id === Auth::user()->id ) {
+                continue;
+            }
+        
+            $last_time = strtotime( $user->last_update );
+            $time_diff = $current_time - $last_time;
+            
+            if( $time_diff < 60 ) {
+                $user_info = json_decode( $user->publicJSON( ), true );
+                $user_info['busy'] = ( $user->game( ) !== false ) ? true : false; 
+                $online[] = $user_info;
+            }
+        }
+           
+        return $online;
+    }
+    
     public function chatrooms( ) {
         return $this->has_many_and_belongs_to('Chatroom');
     }
@@ -11,11 +36,11 @@ class User extends Tokened {
     public function game( ) {
         $current_game = Game::where("challenger_id", "=", $this->id )->take(1)->first( );
         
-        if( $current_game == null ){
+        if( $current_game == null ) {
             $current_game = Game::where("visitor_id", "=", $this->id )->take(1)->first( );
         }
         
-        if( $current_game == null ){
+        if( $current_game == null ) {
             return false;
         }
         
@@ -30,7 +55,7 @@ class User extends Tokened {
         return date( 'M j, Y H:i', strtotime($this->created_at) );
     }
                 
-    public function chattoken( $chatroom_id ) {
+    public function getChatToken( $chatroom_id ) {
         $test = DB::table('chatroom_user')
                     ->where( 'chatroom_id', '=', $chatroom_id )
                     ->where( 'user_id', '=', $this->id )->first( );
@@ -38,18 +63,22 @@ class User extends Tokened {
         return $test->token;
     }
                 
+    public function ping( ){
+        $date = new DateTime( );
+        $this->last_update = $date;
+        $this->save( );
+    }
+                
     public function publicJSON( ) {
         $public = array( );
         
         $token = sha1( $this->id . $this->username );
-
         $public['username'] = $this->username;
         $public['active']   = false;
-        if( $this->id === Auth::user()->id ){ 
+        if( Auth::check() && $this->id === Auth::user()->id ){ 
             $public['active'] = true;
             $public['token'] = $this->encodeToken( $token );
         }
-        
         $public['wins'] = $this->wins;
         $public['losses'] = $this->losses;
         

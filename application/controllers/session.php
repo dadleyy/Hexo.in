@@ -16,6 +16,13 @@ class Session_Controller extends Base_Controller {
     }
     
     public function action_end( ) {
+    
+        if( Auth::user() !== null ) {
+            $date = new DateTime('1970-01-01');
+            Auth::user()->last_update = $date;
+            Auth::user()->save( );
+        }
+    
         Auth::logout();
         return Redirect::to( '/session/create' );
     }

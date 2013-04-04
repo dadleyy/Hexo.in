@@ -27,6 +27,12 @@
     margin-bottom: 10px;
 }
 
+span.icon{ display: block; background-repeat: no-repeat; background-position: center center; background-size: cover; }
+span.icon.busy{
+    width: 12px; height: 12px;
+    background-image: url(/img/unavailable.png);
+}
+
 a{ text-decoration: none; }
 span.plain-logo{
     display: block;
@@ -352,6 +358,9 @@ section.main-content section.basic article.block ul.listing li{
     cursor: default;
     overflow: hidden;
 }
+section.main-content section.basic article.block ul.listing li span.icon{
+    margin-top: 9px;
+}
 header div.left-menu div.chat-list ul li h1.name,
 section.main-content section.basic article.block ul.listing li h1.count,
 section.main-content section.basic article.block ul.listing li h1.amount,
@@ -360,6 +369,8 @@ section.main-content section.basic article.block ul.listing li h1.name{
     color: #5e5e5e;
     font-size: 18px;
     font-weight: 300;
+    min-width: 60px;
+    text-align: center;
 }
 section.main-content section.basic article.block ul.listing li h1.name i{
     text-transform: lowercase;
@@ -447,11 +458,14 @@ section.main-content section.basic article.block div.bottom h2.subtitle{
 }
 section.main-content section.basic article.block div.bottom div.head{
     margin: 5px 0px 5px 0px;
+    padding: 0px 5px;
 }
 section.main-content section.basic article.block div.bottom div.head h4.col{
     font-size: 14px;
     font-weight: 300;
     color: #888;
+    min-width: 60px;
+    text-align: center;
 }
 section.main-content section.basic article.block div.etc{
     margin: 10px 0px 20px 0px;

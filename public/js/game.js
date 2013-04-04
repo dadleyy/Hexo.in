@@ -86,14 +86,21 @@ var /* entry point */
         game.state = conf.state;
         game.tiles = conf.tiles;
         game.turn  = conf.turn || 0;
-    
-        game.chatroom = ( conf.chatroom ) ? Chat(conf.chatroom) : false;
+        
+        /* create the chatroom */
+        var cevts = { events : {'update' : _.bind( game.updateChat, game ) } },
+            cconf = $.extend( {}, cevts, conf.chatroom );
+            
+        game.chatroom = Chat( cconf );
         
         /* make a new socket */
         game.socket = Socket({ 
             url : _d['gamesocket'].url, 
-            callback : game.update.bind( game ), 
-            token : game.token 
+            token : game.token,
+            events : { 
+                'update' : _.bind( game.update, game ),
+                'close' : _.bind( game.end, game )
+            }
         });
                 
         if( errors.length > 0 ){ U.l("was unable to initialize the game","err"); game.errored = true; }
@@ -140,9 +147,7 @@ var /* entry point */
         
         /* open up the sockets */
         game.socket.open( );
-        game.chatroom.start( game.updateChat.bind( game ) );
-        
-        game.updateChat( game.chatroom.messages );
+        game.chatroom.start( );
                     
         svg.attr( _d.dimensions );
         dom.svg = svg;
@@ -348,9 +353,9 @@ Tile.ns = Tile.prototype = (function ( ){
         tile.attr( _d['gamehexo'] );
         
         group
-            .on("mouseover", _onHover.bind( this ) )
-            .on("mouseout", _offHover.bind( this ) )
-            .on("click", _onClick.bind( this ) );
+            .on("mouseover", _.bind( _onHover, this ) )
+            .on("mouseout", _.bind( _offHover, this ) )
+            .on("click", _.bind( _onClick, this ) );
             
         this.dom = { group : group, tile : tile };
             
@@ -402,10 +407,13 @@ Game.ns = Game.prototype =  (function ( ) {
     */
     _ns.update = function( data ) {
         if( !data || data.state === null ){ this.end( ); }
+        
+        /* someone joined the game */
         if( data.state === 1 && this.state === 0 ){
-            this.socket.reset( true );
             this.state = 1;
+            this.socket.force( );
         } 
+        
         if( this.visitor === false && data.visitor != false ){
             U.l("The visitor has joined");
             var visitor = User( data.visitor ),
@@ -433,8 +441,7 @@ Game.ns = Game.prototype =  (function ( ) {
      * Takes a message and displays it to the user 
      * @param {{string}} message The message to display
     */
-    _ns.notify = function ( message ) {
-    
+    _ns.notify = function ( message ) { 
         this.dom.msgbox
             .container.transition().duration(800).attr("transform", U.tsm(0,300) );
     };
@@ -477,9 +484,9 @@ domEntry = function( ) {
     }
 };
 
-$(document).ready( domEntry );
-
 /* expose the game to the window */
 w.Game = Game;
+
+Entry( domEntry );
     
 })( window );

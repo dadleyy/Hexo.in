@@ -35,13 +35,16 @@ class Chat_Controller extends Base_Controller {
         }
     
         /* someone is logged in - get their model */
-        $active_user = Auth::user( );    
-        $real_user_token    = $active_user->chattoken( $chat_obj->id );
+        $active_user        = Auth::user( );    
+        $real_user_token    = $active_user->getChatToken( $chat_obj->id );
         $decoded_user_token = Tokened::decodeToken( $user_token );
         
         if( $real_user_token !== $decoded_user_token ) {
             return Response::make( json_encode($output), 202, $headers ); 
         }
+        
+        /* everything is okay beyond this point */
+        $active_user->ping( );
         
         /* get the flag as it is now */
         $original_flag = $chat_obj->getFlag( );
@@ -58,6 +61,19 @@ class Chat_Controller extends Base_Controller {
             $c_time = time( );
             
             /* ************************************************** *
+             * SOCKET STATE - chat closed                         *
+             * ************************************************** */
+            if( $chat_obj == null || $chat_obj->isClosed( ) ) {
+                $output = array(
+                    "success" => false,
+                    "new_flag" => "dead",
+                    "type" => "chat",
+                    "code" => 4
+                );
+                return Response::make( json_encode($output), 200, $headers );
+            }
+            
+            /* ************************************************** *
              * SOCKET STATE - socket timeout                      *
              * This socket loop has been going on for too long,   *
              * it is time to let the client know to make a new rq *
@@ -65,20 +81,9 @@ class Chat_Controller extends Base_Controller {
             if( ($c_time - $s_time) > 10 || $loops > 10000 ){
                 $output = array(
                     "success" => true,
+                    "type" => "chat",
                     "code" => 2
                 );        
-                return Response::make( json_encode($output), 200, $headers );
-            }
-            
-            /* ************************************************** *
-             * SOCKET STATE - chat closed                         *
-             * ************************************************** */
-            if( $chat_obj == null || $chat_obj->isClosed( ) ) {
-                $output = array(
-                    "success" => false,
-                    "new_flag" => "dead",
-                    "code" => 4
-                );
                 return Response::make( json_encode($output), 200, $headers );
             }
             
@@ -93,6 +98,7 @@ class Chat_Controller extends Base_Controller {
                 $output = array( 
                     "success" => true,
                     "code" => 1,
+                    "type" => "chat",
                     "new_flag" => $chat_obj->getFlag( ),
                     "package" => $package
                 );
@@ -140,14 +146,14 @@ class Chat_Controller extends Base_Controller {
         
         /* someone is logged in - get their model */
         $active_user = Auth::user( );    
-        $real_user_token    = $active_user->chattoken( $chat_obj->id );
+        $real_user_token    = $active_user->getChatToken( $chat_obj->id );
         $decoded_user_token = Tokened::decodeToken( $user_token );
         
         if( $real_user_token !== $decoded_user_token ) {
             return Response::make( json_encode($output), 202, $headers ); 
         }
         
-        $chat_contents = File::get( $chat_obj->chatfile( ) );
+        $chat_contents = File::get( $chat_obj->chatFile( ) );
         $chat_info = json_decode( $chat_contents , true );
         
         $chat_info['messages'][] = array( 
@@ -155,13 +161,58 @@ class Chat_Controller extends Base_Controller {
             "message" => HTML::entities( $message ) 
         );
         
-        File::put( $chat_obj->chatfile( ), json_encode($chat_info) );
+        File::put( $chat_obj->chatFile( ), json_encode($chat_info) );
         $chat_obj->updateFlag( );
         
         $output = array(
             "success" => true,
             "code" => 1
         );
+        
+        return Response::make( json_encode($output), 200, $headers );
+    }
+
+    public function post_online( ) {
+        $headers = array( 'Content-type' => 'application/json' );
+        $output = array( "success" => true, "code" => 2 );
+        
+        $s_online = count( User::online( ) );
+                
+        $s_time = time( );
+        $c_time = time( );
+        
+        $loops   = 0;
+        $changed = false;
+        
+        while( !$changed ) {
+            
+            $c_time = time( );
+            
+             /* ************************************************** *
+             * SOCKET STATE - socket timeout                      *
+             * This socket loop has been going on for too long,   *
+             * it is time to let the client know to make a new rq *
+             * ************************************************** */
+            if( $c_time - $s_time > 10 || $loops > 1000 ) {
+                return Response::make( json_encode($output), 200, $headers );
+            }
+            
+            /* ************************************************** *
+             * SOCKET STATE - updated needed                      *
+             * There has been a change since the last time the    *
+             * socket hit this iteration, send the update to the  *
+             * client.                                            *
+             * ************************************************** */
+             if( count( User::online() ) !== $s_online ){
+                 $output['code'] = 1;
+                 $output['package'] = User::online( );
+                 return Response::make( json_encode($output), 200, $headers );
+             }
+                    
+            $loops++;
+            time_nanosleep( 0, 9000000 );
+        }
+
         
         return Response::make( json_encode($output), 200, $headers );
     }
