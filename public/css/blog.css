@@ -69,7 +69,7 @@ section.main-content.single article.other-posts ul{ list-style: none; display: b
 
 section.main-content.single article.other-posts ul li{ 
     display: block; 
-    margin: 0px 0px 20px 0px; 
+    margin: 0px 0px 5px 0px; 
     height: 20px;
     line-height: 20px;
     font-size: 14px;

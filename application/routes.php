@@ -6,7 +6,7 @@ Route::controller( Controller::detect( ) );
 Route::any('/about', function( ) {
     $view = View::make('layouts.common')
                     ->nest("content", "home.about")
-                    ->with("title", "About");
+                    ->with("title", "about");
     return $view;
 });
 
@@ -14,7 +14,7 @@ Route::any('/about', function( ) {
 Route::any('/tutorial', function( ) {
     $view = View::make('layouts.common')
                     ->nest("content", "home.tutorial")
-                    ->with("title", "Tutorial");
+                    ->with("title", "tutorial");
     return $view;
 });
 
