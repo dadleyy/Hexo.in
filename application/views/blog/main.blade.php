@@ -10,7 +10,7 @@
 <section class="main-content spw middle">
      
      <section class="posts cf">
-     <?php $posts = Blogpost::all( ); ?>
+     <?php $posts = Blogpost::order_by("created_at","desc")->get(); ?>
      @foreach( $posts as $post )
         <article class="post f">
             <div class="inner">

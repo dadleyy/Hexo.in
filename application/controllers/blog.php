@@ -5,7 +5,7 @@ class Blog_Controller extends Base_Controller {
     public function action_index( ){
         $view = View::make('layouts.common')
                     ->nest("content", "blog.main")
-                    ->with("title", "Blog");
+                    ->with("title", "blog");
         return $view; 
     }     
     
@@ -29,7 +29,7 @@ class Blog_Controller extends Base_Controller {
         }
         $view = View::make('layouts.common')
                     ->nest("content", "blog.manage")
-                    ->with("title", "Blog");
+                    ->with("title", "blog");
         return $view; 
     }
 

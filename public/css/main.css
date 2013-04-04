@@ -27,9 +27,10 @@
     margin-bottom: 10px;
 }
 
-span.icon{ display: block; background-repeat: no-repeat; background-position: center center; background-size: cover; }
+span.icon{ display: block; background-repeat: no-repeat; background-position: center center; }
 span.icon.busy{
     width: 12px; height: 12px;
+    background-size: cover;
     background-image: url(/img/unavailable.png);
 }
 
