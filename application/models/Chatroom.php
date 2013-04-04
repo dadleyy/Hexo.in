@@ -9,33 +9,48 @@ class Chatroom extends Tokened {
     }
     
     public function isClosed( ) {
-        return !file_exists( $this->chatfile( ) );   
+        return !file_exists( $this->chatFile( ) );   
     }
     
+    public function addUser( $user ) {
+        
+        $date = new DateTime( );
+                    
+        /* update the table in the db to show this user in chat */
+        DB::table('chatroom_user')->insert( array(
+            'chatroom_id' => $this->id,
+            'user_id'     => $user->id,
+            'token'       => sha1( $this->id . $user->id ),
+            'created_at'  => $date,
+            'updated_at'  => $date
+        ));    
+        
+    } 
+        
     public function getFlag( ) {
-        if( !file_exists( $this->chatfile( ) ) ) {
+        if( $this->isClosed( ) ) {
             return "dead";
         }
-        $info = json_decode( File::get( $this->chatfile( ) ), true ); 
+        $info = json_decode( File::get( $this->chatFile( ) ), true ); 
         return $info['flag'];
     }
     
     public function updateFlag( ) {
-        $info = json_decode( File::get( $this->chatfile() ), true );    
+        $info = json_decode( File::get( $this->chatFile() ), true );    
         $info['flag'] = base_convert( rand( 1000000, 1000000000 ), 10, 36 );
-        File::put( $this->chatfile( ), json_encode( $info ) );
+        File::put( $this->chatFile( ), json_encode( $info ) );
     }
     
     public function messages( ) {
-        $info = json_decode( File::get( $this->chatfile() ), true );
+        $info = json_decode( File::get( $this->chatFile() ), true );
         $messages = $info['messages'];
         return $messages;
     }
     
     public function mostRecentMessages( ){
-        if( !file_exists( $this->chatfile() ) ){ return array("dead"=>true); }
+        if( !file_exists( $this->chatFile() ) ){ return array("dead"=>true); }
     
-        $info = json_decode( File::get( $this->chatfile() ), true );
+        $info = json_decode( File::get( $this->chatFile() ), true );
         $messages = $info['messages'];
         $recent = array( );
         $index = 0;
@@ -49,10 +64,10 @@ class Chatroom extends Tokened {
     public function publicJSON( ) {
         $public = array( );
         
-        $chat_info = json_decode( File::get( $this->chatfile( ) ), true );
+        $chat_info = json_decode( File::get( $this->chatFile( ) ), true );
         
         $active_user = $this->users( )->where( "user_id", "=", Auth::user()->id )->first( );    
-        $usr_token   = ( $active_user !== NULL ) ? $active_user->chattoken( $this->id ) : false;
+        $usr_token   = ( $active_user !== NULL ) ? $active_user->getChatToken( $this->id ) : false;
         
         $public['name'] = $this->name;
         $public['messages'] = $this->mostRecentMessages( );
@@ -62,7 +77,7 @@ class Chatroom extends Tokened {
         return json_encode( $public );         
     }
     
-    public function chatfile( ){
+    public function chatFile( ){
         return path('storage') . 'chats/' . $this->token . '.json';
     }
         

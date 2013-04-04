@@ -41,6 +41,7 @@ Route::filter('auth', function( ) {
     if ( !Auth::check( ) ) {
         return Redirect::to( '/session/create' );   
     }
+    Auth::user()->ping( );
 });
 
 Route::filter('noneed', function( ) {

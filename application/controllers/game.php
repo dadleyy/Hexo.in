@@ -41,15 +41,7 @@ class Game_Controller extends Base_Controller {
     }
     
     public function action_debug( ){
-        
-        /* the location of the file */
-        $location = path('storage') . '/testington.json';
-        $contents = json_encode( array('hello'=>'goodye') );
-        
-        /* store contents */
-        File::put( $location, $contents );
-        
-        return json_encode( File::get( $location ) );
+        return json_encode( User::online() );
     }
     
     public function action_quit( ){
@@ -107,6 +99,9 @@ class Game_Controller extends Base_Controller {
             return Response::make( json_encode( array("success"=>false,"csrf"=>true) ), 204, $headers );
         }
         
+        /* at this point - the game is definitely legitimate */
+        $current_user->ping( );
+        
         /* ************************************************** *
          * SOCKET STATE - raw update required                 *
          * The client has specifically asked for an update    *
@@ -116,6 +111,7 @@ class Game_Controller extends Base_Controller {
             $output = array( 
                 "success" => true,
                 "code" => 1,
+                "type" => "game",
                 "new_flag" => $current_game->getFlag( ),
                 "request" => Request::forged( ),
                 "package" => $package
@@ -158,7 +154,8 @@ class Game_Controller extends Base_Controller {
                 $output = array(
                     "success" => true,
                     "code" => 2,
-                    "type" => "game"
+                    "type" => "game",
+                    "ulup" => $current_user->last_update
                 );
                 return Response::make( json_encode($output), 200, $headers );
             }
@@ -174,6 +171,7 @@ class Game_Controller extends Base_Controller {
                 $output = array( 
                     "success" => true,
                     "code" => 1,
+                    "type" => "game",
                     "new_flag" => $current_game->getFlag( ),
                     "package" => $package,
                     "request" => Request::forged( )
@@ -213,25 +211,21 @@ class Game_Controller extends Base_Controller {
             $file_location = $open->gamefile( );
             $file_contents = File::get( $file_location );
             $game_info = json_decode( $file_contents, true );
+            
+            /* add this user into that game and set state to 1 (playing) */
             $game_info['visitor_id'] = $current_user->id;
             $game_info['state'] = 1;
+            
+            /* save the json */
             File::put( $file_location, json_encode( $game_info ) );
-            
-            $open->save( );
-        
-            $open->updateFlag( );
-            
-            
+                    
             /* put this user into the chatroom */
             $chat = Chatroom::where("game_id", "=", $open->id )->first( );        
-            $date = new DateTime( );
-            DB::table('chatroom_user')->insert( array(
-                'chatroom_id' => $chat->id,
-                'user_id'     => $current_user->id,
-                'token'       => sha1( $chat->id . $current_user->id ),
-                'created_at'  => $date,
-                'updated_at'  => $date
-            ));
+            $chat->addUser( $current_user );
+            
+            /* save the game and update the flag (notifies the waiting challenger) */
+            $open->save( );
+            $open->updateFlag( );
             
             return Redirect::to( '/game/play' );
         } 
@@ -302,6 +296,20 @@ class Game_Controller extends Base_Controller {
         
         return Redirect::to( '/game/play' );
         
+    }
+    
+    public function action_challenge( ) {
+        
+        $output = array( "success" => false, "code" => 4 );
+        $headers = array( 'Content-type' => 'application/json' );
+        
+        if( Request::forged( ) ) {
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $output['success'] = true;
+        $output['code'] = 100;
+        return Response::make( json_encode($output), 200, $headers );
     }
     
 }

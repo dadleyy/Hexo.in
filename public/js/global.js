@@ -21,7 +21,8 @@ var /* global entry point */
     /* variables */
     _time = new Date( ).getTime( ), // the current timestamp
     _csrf = "",                     // reference to the crsf token
-    _cusr,                          // reference to the current user
+    _cusr = null,                   // reference to current user
+    _chatRooms = { },               // private hash of chatrooms
     
     /* functions */
     _toTop, // scrolls window to top
@@ -34,6 +35,9 @@ var /* global entry point */
     C, Chat,
     User;
 
+/* _efn
+ * an empty function for shortcutting
+*/
 _efn = function( ) { };    
 
 
@@ -42,7 +46,7 @@ _efn = function( ) { };
  * is clicked
 */
 _toTop = function ( ) {
-    $("html, body").stop( ).animate({scrollTop:"0px"}, 600);
+    _j("html, body").stop( ).animate({scrollTop:"0px"}, 600);
 };
 
 
@@ -63,6 +67,12 @@ Socket.prototype = (function( ) {
     /* private socket storage */
     _socketXHRs = { },
     
+    /* default socket events */
+    _defaultEvents = { 
+        'close' : _efn,
+        'update' : _efn
+    },
+    
     /* _data 
      * A helper that generates optional data 
      * to pass into the xhr
@@ -72,8 +82,46 @@ Socket.prototype = (function( ) {
             csrf_token : _csrf,
             token : this.token,
             extras : this.extras,
-            raw : (this.raw) ? "raw" : false
+            raw : (this.raw === true) ? "raw" : false
         };
+    },
+    
+    /* Socket._delegate
+     * takes the information from the server and
+     * decides the next course of action
+     * @param {object} data Server data
+    */
+    _delegate = function ( data ) {
+            
+        /* the socket died */
+        if( data.new_flag && data.new_flag == "dead" ) {
+            
+            this.close( );
+            this.ready = false;
+            this.events['close']( );
+               
+            U.l("Socket #" + this.uid + ": was terminated on the server end");
+            return false;
+        } 
+        
+        /* something traumatic happened */
+        else if( !data.success ) { 
+            U.l("Socket #" + this.uid + ": the socket was unsuccessful", "err"); 
+            this.ready = false;
+            return false;
+        }
+            
+        /* server sends back an update */
+        if( parseInt( data.code, 10 ) == 1 ){
+            U.l("Socket #" + this.uid + ": package received");
+            this.events['update']( data['package'] || { } );
+        } 
+        
+        /* server sends back a timeout */
+        else {
+            U.l("Socket #"+this.uid+": no package received -> restarting");
+        }
+        
     },
     
     /* Socket._loop
@@ -85,32 +133,12 @@ Socket.prototype = (function( ) {
         
         /* check for data */
         if( data !== undefined && U.type(data) === "object" ) { 
-            if( this.raw ){ this.raw = false; } 
-            
-            /* the socket died */
-            if( data.new_flag && data.new_flag == "dead" ) {
-                this.close( );
-                this.ready = false;
-                U.l("Socket #" + this.uid + ": was terminated on the server end");
-            } 
-            /* something traumatic happened */
-            else if( !data.success ) { 
-                U.l("Socket #" + this.uid + ": the socket was unsuccessful", "err"); 
-                this.ready = false;
-            }
-                
-            if( parseInt( data.code, 10 ) == 1 ){
-                U.l("Socket #" + this.uid + ": package received");
-                this.callback( data['package'] || { } );
-            } 
-            else {
-                U.l("Socket #"+this.uid+": no package received ("+data.timeout+") -> restarting");
-            }
+            _delegate.call( this, data );
         }
         
         /* make the xhr call */
         if( this.looping === true && this.ready === true ) {
-            _socketXHRs[this.uid] = $.post( this.url, _data.call( this ), _loop.bind( this ), "json" );
+            _socketXHRs[this.uid] = _j.post( this.url, _data.call( this ), _.bind( _loop, this ), "json" );
         }
     };
     
@@ -122,35 +150,30 @@ Socket.prototype = (function( ) {
         if( !conf || conf === undefined || U.type(conf) !== "object" ) { return false; }
 
         this.url = conf.url || false;
-        this.callback = conf.callback || false;
+        
+        /* apply the events from the configuration to this socket */
+        this.events = _j.extend( { }, _defaultEvents, conf.events );
+        
+        /* set all of the other goodies */
         this.token = conf.token;
         this.extras = conf.extras || { };
-    
-        this.uid = U.uid();
-        
+        this.uid = U.uid( );
         this.raw = false;
         
-        if( this.url === false || this.callback === false ) { return false; }
+        /* every socket needs a url */
+        if( this.url === false )
+            return false;
+        
         this.ready = true;
     };
-    
-    /* Socket.reset
-     * Clears out any existing requests and starts the looping 
-     * over again
-    */
-    _ns.reset = function ( raw ) {
-        if( !this.ready ) { return false; }
-        
-        if( _socketXHRs[this.uid] ){
-            _socketXHRs[this.uid].abort( );
-        }
-        if( raw !== undefined && raw === true ){
-            this.raw = true;
-            U.l("forcing socket information");
-        }
-        
-        this.open( );
-        
+
+    _ns.force = function ( ) {
+        var cb = (function( self ) {
+            return (function(data){ _delegate.call( self, data ); });
+        })( this );
+        U.l("forcing socket #" + this.uid); 
+        this.raw = true;
+        _j.post( this.url, _data.call( this ), cb, "json" );
         this.raw = false;
     };
 
@@ -169,9 +192,9 @@ Socket.prototype = (function( ) {
     */
     _ns.close = function ( ) {
         this.looping = false; 
-        if( _socketXHRs[this.uid] ){
-            _socketXHRs[this.uid].abort( );
-        }
+        this.ready = false;
+        if( _socketXHRs[this.uid] )
+            _socketXHRs[this.uid].abort( );    
     };
     
     return _ns;
@@ -192,6 +215,7 @@ User.ns = User.prototype = (function( ) {
     };
 
     _ns.rig = function( conf ) {
+    
         if( !conf || conf == undefined ){ return false; }
         
         this.username = conf.username || "N/A";
@@ -199,7 +223,12 @@ User.ns = User.prototype = (function( ) {
         this.losses = ( U.pint( conf.losses ) ) ? U.pint( conf.losses ) : 0;
         
         this.active = conf.active || false;
-        this.token  = conf.token || false;  
+        
+        if( this.active !== false )
+            _cusr = this
+            
+        this.token  = conf.token || false; 
+    
     };
 
     return _ns;
@@ -218,6 +247,10 @@ Chat.ns = Chat.prototype = (function ( ) {
             version : "1.0"
         },
         
+        _defaultEvents = {
+            'update' : _efn
+        },
+        
         _data = function ( input ) {
             var d = {
                 msg : input.message || false,
@@ -226,21 +259,25 @@ Chat.ns = Chat.prototype = (function ( ) {
                 csrf_token : _csrf
             };     
             return d;
-        },
-        
-        /* private list of chat rooms */
-        _chatRooms = { };
-    
+        };    
 
+    /* Chat.receive
+     * the callback for the 'update' event of
+     * the chatroom's socket 
+     * @param {{object}} data The data sent back from the server
+    */
     _ns.receive = function( data ) { 
         if( !data || !data.length ) { return false; }
-        this.receiver( data );
+        this.messages = data;
+        this.events['update']( this.messages );
     };
         
-    _ns.start = function ( callback ) {
-        if( !this.ready ){ U.l("chat room not ready to make calls","err"); return false; }        
-        /* set the function that will deal with the data */
-        this.receiver = callback;
+    /* Chat.start
+     * opens up the socket
+    */
+    _ns.start = function ( ) {
+        if( !this.ready ){ U.l("chat room not ready to make calls","err"); return false; }     
+        this.events['update']( this.messages );
         /* open up the socket */
         this.socket.open( );  
     };
@@ -257,32 +294,26 @@ Chat.ns = Chat.prototype = (function ( ) {
     
     _ns.send = function ( stuff ) {
         if( !this.ready ){ U.l("chat room not ready to send messages","err"); return false; }
-        $.post("/chat/send", _data.call( this, stuff ), this.sendCheck.bind( this ) );
+        _j.post("/chat/send", _data.call( this, stuff ), _.bind( this.sendCheck, this ) );
     };
         
     _ns.registerForm = function( opts ) {
         var f;
-
+        
         if( U.type(opts) == "string" ) {
-            
             f = new IV({
                 form : _doc.getElementById( opts ),
-                callback : this.send.bind(this)
+                callback : _.bind( this.send, this )
             });
-                  
         } else if( U.type(opts) == "object" ) {
-            
             f = new IV({
                 form : opts.form || undefined,
-                callback : this.send.bind(this)
-            });
-         
-        } else {
-            
+                callback : _.bind( this.send, this )
+            });       
+        } else {  
             f = new IV({
                 callback : _efn 
             });
-            
         }
         
         this.input = f;
@@ -294,22 +325,33 @@ Chat.ns = Chat.prototype = (function ( ) {
         
         this.ready = false;
         
+        /* basic identifying properties */
         this.name = conf.name || "N/A";
         this.uid = U.uid( );
+    
+        /* set the events property up */
+        this.events = _j.extend( { }, _defaultEvents, conf.events );
+        
+        /* important information */
         this.chat_token = conf.chat_token || false;
         this.user_token = conf.user_token || false;
         this.messages = conf.messages || [ ];
         
-        if( this.chat_token === false || this.user_token === false ){ return false; }
+        /* if there weren't tokens, stop immediately */
+        if( this.chat_token === false || this.user_token === false )
+            return false;
         
+        /* open up the socket */
         this.socket = Socket({ 
             url : "/chat/socket", 
-            callback : this.receive.bind( this ), 
+            events : { 'update' : _.bind( this.receive, this ) },
             token : this.chat_token,
             extras : { chat_token : this.chat_token, user_token : this.user_token }
         });
         
+        /* save this chatroom in the private hash */
         _chatRooms[this.uid] = this;
+        
         this.ready = true;
     };
     
@@ -322,6 +364,57 @@ Chat.ns.rig.prototype = Chat.prototype;
 // NAMESPACE : Utilities //
 ///////////////////////////
 Utils = U = {
+
+    template : (function ( ) {
+        
+        var /* public: */
+            template,
+            
+            /* private: */
+            _loadAll,
+            _load,
+            _templates = { };
+        
+        
+        _load = function ( ) {
+            
+            if( $(this).length < 1 )
+                return false;
+                
+            var $temp = $(this),
+                name = $temp.data("name") || U.uid( ),
+                html = $temp.html( );
+                
+            _templates[name] = _.template( html );
+        };
+        
+        _loadAll = function ( ) {
+            U.l("loading all templates");
+            _j('script[type="text/template"]').each( _load );
+        };
+        
+        /* U.template
+         * creates the underscore html template
+         * for a given object from the name param
+         * @param {string} name The name of the template
+         * @param {object} context The object to be rendered
+         * @returns {string} html for the new item
+        */
+        template = function ( name, context ) {
+            
+            if( !_templates.hasOwnProperty( name ) )
+                return false;
+                
+            return _templates[name](context);
+        };
+        
+        /* give access to load function */
+        template.load = _load;
+        
+        _j(_doc).ready( _loadAll );
+        return template;
+        
+    })( ),
 
     /* U.uid
      * returns a unique identifier for uses 
@@ -374,6 +467,56 @@ Utils = U = {
         return _type;
     })( ),
     
+    /* U.Entry
+     * calls document.ready callbacks 
+     * from other scripts
+    */
+    Entry : (function ( ) {
+        
+        var /* public: */
+            entry,
+            
+            /* private: */
+            _callbacks = [ ],  // the array of callbacks
+            _finished = false, // state management
+            _onready;          // the function that calls all of these
+        
+        /* U._onready
+         * private callback to trigger all onready functions
+        */
+        _onready = function ( ) {
+            if( _finished ) { return false; }
+                
+            for( var i = 0; i < _callbacks.length; i++ ){
+                // send these callbacks the current user
+                _callbacks[i]( _cusr, _csrf );
+            }
+            _finished = true;
+        };
+        
+        /* U.entry
+         * pushes a callback into the stack
+         * @param {function} fn The callback to push   
+        */
+        entry = function ( fn ) {
+            if( U.type(fn) !== "function" )
+                return false;
+            
+            // push callback into private array
+            _callbacks.push( fn );
+            
+            // if the document was faster than the call
+            if( _finished )
+                fn( _cusr );
+                    
+            return true;
+        };
+        
+        _j(_doc).ready( _onready );
+               
+        return entry;
+        
+    })( ),
     
     /* U.l
      * console logging helper.
@@ -405,8 +548,8 @@ Utils = U = {
             }  
             return;
         };
-    })( !!_w.console )
-
+    })( !!_w.console ),
+    
 };
 
 //////////////////////
@@ -437,13 +580,13 @@ _Menu = (function ( ) {
     _open = function ( ) {
         if( !_ready ) { return; }
         this.addClass("open");
-        _j(_doc).on("keydown", _checkEsc.bind( this ) );
+        _j(_doc).on("keydown", _.bind( _checkEsc, this ) );
     };
     
     _close = function ( ) {
         if( !_ready ) { return; }
         this.removeClass("open");
-        _j(_doc).off("keydown", _checkEsc.bind( this ) );
+        _j(_doc).off("keydown", _.bind( _checkEsc, this ) );
     };
     
     _toggle = function ( ) {
@@ -481,10 +624,10 @@ domReady = function ( ) {
         _Menu.init("#chatist-menu");
     
     if( _doc.getElementById("to-top") !== null ) 
-        $("#to-top").click( _toTop ); 
+        _j("#to-top").click( _toTop ); 
     
     if( _doc.getElementById( String(_time ).substring( 0, 5 ) ) !== null ) 
-        _csrf = $("#"+String(_time ).substring( 0, 5 )).find('input[type="hidden"]').val( );
+        _csrf = _j("#"+String(_time ).substring( 0, 5 )).find('input[type="hidden"]').val( );
 };
 
 
@@ -493,10 +636,9 @@ window.U = window.Utils = U;
 window.C = window.Chat = C;
 window.User = User;
 window.Socket = Socket;
+window.Entry = U.Entry;
 
 /* set the dom ready function */
-_j(_doc).ready( domReady );
+Entry( domReady );
     
-Function.prototype.bind=Function.prototype.bind||function(d){var a=Array.prototype.splice.call(arguments,1),c=this;var b=function(){var e=a.concat(Array.prototype.splice.call(arguments,0));if(!(this instanceof b)){return c.apply(d,e)}c.apply(this,e)};b.prototype=c.prototype;return b};
-
 })( window );

@@ -14,5 +14,5 @@ class Home_Controller extends Base_Controller {
                     ->with("title", "home");
         return $view;
     }
-
+        
 }
