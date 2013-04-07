@@ -33,6 +33,15 @@
         </article>
         
         <section class="game-zone f">
+            
+            <div class="game-title">
+                @if( $game->is_private )
+                <h1><em>Pivate</em>game</h1>
+                @else
+                <h1><em>Public</em>game</h1>
+                @endif
+            </div>
+            
             <div class="inner">
             <section class="game-board whole">
                 <figure id="render-zone"></figure>
@@ -92,7 +101,7 @@
     <script type="text/javascript" src="/js/d3.js"></script>
     @render('globals.scripts')
     <script type="text/javascript" src="/js/IV.js"></script>
-    <script type="text/javascript" src="/js/game.min.js"></script>
+    <script type="text/javascript" src="/js/game.js"></script>
     <script type="text/javascript">Game({{ $game_js }})</script>
     
 </body>

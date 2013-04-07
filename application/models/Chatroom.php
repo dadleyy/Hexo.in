@@ -77,6 +77,18 @@ class Chatroom extends Tokened {
         return json_encode( $public );         
     }
     
+    public function createJSON( ) {
+        
+        $chat_location = $this->chatfile( );
+        $chat_contents = array(
+            "messages" => array( ),
+            "token" => $this->token,
+            "flag"  => rand( 0, 100000 )
+        );
+        File::put( $chat_location, json_encode( $chat_contents ) );
+        
+    }
+    
     public function chatFile( ){
         return path('storage') . 'chats/' . $this->token . '.json';
     }

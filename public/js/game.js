@@ -40,19 +40,10 @@ var /* entry point */
         _mbgrad.append("stop").attr( _d["msgboxgradstops"][0] );
         _mbgrad.append("stop").attr( _d["msgboxgradstops"][1] );
         
-        /*
-            <linearGradient id="g864" gradientUnits="userSpaceOnUse" x1="100%" y1="100%" x2="100%" y2="0%">
-                <stop stop-color="#726D5D" offset="0"/>
-                <stop stop-color="#807A69" offset="1"/>
-            </linearGradient>
-        */    
-        
         _hexo.attr( _d['hexo'] );
         _helper.attr( _d['helpersvg'] );
         _mbgrad.attr( _d['msgboxgrad'] );
-        
-        
-        
+                
     },
     
     /* _set
@@ -81,7 +72,7 @@ var /* entry point */
             _userTurn = 1;
             U.l("you are the challenger of this game");
         }
-    
+
         /* set the rest of the stuff */
         game.state = conf.state;
         game.tiles = conf.tiles;
@@ -341,6 +332,7 @@ Tile.ns = Tile.prototype = (function ( ){
         
         this.state = opts.state || 0;
         this.value = opts.value || 0;
+        
     };
 
     _ns.render = function( layer, xpos, ypos ){

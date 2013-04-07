@@ -174,7 +174,14 @@ class Chat_Controller extends Base_Controller {
 
     public function post_online( ) {
         $headers = array( 'Content-type' => 'application/json' );
-        $output = array( "success" => true, "code" => 2 );
+        $output = array( "success" => false, "code" => 4 );
+        
+        if( Request::forged( ) ) {
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $output['success'] = true;
+        $output['code'] = 2;
         
         $s_online = count( User::online( ) );
                 

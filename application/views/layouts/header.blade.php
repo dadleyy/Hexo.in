@@ -20,16 +20,16 @@
         
         <div class="f site-links">
             <ul class="links cf">
-                <li class="f t <?php if( $title == "About"){ echo "active"; } ?>">
+                <li class="f t <?php if( $title == "about"){ echo "active"; } ?>">
                     <a class="darkg c t" href="/about" title="">About</a>
                 </li>
-                <li class="f t <?php if( $title == "Tutorial"){ echo "active"; } ?>">
+                <li class="f t <?php if( $title == "tutorial"){ echo "active"; } ?>">
                     <a class="darkg c t" href="/tutorial" title="">Tutorial</a>
                 </li>
-                <li class="f t <?php if( $title == "Blog"){ echo "active"; } ?>">
+                <li class="f t <?php if( $title == "blog"){ echo "active"; } ?>">
                     <a class="darkg c t" href="/blog" title="">Blog</a>
                 </li>
-                <li class="f t <?php if( $title == "Contact"){ echo "active"; } ?>">
+                <li class="f t <?php if( $title == "contact"){ echo "active"; } ?>">
                     <a class="darkg c t" href="/contact" title="">Contact</a>
                 </li>
             </ul>

@@ -48,10 +48,21 @@ section.main-content article.player-name div.stats dl dt{
 section.main-content article.player-name div.stats dl dd{ font-weight: 700; color: #333; font-size: 14px; }
 
 section.main-content section.game-zone{ 
-    padding-top: 20px; 
+    padding-top: 10px; 
     box-shadow: 0px 0px 3px rgba(0,0,0,0.75),    
                 inset 0px 0px 3px rgba(255,255,255,0.75);
 }
+section.main-content section.game-zone{ text-align: center; }
+section.main-content section.game-zone h1{ 
+    font-size: 20px;
+    text-transform: uppercase;
+    font-weight: 300;
+    line-height: 20px;
+    margin-bottom: 10px;
+    color: #aaa;
+}
+section.main-content section.game-zone h1 em{ color: #888; }
+
 section.main-content section.game-zone div.inner{
     position: relative;
     margin: 0px 20px 20px 20px;

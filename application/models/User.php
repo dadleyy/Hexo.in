@@ -33,6 +33,10 @@ class User extends Tokened {
         return $this->has_many_and_belongs_to('Chatroom');
     }
     
+    public function notifications( ) {
+        return $this->has_many('Notification');
+    }
+    
     public function game( ) {
         $current_game = Game::where("challenger_id", "=", $this->id )->take(1)->first( );
         
@@ -63,12 +67,21 @@ class User extends Tokened {
         return $test->token;
     }
                 
-    public function ping( ){
+    public function ping( ) {
         $date = new DateTime( );
         $this->last_update = $date;
         $this->save( );
     }
                 
+    public function getUpdates( ) {
+        $notifications = $this->notifications()->get();
+        $updates = array( );
+        foreach( $notifications as $note ) {
+            $updates[] = json_decode( $note->publicJSON(), true );
+        }
+        return $updates;
+    }
+    
     public function publicJSON( ) {
         $public = array( );
         
