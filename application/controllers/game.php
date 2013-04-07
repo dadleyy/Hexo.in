@@ -49,10 +49,14 @@ class Game_Controller extends Base_Controller {
         $current_game = $current_user->game( );
     
         if( $current_game !== false ) {
-            
+        
             $current_chat = $current_game->chatroom( );
-            
-            File::delete( $current_game->gamefile( ) );
+            $notification = Notification::where( "item_id", "=", $current_game->id )->first( );
+            if( $notification !== null ) {
+                $notification->delete( );
+            }
+                
+            File::delete( $current_game->gameFile( ) );
             File::delete( $current_chat->chatfile( ) );
             DB::table('chatroom_user')->where( 'chatroom_id', '=', $current_chat->id )->delete( );
             
@@ -187,7 +191,7 @@ class Game_Controller extends Base_Controller {
         return Response::make( json_encode( array("success"=>false,"csrf"=>true) ), 404, array() );
     }
     
-    public function action_start( ){
+    public function action_start( $specific = -1 ){
         
         /* try to find the game the current user is playing (if any) */
         $current_user = Auth::user( );
@@ -196,117 +200,82 @@ class Game_Controller extends Base_Controller {
             return Redirect::to( '/game/play' );
         }
         
+        /* check to see if this was an invite */
+        if( $specific !== -1 ) {
+            $challenged = Game::find( $specific );
+            
+            if( $challenged !== null && $challenged->target_id === $current_user->id ){
+                
+                $challenged->addUser( $current_user );
+                
+                $notification = Notification::where( "item_id", "=", $challenged->id )->first( );
+                if( $notification !== null ) {
+                    $notification->delete( );
+                }
+                
+                return Redirect::to( '/game/play' );
+            }
+        }
+        
         /* At this point, there is no current game.
          * The next step is to either join or make a
          * brand new one
         */
         
         /* try to find an open game */
-        $open = Game::where("visitor_id", "=", 0)->take(1)->first();
-        if( $open !== NULL ){
-            
-            $open->visitor_id = $current_user->id;
-            
-            /* set the json for this game */
-            $file_location = $open->gamefile( );
-            $file_contents = File::get( $file_location );
-            $game_info = json_decode( $file_contents, true );
-            
-            /* add this user into that game and set state to 1 (playing) */
-            $game_info['visitor_id'] = $current_user->id;
-            $game_info['state'] = 1;
-            
-            /* save the json */
-            File::put( $file_location, json_encode( $game_info ) );
-                    
-            /* put this user into the chatroom */
-            $chat = Chatroom::where("game_id", "=", $open->id )->first( );        
-            $chat->addUser( $current_user );
-            
-            /* save the game and update the flag (notifies the waiting challenger) */
-            $open->save( );
-            $open->updateFlag( );
-            
+        $open = Game::getOpen( );
+        if( $open !== false ) { 
+            $open->addUser( $current_user );
             return Redirect::to( '/game/play' );
-        } 
-        
-        //////////////////////////////
-        // GAME INITIALIZATION      //
-        $game = new Game;
-        
-        $game->visitor_id    = 0; 
-        $game->challenger_id = $current_user->id;
-        $game->token         = sha1( time() );
-        
-        /* create the file that will hold the game states */
-        $file_location = $game->gamefile( );
-        
-        /* initialize the tiles array */
-        $tiles = array();
-        for( $i = 0; $i < 37; $i++ ){
-            if( $i == 18 ) { continue; }
-            $value = ( $i > 18 ) ? $i : $i + 1;
-            $tiles[ $i ] = array( "id" => $i, "state" => 0, "value" => $value );
         }
         
-        $file_contents = array( 
-            "state" => 0, 
-            "turn"  => 1,
-            "flag"  => rand( 0, 100000 ),
-            "tiles" => $tiles, 
-            "token" => $game->token, 
-            "challenger" => $current_user->id 
-        );
-        
-        File::put( $file_location, json_encode( $file_contents ) );
-        
-        $game->save( );
-        
-        
-        
-        //////////////////////////////
-        // CHATROOM INITIALIZATION  //
-        
-        /* make the chatroom for this */
-        $chat = new Chatroom;
-        
-        $chat->game_id = $game->id;
-        $chat->token = sha1( $game->token );
-        $chat->name = "Game #" . $game->id;
-        
-        $chat->save( );
-        
-        $chat_location = $chat->chatfile( );
-        $chat_contents = array(
-            "messages" => array( ),
-            "token" => $chat->token,
-            "flag"  => rand( 0, 100000 )
-        );
-        File::put( $chat_location, json_encode( $chat_contents ) );
-        
-        /* add the current user to that chatroom */
-        $date = new DateTime( );
-        DB::table('chatroom_user')->insert( array(
-            'chatroom_id' => $chat->id,
-            'user_id'     => $current_user->id,
-            'token'       => sha1( $chat->id . $current_user->id ),
-            'created_at'  => $date,
-            'updated_at'  => $date
-        ));
-        
+        $game = Game::open( $current_user );
         return Redirect::to( '/game/play' );
         
     }
     
     public function action_challenge( ) {
         
-        $output = array( "success" => false, "code" => 4 );
+        $output = array( 'success' => false, 'code' => 4 );
         $headers = array( 'Content-type' => 'application/json' );
         
         if( Request::forged( ) ) {
             return Response::make( json_encode($output), 200, $headers );
         }
         
+        $p_target = Input::get('target');
+        $p_token  = Input::get('token');
+        
+        /* check the tokens */
+        $current_user = Auth::user( );
+        $r_token = sha1( $current_user->id . $current_user->username );
+        $d_token = User::decodeToken( $p_token );
+        
+        if( $r_token !== $d_token ){
+            $output['msg'] = 'invalid input';
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        /* get the user */
+        $target = User::where( "username", "=", $p_target )->first( );
+        if( $target == null ){
+            $output['msg'] = 'opponent not found';
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        if( $current_user->game() !== false ){
+            $output['msg'] = 'you are already in a game';
+            return Response::make( json_encode($output), 200, $headers );
+        }
+            
+        $game = Game::open( $current_user, $target->id );
+        
+        $notification = new Notification( );
+        $notification->source_id = $current_user->id;
+        $notification->user_id = $target->id;
+        $notification->item_id = $game->id;
+        $notification->type = "game";
+        $notification->save( );
+                
         $output['success'] = true;
         $output['code'] = 100;
         return Response::make( json_encode($output), 200, $headers );

@@ -37,7 +37,7 @@ OnlineList = (function ( ) {
          * @param {string} usr The username of the user being challenged
          * @returns an obj 
         */
-        _makeData = function ( usr ){
+        _makeChallengeData = function ( usr ){
             return {
                 csrf_token : _csrf,
                 target : usr,
@@ -51,7 +51,11 @@ OnlineList = (function ( ) {
         _checkChallenge; // data receiver for /game/challenge calls
         
     _checkChallenge = function ( data ) {
-        console.log( data );  
+        if( !data || !data.success ) {                
+            return false;
+        }
+        
+        document.location = "/game/play";
     };
         
     _challengeUser = function ( ) {
@@ -88,7 +92,7 @@ OnlineList = (function ( ) {
         _socket =  Socket({ 
             url : _defaults['socket_url'], 
             token : _user.token,
-            events : { 'update' : _ns.update.bind( _ns ) }
+            events : { 'update' : _.bind( _ns.update, _ns ) }
         });
         
         _socket.open( );

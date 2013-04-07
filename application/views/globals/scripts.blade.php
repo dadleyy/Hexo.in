@@ -27,4 +27,17 @@ _gaq.push(['_trackPageview']);
 <script type="text/javascript">User({{ Auth::user()->publicJSON() }})</script>
 @endif
 
+<script type="text/template" data-name="game-notification">
+    <li class="game cf"> 
+        <a href="/game/start/<%= item_id %>" class="t slick f gr3">+</a>
+        <p><%= source_name %> has invited you to play a game with them!</p>
+    </li>
+</script>
+<script type="text/template" data-name="friend-notification">
+    <li class="friend cf"> 
+    
+    </li>
+</script>
+
+
 <!-- end global js scripts -->

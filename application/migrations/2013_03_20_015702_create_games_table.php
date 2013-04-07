@@ -11,6 +11,9 @@ class Create_Games_Table {
             $table->integer('visitor_id')->default(0);
             $table->integer('challenger_id')->default(0);
                          
+            $table->boolean('is_private')->default(false);
+            $table->integer('target_id')->default(0);
+                         
             $table->timestamps();
         });
     }

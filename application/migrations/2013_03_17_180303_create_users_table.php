@@ -8,7 +8,6 @@ class Create_Users_Table {
 	 * @return void
 	 */
     public function up( ) {
-        $date = time( );
     
         Schema::create('users', function($table) {
             $table->increments('id');
@@ -22,7 +21,7 @@ class Create_Users_Table {
             $table->integer('losses')->default(0);
             $table->integer('games')->default(0);
             
-            $table->timestamp('last_update')->default( $date );
+            $table->timestamp('last_update');
             
             $table->timestamps();
         });

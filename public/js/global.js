@@ -30,6 +30,7 @@ var /* global entry point */
     _efn,   // empty function
     
     /* Public: */
+    Heartbeat,
     U, Utils,
     Socket,
     C, Chat,
@@ -389,7 +390,6 @@ Utils = U = {
         };
         
         _loadAll = function ( ) {
-            U.l("loading all templates");
             _j('script[type="text/template"]').each( _load );
         };
         
@@ -552,6 +552,80 @@ Utils = U = {
     
 };
 
+///////////////////////////
+// NAMESPACE : Heartbeat //
+///////////////////////////
+Heartbeat = (function( ) {
+    
+    var _ns = { },
+        _defaults = { 
+            "menu_id" : "#heartbeat-menu",
+            "socket_url" : "/home/heartbeat",
+            "container" : "#notification-list"
+        },
+        /* vars: */
+        _socket,
+        _count = 0,
+        _container,
+        _bubble,
+        
+        /* fn: */
+        _updateBubble;
+    
+    _updateBubble = function ( ) {
+        if( _count > 0 )
+            _bubble.text( _count ).css("display","block");
+        else 
+            _bubble.text( 0 ).css("display","none");
+    };
+    
+    _ns.update = function ( data ) {
+        if( U.type(data) !== "array" ) 
+            return false;
+    
+        /* clear out old html */
+        _container.html('');
+        _count = data.length;
+        
+        var newhtml = "";
+        for( var i = 0; i < data.length; i++ ){
+            if( data[i].type == "game" )
+                newhtml += U.template( 'game-notification', data[i] );  
+            else 
+                newhtml += U.template( 'friend-notification', data[i] );
+        }
+        _container.html( newhtml );
+        
+        _updateBubble( );
+    };
+    
+    /* Heartbeat.init
+     * initializes the heartbeat zocket and menu
+    */
+    _ns.init = function ( ) {
+        U.l("setting up the heartbeat view");
+        
+        _Menu.init( _defaults['menu_id'] );
+        
+        _container = $( _defaults['container'] );
+        _bubble = $( _defaults['menu_id'] ).find("span.bubble");
+        _count = _container.children("li").length;
+            
+        /* create the socket that updates information */
+        _socket =  Socket({ 
+            url : _defaults['socket_url'], 
+            token : _cusr.token,
+            events : { 'update' : _.bind( _ns.update, _ns ) }
+        });
+        _socket.open( );
+        
+        _updateBubble( );
+    };
+    
+    return _ns;
+    
+})( );
+
 //////////////////////
 // DOMHELPER : Menu //
 //////////////////////
@@ -566,6 +640,7 @@ _Menu = (function ( ) {
         
         /* variables */
         _menuDiv,
+        _active = null,
         _cb,
         
         _ready = false,
@@ -579,12 +654,21 @@ _Menu = (function ( ) {
     
     _open = function ( ) {
         if( !_ready ) { return; }
+        
+        if( _active !== null )
+            _close.call( _active );
+            
+        _active = this;
+        
         this.addClass("open");
         _j(_doc).on("keydown", _.bind( _checkEsc, this ) );
     };
     
     _close = function ( ) {
         if( !_ready ) { return; }
+        
+        _active = null;
+        
         this.removeClass("open");
         _j(_doc).off("keydown", _.bind( _checkEsc, this ) );
     };
@@ -617,6 +701,10 @@ _Menu = (function ( ) {
 
 /* entry point */
 domReady = function ( ) {
+    
+    if( _doc.getElementById( String(_time ).substring( 0, 5 ) ) !== null ) 
+        _csrf = _j("#"+String(_time ).substring( 0, 5 )).find('input[type="hidden"]').val( );
+
     if( _doc.getElementById("authd-menu") !== null )
         _Menu.init("#authd-menu");
     
@@ -626,8 +714,9 @@ domReady = function ( ) {
     if( _doc.getElementById("to-top") !== null ) 
         _j("#to-top").click( _toTop ); 
     
-    if( _doc.getElementById( String(_time ).substring( 0, 5 ) ) !== null ) 
-        _csrf = _j("#"+String(_time ).substring( 0, 5 )).find('input[type="hidden"]').val( );
+    if( _doc.getElementById("heartbeat-menu") )
+        Heartbeat.init( );
+        
 };
 
 
