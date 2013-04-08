@@ -158,6 +158,21 @@ class Game extends Tokened {
         return json_encode( $public );
     }
     
+    public function moveTile( $tile_value, $tile_state ) {
+    
+        $info = json_decode( File::get( $this->gameFile() ), true );
+        $tiles = $info['tiles'];
+        
+        /* switch the turn */
+        if( $this->turn == 1 ){
+            $this->turn = 2;
+        } else {
+            $this->turn = 1;
+        }
+        
+        $this->save( );
+    }
+    
     public function createJSON( ){
     
         /* create the file that will hold the game states */
