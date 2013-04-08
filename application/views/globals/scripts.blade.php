@@ -4,6 +4,7 @@
 
 <!-- start global js scripts -->
 <script type="text/javascript" src="/js/dependencies.js"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqLAjnUApy5HiwwPTj_Oq9WIiQo-plM1A&sensor=false"></script>
 <script type="text/javascript" src="/js/global.js"></script>
 <script type="text/javascript">
 var _gaq = _gaq || [];
@@ -33,11 +34,17 @@ _gaq.push(['_trackPageview']);
         <p><%= source_name %> has invited you to play a game with them!</p>
     </li>
 </script>
+
 <script type="text/template" data-name="friend-notification">
     <li class="friend cf"> 
     
     </li>
 </script>
 
-
+<script type="text/template" data-name="chat-message-template">
+    <dl class="cf message">
+        <dt class="f"><%= user %></dt>
+        <dd class="f"><%= text %></dd>
+    </dl>
+</script>
 <!-- end global js scripts -->

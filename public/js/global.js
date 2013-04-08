@@ -31,6 +31,7 @@ var /* global entry point */
     
     /* Public: */
     Heartbeat,
+    Geo,
     U, Utils,
     Socket,
     C, Chat,
@@ -54,8 +55,8 @@ _toTop = function ( ) {
 ////////////////////////
 // NAMESPACE : Socket //
 ////////////////////////
-Socket = function( conf ) { return new Socket.prototype.rig(conf); };
-Socket.prototype = (function( ) {
+Socket = function( conf ) { return new Socket.ns.rig(conf); };
+Socket.prototype = Socket.ns = (function( ) {
 
     var _ns = {
         constructor : Socket,
@@ -201,7 +202,7 @@ Socket.prototype = (function( ) {
     return _ns;
     
 })( );
-Socket.prototype.rig.prototype = Socket.prototype;
+Socket.ns.rig.prototype = Socket.ns;
 
     
 //////////////////////
@@ -235,7 +236,7 @@ User.ns = User.prototype = (function( ) {
     return _ns;
     
 })( );
-User.ns.rig.prototype = User.prototype;
+User.ns.rig.prototype = User.ns;
 
 //////////////////////
 // NAMESPACE : Chat //
@@ -359,7 +360,7 @@ Chat.ns = Chat.prototype = (function ( ) {
     return _ns;
     
 })( );
-Chat.ns.rig.prototype = Chat.prototype;
+Chat.ns.rig.prototype = Chat.ns;
 
 ///////////////////////////
 // NAMESPACE : Utilities //
@@ -552,6 +553,76 @@ Utils = U = {
     
 };
 
+Geo = (function( able ) {
+
+    if( !able )
+        return { init : _efn };
+        
+
+    var _ns = { },
+        _able = false,
+        
+        _g = navigator.geolocation, // shortcut for geo obj
+        _position = null,           // the saved position
+        _map = null,                // constructed map object
+        _marker = null,
+        _container = null,          // the div container
+        
+        /* default settings for the map */
+        _defs = { 
+            zoom : 5,
+            zoomControl : false,
+            mapTypeId : google.maps.MapTypeId.ROADMAP,
+            disableDefaultUI : true,
+            styles : [{
+                "elementType": "labels",
+                "stylers": [ { "visibility": "off" } ]
+            },{
+                "featureType": "road",
+                "elementType": "geometry",
+                "stylers": [
+                    { "hue": "#0088ff" },
+                    { "saturation": -71 },
+                    { "visibility": "off" }
+                ]
+            },{
+                "elementType": "geometry.fill",
+                "stylers": [
+                    { "hue": "#ff0000" },
+                    { "saturation": -99 },
+                    { "lightness": -7 }
+                ]
+            }]
+        };
+
+    
+    _ns.setPosition = function ( position ) { 
+        
+        _container = $("#geo-zone").css("display","block").get()[0];
+        
+        var options = { },
+            lat = position.coords.latitude,
+            lng = position.coords.longitude,
+            latlng = new google.maps.LatLng(lat,lng);   
+        
+        options.center = latlng;
+        
+        _map = new google.maps.Map( _container, $.extend({},_defs,options) );
+        _marker = new google.maps.Marker({ 
+            map : _map, 
+            position : latlng, 
+            icon : "http://hexo.in/img/marker.png" 
+        });  
+    };
+    
+    _ns.init = function ( ) {
+        _g.getCurrentPosition( _ns.setPosition );
+    };
+    
+    return _ns;
+    
+})( (!!window.navigator) && (!!window.navigator.geolocation) );
+
 ///////////////////////////
 // NAMESPACE : Heartbeat //
 ///////////////////////////
@@ -705,8 +776,8 @@ domReady = function ( ) {
     if( _doc.getElementById( String(_time ).substring( 0, 5 ) ) !== null ) 
         _csrf = _j("#"+String(_time ).substring( 0, 5 )).find('input[type="hidden"]').val( );
 
-    if( _doc.getElementById("authd-menu") !== null )
-        _Menu.init("#authd-menu");
+    if( _doc.getElementById("settings-menu") !== null )
+        _Menu.init("#settings-menu");
     
     if( _doc.getElementById("chatist-menu") !== null )
         _Menu.init("#chatist-menu");
@@ -714,9 +785,11 @@ domReady = function ( ) {
     if( _doc.getElementById("to-top") !== null ) 
         _j("#to-top").click( _toTop ); 
     
-    if( _doc.getElementById("heartbeat-menu") )
+    if( _doc.getElementById("heartbeat-menu") !== null )
         Heartbeat.init( );
-        
+    
+    if( _doc.getElementById("geo-zone") !== null )
+        Geo.init( );
 };
 
 

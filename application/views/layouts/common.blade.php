@@ -2,8 +2,12 @@
 <html>
 <head>
     <meta charset="UTF-8">    
+    
     @include('globals.headerinfo')
+    
     @yield('styles')
+    
+    @render('globals.tests')
     
 </head>
 <body>

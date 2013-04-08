@@ -38,7 +38,7 @@
         <div class="r right cf">
 
             @if ( Auth::check() )
-            @render( "layouts.menu" )
+            @render( "layouts.headermenu" )
             @endif
 
         </div>

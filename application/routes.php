@@ -18,6 +18,12 @@ Route::any('/tutorial', function( ) {
     return $view;
 });
 
+/* upgrade page */
+Route::any('/upgrade', function( ) {
+    $view = View::make('home.upgrade')
+                ->with("title","upgrade");
+    return $view;
+});
 
 Event::listen('404', function( ) {
 	return Response::error('404');

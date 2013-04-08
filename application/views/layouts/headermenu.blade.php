@@ -1,4 +1,5 @@
-<div class="r menu" id="authd-menu">
+<div id="geo-zone" class="r" style="display:none;"></div>
+<div class="r menu" id="settings-menu">
     <button class="toggle"></button>
     <div class="dropable t">
         <h1>Settings</h1>
