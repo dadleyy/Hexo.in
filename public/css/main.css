@@ -61,15 +61,20 @@ section.main-content > h1 em{
     font-size: 45px;
 }
 
-body{ 
+html, body{ 
+    height: 100%;
     background-color: rgba(38,38,38,1);
     font-family: 'Raleway', sans-serif;
     font-weight: 300;
 }
 body > section.content{
-    min-height: 650px;
+    min-height: 100%;
+    min-height: -webkit-calc( 100% - 85px );
+    min-height: -moz-calc( 100% - 85px );
+    min-height: -o-calc( 100% - 85px );
+    min-height: calc( 100% - 85px );
     background-color: #f5f5ef;
-    padding: 20px 0px 60px 0px;
+    padding: 20px 0px 20px 0px;
     position: relative;
     z-index: 50;
 }
@@ -173,6 +178,7 @@ header div.menu{
     display: block;
     padding-top: 45px;
 }
+header div#settings-menu,
 header div#heartbeat-menu{ margin-right: 10px; }
 header div.menu.open,
 header div.menu:hover{
@@ -197,7 +203,6 @@ header div#heartbeat-menu span.bubble{
                 0px 0px 4px rgba(0,0,0,0.5);
 }
 header div#heartbeat-menu span.bubble.off{ display: none; }
-
 header div.menu button.toggle{
     position: absolute;
     width: 45px;
@@ -211,7 +216,7 @@ header div.menu button.toggle{
     background-position: center center;
 }
 header div#heartbeat-menu button.toggle{ background-image: url(/img/Notifications.png); }
-
+header div#geo-zone{ width: 200px; height: 45px; background-color: white; box-shadow: inset 0px 0px 1px 1px rgba(255,255,255,0.20), 0px 0px 1px 1px rgba(0,0,0,0.20); }
 
 
 header div.menu div.dropable{

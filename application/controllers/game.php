@@ -69,6 +69,9 @@ class Game_Controller extends Base_Controller {
     
     public function action_move( ) {
         
+        $headers = array( 'Content-type' => 'application/json' );
+        $output = array( "success" => false );
+        
         $current_user = Auth::user( );
         $current_game = $current_user->game( );
         
@@ -77,7 +80,18 @@ class Game_Controller extends Base_Controller {
         }   
 
         $current_game->updateFlag( );                
-        return json_encode( array( "success" => true ) );
+    
+        $package = json_decode( $current_game->publicJSON( ), true );
+        $output = array( 
+            "success" => true,
+            "code" => 1,
+            "type" => "game",
+            "input" => Request::all( ),
+            "package" => $package,
+            "request" => Request::forged( )
+        );
+        
+        return Response::make( json_encode($output), 200, $headers );
     }
     
     public function action_socket( ) {

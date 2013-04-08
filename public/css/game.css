@@ -78,6 +78,7 @@ section.main-content section.game-zone section.game-board{
     position: relative;
     width: 540px;
     height: 440px;
+    overflow: hidden;
 }
 section.main-content section.game-zone section.chat-window{ overflow: hidden; height: 200px; padding: 10px 0px; }
 
@@ -120,7 +121,6 @@ section.ingame-menu a.slick{
 section.main-content article.player-name.challenger section.ingame-menu a.slick{ float: right; }
 section.main-content section.chat-control{ padding: 0px 10px; height: 35px; }
 section.main-content section.chat-control input[type="text"]{
-
     background: transparent;
     display: block;
     height: 35px;
@@ -136,3 +136,34 @@ section.main-content section.chat-control input[type="text"]{
     z-index: 9;
     text-shadow: 1px 1px rgba(255,255,255,0.1);
 }
+#game-message-box{
+    position: absolute;
+    left: 50%; top: -100px;
+    width: 400px; height: 100px;
+    margin: 0px 0px 0px -200px;
+    border-radius: 5px;
+    z-index: 1000;
+    background-color: rgba(147,157,157,0.95);
+    box-shadow: inset 0px 1px 1px 0px rgba(255,255,255,0.3), 0px 0px 3px rgba(0,0,0,0.95);
+}
+#game-message-box > div.pad{ 
+    padding: 20px; 
+    font-size: 20px; line-height: 1.5em;
+    color: #333; text-align: center;
+    font-family: 'Open Sans', sans-serif; 
+    font-weight: 700;
+}
+#game-message-box > div.pad button{
+    margin-top: 20px;
+    border-radius: 3px;
+    box-shadow: 0px 0px 1px rgba(255,255,255,0.85);
+    padding: 0px 40px; line-height: 35px;
+    font-size: 12px; text-transform: uppercase;
+    display: block; cursor: pointer; 
+    color: white; text-align: center;
+    font-family: 'Open Sans', sans-serif; 
+    font-weight: 700;
+}
+
+
+

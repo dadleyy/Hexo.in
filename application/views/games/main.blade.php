@@ -4,7 +4,7 @@
     <meta charset="UTF-8">    
     @include('globals.headerinfo')
     <link rel="stylesheet" type="text/css" href="/css/game.css">
-    
+    @render('globals.tests')
 </head>
 <body>
     
@@ -44,6 +44,7 @@
             
             <div class="inner">
             <section class="game-board whole">
+                <div id="game-message-box" class=""><div class="inner"></div></div>
                 <figure id="render-zone"></figure>
             </section>
             </div>
@@ -103,6 +104,14 @@
     <script type="text/javascript" src="/js/IV.js"></script>
     <script type="text/javascript" src="/js/game.js"></script>
     <script type="text/javascript">Game({{ $game_js }})</script>
+    
+    <script type="text/template" data-name="game-messagebox">
+        <div class="pad">
+            <p><%= message %></p>
+            <button class="middle gr3 closer">close</button>
+        </div>
+    </script>
+    
     
 </body>
 </html>
