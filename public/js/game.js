@@ -434,6 +434,16 @@ Game.ns = Game.prototype =  (function ( ) {
         this.socket.close( );
     };
     
+    /* Game.postMove 
+     *
+    */
+    _ns.postMove = function ( data ) {
+        if( !data.success )
+            return false;
+            
+        this.turn = U.pint( data.turn );
+    };
+    
     /* Game.update
      * The callback from the socket. deals with the data
      * send back from the long poll
@@ -479,8 +489,14 @@ Game.ns = Game.prototype =  (function ( ) {
      * @param {Tile} the tile that was flipped
     */
     _ns.move = function ( tile ) {
-        tile.state = _userTurn;
-        $.post( _d['gameserver'].moves, _moveData.call( this, tile ), _.bind( this.update, this ) );
+        
+        var data = _moveData.apply( this, [tile] );
+        $.post( _d['gameserver'].moves, {
+            "csrf_token" : _csrf,   
+            "token" : this.token,
+            "tile" : { "value" : tile.value, "state" : tile.state }
+        }, _.bind( this.postMove, this) );
+        
     };
     
     /* Game.notify

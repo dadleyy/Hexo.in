@@ -593,7 +593,14 @@ Geo = (function( able ) {
                     { "lightness": -7 }
                 ]
             }]
-        };
+        },
+        
+        /* event blocking */
+        _block = function ( e ) { 
+            e.cancelBubble = true; 
+            if ( e.stopPropagation ) 
+                e.stopPropagation( ); 
+        }; 
 
     
     _ns.setPosition = function ( position ) { 
@@ -613,6 +620,11 @@ Geo = (function( able ) {
             position : latlng, 
             icon : "http://hexo.in/img/marker.png" 
         });  
+        
+        google.maps.event.addDomListener( _container, 'mousedown', _block ); 
+        google.maps.event.addDomListener( _container, 'click', _block ); 
+        google.maps.event.addDomListener( _container, 'dblclick', _block ); 
+        google.maps.event.addDomListener( _container, 'contextmenu', _block ); 
     };
     
     _ns.init = function ( ) {
@@ -788,7 +800,7 @@ domReady = function ( ) {
     if( _doc.getElementById("heartbeat-menu") !== null )
         Heartbeat.init( );
     
-    if( _doc.getElementById("geo-zone") !== null )
+    if( _doc.getElementById("geo-zone") !== null ){ }
         Geo.init( );
 };
 

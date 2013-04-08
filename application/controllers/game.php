@@ -74,22 +74,48 @@ class Game_Controller extends Base_Controller {
         
         $current_user = Auth::user( );
         $current_game = $current_user->game( );
-        
-        if( $current_game == null ){ 
-            return json_encode( array( "success" => false ) );
-        }   
-
-        $current_game->updateFlag( );                
     
-        $package = json_decode( $current_game->publicJSON( ), true );
-        $output = array( 
-            "success" => true,
-            "code" => 1,
-            "type" => "game",
-            "input" => Request::all( ),
-            "package" => $package,
-            "request" => Request::forged( )
-        );
+        if( $current_game == null || Request::forged( ) ){ 
+            $output['msg'] = "invalid request";
+            return Response::make( json_encode($output), 200, $headers );
+        }   
+        
+        /* get the two tokens */
+        $g_token = Input::get("token");
+        $r_token = $current_game->token;
+      
+        if( Game::decodeToken($g_token) !== $r_token ){
+            $output['msg'] = "invalid token";
+            return Response::make( json_encode($output), 200, $headers );
+        }
+    
+        $t_obj = Input::get("tile");
+        if( $t_obj == null || !is_array($t_obj) ){
+            $output['msg'] = "invalid parameters for move call";
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        /* find out if this is the correct turn */ 
+        if( $current_game->turn == 1 && ($current_game->visitor()->id == $current_user->id) ) {
+            $output['success'] = true;
+            $output['msg'] = 'wrong turn';
+            return Response::make( json_encode($output), 200, $headers );
+        } else if ( $current_game->turn == 2 && ($current_game->challenger()->id == $current_user->id) ) {
+            $output['success'] = true;
+            $output['msg'] = 'wrong turn';
+            return Response::make( json_encode($output), 200, $headers );
+        }
+            
+        
+        $t_value = $t_obj['value'];
+        $t_state = $t_obj['state'];
+        
+        $current_game->moveTile( $t_value, $t_state );
+        $current_game->updateFlag( );                
+        
+        $output['turn'] = $current_game->turn;
+        $output['input'] = Input::all( ); 
+        $output['success'] = true; 
         
         return Response::make( json_encode($output), 200, $headers );
     }
