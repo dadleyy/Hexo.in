@@ -552,7 +552,7 @@ section.main-content section.basic article.block div.etc dl dt{
 
 /* generic form styles */
 section.main-content article.form-container{ 
-    margin: 0px 0 60px -10px; 
+    margin: 0px 0 60px 0px; 
     position: relative; 
     padding: 0 0px 10px 0px; 
     overflow: hidden; 
