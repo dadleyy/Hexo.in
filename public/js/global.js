@@ -800,7 +800,7 @@ domReady = function ( ) {
     if( _doc.getElementById("heartbeat-menu") !== null )
         Heartbeat.init( );
     
-    if( _doc.getElementById("geo-zone") !== null ){ }
+    if( _doc.getElementById("geo-zone") !== null )
         Geo.init( );
 };
 

@@ -63,6 +63,24 @@ class Game extends Tokened {
         return $game;
     }
     
+    /* Game->visitor 
+     * returns the visitor of the game
+     * @return {User} the visitor of the game
+    */
+    public function visitor( ){ return User::find( $this->visitor_id ); }
+    
+    /* Game->challenger 
+     * returns the challenger of the game
+     * @return {User} the challenger of the game
+    */
+    public function challenger( ){ return User::find( $this->challenger_id ); }
+    
+    /* Game->chatroom 
+     * returns the chatroom of the game
+     * @return {Chatroom} the chatroom of the game
+    */
+    public function chatroom( ){ return Chatroom::where( "game_id", "=", $this->id )->first( ); }
+    
     /* game->addUser
      * Adds the user to the game
      * @param {User} the user to be added
@@ -94,26 +112,48 @@ class Game extends Tokened {
         return true;
     }
     
-    public function visitor( ){ 
-        return User::find( $this->visitor_id ); 
+    /* Game->checkTurn
+     * Checks whether the user is able to make a move 
+     * this turn based on the state of the game
+     * @param {User} the user trying to make a move
+     * @return {boolean} if the turn matches up
+    */
+    public function checkTurn( $user ) {
+        
+        if( $this->visitor() !== null ) {
+            if( $this->visitor()->id === $user->id && $this->turn === 1 ) {
+                return false;
+            }
+        }      
+        if( $this->challenger()->id === $user->id && $this->turn === 2 ) {
+            return false;
+        }  
+
+        return true;
     }
     
-    public function challenger( ){ 
-        return User::find( $this->challenger_id ); 
-    }
+    /* Game->isOver
+     * Checks to see if the game file has been
+     * deleted, which would mean the game is over 
+     * @return {boolean}
+    */
+    public function isOver( ) { return !file_exists( $this->gameFile( ) ); }
     
-    public function isOver( ) { 
-        return !file_exists( $this->gameFile( ) ); 
-    }
+    /* Game->gameFile
+     * Returns the location of the game file
+     * @return {string} the location of the game file
+    */
+    public function gameFile( ){ return path('storage') . 'games/' . $this->token . '.json'; }
     
-    public function gameFile( ){
-        return path('storage') . 'games/' . $this->token . '.json';
-    }
+    /* Game->getLastTime
+     * @return {timestamp} the timestamp of the latest update
+    */
+    public function getLastTime( ) { return strtotime( $this->updated_at ); }
     
-    public function getLastTime( ) {
-        return strtotime( $this->updated_at );
-    }
-    
+    /* Game->getFlag 
+     * Returns the current flag from the game file
+     * @return {string} the game flag
+    */
     public function getFlag( ) {
         
         if( !file_exists( $this->gameFile() ) ) {
@@ -124,12 +164,22 @@ class Game extends Tokened {
         return $info['flag'];
     }
     
+    /* Game->updateFlag
+     * Updates the game file with a new random flag to 
+     * trigger any needed socket updates
+    */
     public function updateFlag( ) {
         $info = json_decode( File::get( $this->gameFile() ), true );    
         $info['flag'] = base_convert( rand( 1000000, 1000000000 ), 10, 36 );
         File::put( $this->gameFile(), json_encode( $info ) );
     }
     
+    /* Game->publicJSON
+     * Returns a json encoded array of
+     * information that is usable on the client
+     * side for communication
+     * return {string} json ecoded array
+    */
     public function publicJSON( ){
     
         $info  = json_decode( File::get( $this->gameFile() ), true );
@@ -157,11 +207,22 @@ class Game extends Tokened {
         return json_encode( $public );
     }
     
+    /* Game->getTiles 
+     * Returns a php array of the tiles that
+     * are in the game file
+     * @return {array} the tiles
+    */
     public function getTiles( ) {
         $info = json_decode( File::get( $this->gameFile() ), true );
         return $info['tiles'];
     }
     
+    /* Game->moveTile
+     * Changes the tile with the appropriate
+     * value to a specific state
+     * @param {int} the target tile value
+     * @param {int} the new tile state
+    */
     public function moveTile( $tile_value, $tile_state ) {
     
         $info = json_decode( File::get( $this->gameFile() ), true );
@@ -203,6 +264,9 @@ class Game extends Tokened {
         return $result;
     }
     
+    /* Game->createJSON
+     * Sets up the json file for future use
+    */
     public function createJSON( ){
     
         /* create the file that will hold the game states */
@@ -232,10 +296,6 @@ class Game extends Tokened {
         );
         
         File::put( $file_location, json_encode( $file_contents ) );
-    }
-
-    public function chatroom( ){
-        return Chatroom::where( "game_id", "=", $this->id )->first( );
     }
     
 }

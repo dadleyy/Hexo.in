@@ -96,13 +96,8 @@ class Game_Controller extends Base_Controller {
         }
         
         /* find out if this is the correct turn */ 
-        if( $current_game->turn == 1 && ($current_game->visitor()->id == $current_user->id) ) {
-            $output['success'] = false;
-            $output['msg'] = 'wrong turn';
-            return Response::make( json_encode($output), 200, $headers );
-        } else if ( $current_game->turn == 2 && ($current_game->challenger()->id == $current_user->id) ) {
-            $output['success'] = false;
-            $output['msg'] = 'wrong turn';
+        if( !$current_game->checkTurn( $current_user ) ){
+            $output['msg'] = "wrong turn";
             return Response::make( json_encode($output), 200, $headers );
         }
             
