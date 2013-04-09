@@ -97,11 +97,11 @@ class Game_Controller extends Base_Controller {
         
         /* find out if this is the correct turn */ 
         if( $current_game->turn == 1 && ($current_game->visitor()->id == $current_user->id) ) {
-            $output['success'] = true;
+            $output['success'] = false;
             $output['msg'] = 'wrong turn';
             return Response::make( json_encode($output), 200, $headers );
         } else if ( $current_game->turn == 2 && ($current_game->challenger()->id == $current_user->id) ) {
-            $output['success'] = true;
+            $output['success'] = false;
             $output['msg'] = 'wrong turn';
             return Response::make( json_encode($output), 200, $headers );
         }
@@ -110,12 +110,18 @@ class Game_Controller extends Base_Controller {
         $t_value = $t_obj['value'];
         $t_state = $t_obj['state'];
         
-        $current_game->moveTile( $t_value, $t_state );
-        $current_game->updateFlag( );                
+        $result = $current_game->moveTile( $t_value, $t_state );
+        if( $result === false ){
+            $output['success'] = false;
+            $output['msg'] = 'unable to move turn';
+            return Response::make( json_encode($output), 200, $headers );
+        }
         
         $output['turn'] = $current_game->turn;
-        $output['input'] = Input::all( ); 
+        $output['update'] = $result;
         $output['success'] = true; 
+        
+        $current_game->updateFlag( );
         
         return Response::make( json_encode($output), 200, $headers );
     }

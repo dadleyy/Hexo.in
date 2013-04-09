@@ -11,7 +11,7 @@
  * font-family: 'Open Sans', sans-serif; ( 400, 300, 600, 700 )
 */
 .orange.c{ color: #cf9b34; }
-.blue.c{ color: #00507a; }
+.blue.c{ color: #00ccff; }
 .green.c{ color: #669966; }
 .red.c{ color: #ce334c; }
 .lightg.c{ color: #a0a0a0; }
@@ -556,7 +556,6 @@ section.main-content article.form-container{
     position: relative; 
     padding: 0 0px 10px 0px; 
     overflow: hidden; 
-    border-right: 1px solid #aaa;
 }
 section.main-content article.form-container div.inner{ padding-right: 20px; padding-left: 0px; }
 section.main-content article.form-container article.success{
@@ -625,7 +624,7 @@ section.main-content article.form-container form textarea{
     min-height: 140px;
     padding: 10px;
     line-height: 35px;
-    width: 620px;
+    width: 400px;
     text-indent: 0px;
 }
 section.main-content article.form-container form input[type="submit"]{

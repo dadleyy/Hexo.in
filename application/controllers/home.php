@@ -111,7 +111,7 @@ class Home_Controller extends Base_Controller {
             
             $output['users'][] = $u_array;
         }
-        
+
         return json_encode( $output );
             
     }
