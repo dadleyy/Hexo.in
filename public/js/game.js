@@ -152,8 +152,8 @@ _layerInits = {
         U.l("rendering game layer");
         
         var x = 100, y = 130, row = 0, order = [3,4,5,6,5,4,3],
-            set = 0, inc = -1, nx, ny, sum = 0, val = 0, _tiles = [ ],
-            info;
+            set = 0, inc = -1, nx, ny, sum = 0, val = 0, 
+            _tiles = { }, info;
             
         for( var i in this.tiles ) {
             /* prevent prototyping of tiles array */
@@ -185,9 +185,8 @@ _layerInits = {
             
             /* make the tile, render and push */    
             var t = Tile( info , this );
-            _tiles.push( t.render( layer, nx, ny ) );
+            _tiles[i] = t.render( layer, nx, ny );
         }
-        
         
         this.tiles = _tiles;
     },
@@ -225,8 +224,8 @@ _defaults = _d = {
         "fill" : "#333",
         "style" : "cursor:pointer" 
     },
-    visitorhexo : { "fill" : "red" },
-    challengerhexo : { "fill" : "blue" },
+    visitorhexo : { "fill" : "#ce334c" },
+    challengerhexo : { "fill" : "#00ccff" },
     hexotext : {
         "text-anchor" : "middle",
         "fill" : "#eee",
@@ -372,13 +371,17 @@ Tile.ns = Tile.prototype = (function ( ){
         return this.draw( ); 
     };
     
+    _ns.setState = function ( state ) {
+        this.state = U.pint( state );  
+    };
+    
     _ns.draw = function ( ) {
         this.dom.tile.attr( _d['gamehexo'] );
         
-        if( this.state == 1 )
+        if( U.pint( this.state ) == 1 )
             this.dom.tile.attr( _d['challengerhexo'] )
             
-        else if( this.state == 2 )
+        else if( U.pint( this.state ) == 2 )
             this.dom.tile.attr( _d['visitorhexo'] )
         
         return this;  
@@ -439,9 +442,12 @@ Game.ns = Game.prototype =  (function ( ) {
     */
     _ns.postMove = function ( data ) {
         if( !data.success )
-            return false;
-            
+            return this.notify( data.msg );
+        
+        this.tiles[data.update.key].setState( data.update.state );
+        
         this.turn = U.pint( data.turn );
+        this.draw( );
     };
     
     /* Game.update
@@ -469,7 +475,13 @@ Game.ns = Game.prototype =  (function ( ) {
             
             this.visitor = visitor;
         }
-        
+        _.each( data.tiles, function ( tile, indx ) { 
+            if( U.pint( this.tiles[indx].value ) ===  U.pint( tile.value ) ) {
+                this.tiles[indx].state = U.pint( tile.state );
+            }
+        }, this );
+                
+        this.turn = data.turn;        
         this.draw( );
     };
     
@@ -479,9 +491,9 @@ Game.ns = Game.prototype =  (function ( ) {
     */
     _ns.draw = function ( ) {
         U.l("redrawing the game");  
-        for( var i = 0; i < this.tiles.length; i++ ){
-            this.tiles[i].draw( );
-        }
+        _.each( this.tiles, function( tile ){ 
+            tile.draw( );
+        });
     };
     
     /* Game.move
@@ -489,12 +501,11 @@ Game.ns = Game.prototype =  (function ( ) {
      * @param {Tile} the tile that was flipped
     */
     _ns.move = function ( tile ) {
-        
         var data = _moveData.apply( this, [tile] );
         $.post( _d['gameserver'].moves, {
             "csrf_token" : _csrf,   
             "token" : this.token,
-            "tile" : { "value" : tile.value, "state" : tile.state }
+            "tile" : { "value" : tile.value, "state" : _userTurn }
         }, _.bind( this.postMove, this) );
         
     };

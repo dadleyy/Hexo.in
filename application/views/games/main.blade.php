@@ -74,7 +74,7 @@
         <article class="f player-name visitor" id="visitor-info">
         <?php $visitor = $game->visitor(); ?>
             <h4 class="position">Visitor</h4>
-            <h1 class="name green c">{{ ($visitor != null) ? $visitor->username : "waiting" }}</h1>
+            <h1 class="name red c">{{ ($visitor != null) ? $visitor->username : "waiting" }}</h1>
             <div class="cf stats">
                 <dl class="f wins">
                     <dt>Wins</dt>

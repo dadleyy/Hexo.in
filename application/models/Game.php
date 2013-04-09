@@ -133,16 +133,15 @@ class Game extends Tokened {
     public function publicJSON( ){
     
         $info  = json_decode( File::get( $this->gameFile() ), true );
-        $token = $info['token'];
         $public = array( );
 
         /* save the information into the public array */
-        $public['token'] = $this->encodeToken( $token );
-    
         $public['state'] = $info['state'];
-        $public['turn'] = $info['turn'];
         $public['tiles'] = $info['tiles'];
         $public['flag'] = $info['flag'];
+        $public['turn'] = intval( $info['turn'] );
+        
+        $public['token'] = $this->encodeToken( $this->token );
         $public['is_private'] = $this->is_private;
         
         /* output the two users */
@@ -158,19 +157,50 @@ class Game extends Tokened {
         return json_encode( $public );
     }
     
+    public function getTiles( ) {
+        $info = json_decode( File::get( $this->gameFile() ), true );
+        return $info['tiles'];
+    }
+    
     public function moveTile( $tile_value, $tile_state ) {
     
         $info = json_decode( File::get( $this->gameFile() ), true );
         $tiles = $info['tiles'];
         
-        /* switch the turn */
-        if( $this->turn == 1 ){
-            $this->turn = 2;
-        } else {
-            $this->turn = 1;
+        /* set the tile state */
+        $indx = -1;
+        foreach( $tiles as $key=>$tile ) {
+            $indx = $key;
+            if( (int)$tile['value'] === (int)$tile_value ){
+                break;
+            }
         }
         
+        if( !isset( $tiles[$indx] ) || $tiles[$indx]['state'] !== 0 ) {
+            return false;    
+        }
+        
+        /* set the state - put it back in - save it */
+        $info['tiles'][$indx]['state'] = $tile_state;
+        
+        $result = array( );
+        $result['key'] = $indx;
+        $result['state'] = $info['tiles'][$indx]['state'];
+        
+        /* switch the turn */
+        if( $info['turn'] == 1 ){
+            $this->turn = 2;
+            $info['turn'] = 2;
+        } else {
+            $this->turn = 1;
+            $info['turn'] = 1;
+        }
+        
+        File::put( $this->gameFile(), json_encode( $info ) );
+        
+        $this->touch( );
         $this->save( );
+        return $result;
     }
     
     public function createJSON( ){
@@ -194,11 +224,10 @@ class Game extends Tokened {
         }
         
         $file_contents = array( 
-            "state" => 0, 
-            "turn"  => 1,
+            "state" => 0,
             "flag"  => rand( 0, 100000 ),
             "tiles" => $tiles, 
-            "token" => $this->token, 
+            "turn"  => 1,
             "challenger" => $this->challenger_id 
         );
         

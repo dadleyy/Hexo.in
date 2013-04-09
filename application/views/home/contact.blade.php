@@ -9,10 +9,11 @@
 
 @section('content')
 <section class="main-content spw middle">
-    <h1>Something to say?<br><em>Send us an email.</em></h1>
-    <section class="cf fourth">
-        <article class="form-container middle f three">
+    <h1>Something to say?<br><em>Send an email.</em></h1>
+    <article class="two cf">
+        <article class="form-container middle f two">
         <div class="inner">
+            <p class="big">Have an idea to make the game better?</p>
             <article class="success">
                 <h1>Thank you!</h1>
                 <h3>Your feedback is appreciated</h3>
@@ -37,20 +38,26 @@
     <?php echo Form::close( ); ?>
         </div>
         </article>
-        <article class="one f other-contact">
+        <article class="two f other-contact">
         <div class="inner">
-            <h1 class="addt">Direct email</h1>
-            <dl class="cf">
-                <dt class="f">info:</dt>
-                <dd class="f">info@hexo.in</dd>
-            </dl>
-            <dl class="cf">
-                <dt class="f">danny:</dt>
-                <dd class="f">danny@hexo.in</dd>
-            </dl>
+            <p class="big">Looking to email someone in particular?</p>
+            <ul class="reviews">
+                <li><a href="mailto:info@hexo.in">info:  <em>info@hexo.in</em></a></li>
+                <li><a href="mailto:danny@hexo.in">danny: <em>danny@hexo.in</em></a></li>
+            </ul>
+<!--
+<dl class="cf">
+    <dt class="f">info:</dt>
+    <dd class="f">info@hexo.in</dd>
+</dl>
+<dl class="cf">
+    <dt class="f">danny:</dt>
+    <dd class="f">danny@hexo.in</dd>
+</dl>
+-->
         </div>
         </article>
-    </section>
+    </article>
     <p class="big">Follow <em class="rale">Hexo.in</em></p>
     <div class="socials cf">
         <a href="https://twitter.com/hexoin" title="" class="f icon twitter">
