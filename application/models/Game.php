@@ -5,6 +5,56 @@ class Game extends Tokened {
     public static $table = 'games';
     public static $timestamps = true;
     
+    /* static properties */
+    private static $tile_values = array( 0, 12, 32, 23, 25, 26, 17, 31, 5, 15, 13, 20, 18, 22, 19, 28, 
+    8, 24, 1, 16, 6, 11, 35, 4, 7, 3, 21, 27, 9, 10, 14, 36, 29, 30, 33, 34, 2, 37 );
+    private static $tile_neighbors = array(
+        
+        12 => array( 32, 17, 26 ),
+        32 => array( 12, 17, 31, 23 ),
+        23 => array( 25, 5,  31, 32 ),
+        25 => array( 15, 5, 23 ),
+        
+        26 => array( 12, 13, 20, 17 ),
+        17 => array( 26, 12, 32, 31, 18, 20 ),
+        31 => array( 17, 32, 23, 5,  22, 18 ),
+        5  => array( 15, 19, 22, 31, 23, 25 ),
+        15 => array( 25, 5,  19, 28 ),
+        
+        13 => array( 8,  24, 20, 26 ),
+        20 => array( 13, 26, 17, 18, 1, 24 ),
+        18 => array( 1,  20, 17, 31, 22 ),
+        22 => array( 18, 31, 5,  19, 16 ),
+        19 => array( 22, 5,  15, 28, 6, 16 ),
+        28 => array( 15, 19, 6,  11 ),
+        
+        8  => array( 13, 24, 35 ),
+        24 => array( 8,  13, 20, 1,  4,  35 ),
+        1  => array( 24, 20, 18, 7,  4 ),
+        16 => array( 22, 19, 6,  21, 3 ),
+        6  => array( 16, 19, 28, 11, 27, 21 ),
+        11 => array( 28, 6,  27 ),
+        
+        35 => array( 8,  24, 4,  9 ),
+        4  => array( 35, 24, 1,  7,  10, 9 ),
+        7  => array( 1,  4,  10, 14, 3 ),
+        3  => array( 7,  14, 36, 21, 16 ),
+        21 => array( 3,  36, 29, 27, 6, 16 ),
+        27 => array( 21, 29, 11, 6 ),
+        
+        9  => array( 35, 4,  10, 30 ),
+        10 => array( 9,  4,  7,  14, 33, 30 ),
+        14 => array( 10, 7,  3,  36, 34, 33 ),
+        36 => array( 14, 3,  21, 29, 2,  34 ),
+        29 => array( 36, 21, 27, 2 ),
+        
+        30 => array( 9,  10, 33 ),
+        33 => array( 30, 10, 14, 34 ),
+        34 => array( 33, 14, 36, 2  ),
+        2  => array( 34, 36, 29 )
+        
+    );
+    
     /* Game::getOpen
      * returns a game if there is any open, or returns false
      * if none are open
@@ -80,6 +130,54 @@ class Game extends Tokened {
      * @return {Chatroom} the chatroom of the game
     */
     public function chatroom( ){ return Chatroom::where( "game_id", "=", $this->id )->first( ); }
+    
+    private function getTileState( $tile_value ) {
+        $info = json_decode( File::get( $this->gameFile() ), true );
+        $tiles = $info['tiles'];
+        foreach( $tiles as $tile ) {
+            if( $tile['value'] === $tile_value ){ 
+                return (int)$tile['state'];
+            }
+        }
+        return -1;
+    }
+    
+    private function setTileState( $tile_value, $tile_state, $flip_turn = false ) {
+        $info = json_decode( File::get( $this->gameFile() ), true );
+        $tiles = $info['tiles'];
+        
+        $okay  = false;
+        $indx  = -1;
+        $state = 0;
+        
+        foreach( $tiles as $key=>$tile ) {
+            if( (int)$tile['value'] === (int)$tile_value ){ 
+                $info['tiles'][$key]['state'] = (int)$tile_state;
+                
+                $indx  = $key;
+                $okay  = true;
+                $state = (int)$tile_state;
+            }
+        }
+        
+        if( !$okay ){ return false; }
+        
+        if( $flip_turn === true ) {
+            /* switch the turn */
+            if( $info['turn'] == 1 ){
+                $this->turn = 2;
+                $info['turn'] = 2;
+            } else {
+                $this->turn = 1;
+                $info['turn'] = 1;
+            }
+        }
+        
+        File::put( $this->gameFile(), json_encode( $info ) );
+        flush( );
+        
+        return array( "state" => $state, "key" => $indx );
+    }
     
     /* game->addUser
      * Adds the user to the game
@@ -224,41 +322,38 @@ class Game extends Tokened {
      * @param {int} the new tile state
     */
     public function moveTile( $tile_value, $tile_state ) {
-    
-        $info = json_decode( File::get( $this->gameFile() ), true );
-        $tiles = $info['tiles'];
         
         /* set the tile state */
-        $indx = -1;
-        foreach( $tiles as $key=>$tile ) {
-            $indx = $key;
-            if( (int)$tile['value'] === (int)$tile_value ){
-                break;
+        $status = $this->setTileState( $tile_value, $tile_state, true );
+        if( !is_array($status) ){ return false; }
+    
+        /* check the neighbors */
+        $target_neighbors = Game::$tile_neighbors[$tile_value];
+        $r_neighbors = array();
+        $changed = false;
+        foreach( $target_neighbors as $n_value ) {
+        
+            /* only check neighbors that are in jeopardy */
+            $n_state = $this->getTileState( $n_value );
+            if( $n_state === 0 || $n_state === -1 || (int)$n_state === (int)$tile_state ){ continue; }
+            
+            /* we have a neighbor that is taken by the opponent */    
+            $neighbor_neighbors = Game::$tile_neighbors[$n_value];
+            $nn_arr = array( );
+            foreach( $neighbor_neighbors as $nn_value ){
+                $nn_state = $this->getTileState( $nn_value );
+                if( $nn_state !== (int)$tile_state ){ continue; }
+                $nn_arr[] = array( "value" => $nn_value, "state" => $nn_state );
             }
+            if( count($nn_arr) > 3 ) {
+                $this->moveTile( (int)$n_value, (int)$tile_state );
+            }
+            $r_neighbors[$n_value] = $nn_arr;
         }
-        
-        if( !isset( $tiles[$indx] ) || $tiles[$indx]['state'] !== 0 ) {
-            return false;    
-        }
-        
-        /* set the state - put it back in - save it */
-        $info['tiles'][$indx]['state'] = $tile_state;
-        
-        $result = array( );
-        $result['key'] = $indx;
-        $result['state'] = $info['tiles'][$indx]['state'];
-        
-        /* switch the turn */
-        if( $info['turn'] == 1 ){
-            $this->turn = 2;
-            $info['turn'] = 2;
-        } else {
-            $this->turn = 1;
-            $info['turn'] = 1;
-        }
-        
-        File::put( $this->gameFile(), json_encode( $info ) );
-        
+
+        $result['key'] = $status['key'];
+        $result['state'] = $status['state'];
+            
         $this->touch( );
         $this->save( );
         return $result;
@@ -273,11 +368,7 @@ class Game extends Tokened {
         $file_location = $this->gameFile( );
         
         /* array of vals for the tiles */
-        $tile_values = array( 0, 12, 32, 23, 25, 26, 17, 31, 
-                              5, 15, 13, 20, 18, 22, 19, 28, 
-                              8, 24, 1, 16, 6, 11, 35, 4, 7, 
-                              3, 21, 27, 9, 10, 14, 36, 29, 
-                              30, 33, 34, 2, 37 );
+        $tile_values = Game::$tile_values;
         
         /* initialize the tiles array */
         $tiles = array( );
