@@ -15,8 +15,10 @@ var /* entry point */
     GameMessageBox,
     
     /* private: */
+    U = hexo.Utils,
     _games = { },      // hash of game instances
     _renderZone,       // the render zone
+    _$indicator,       // the turn indicator
     _chatInput,        // chat input box
     _chatZone,         // the chat zone
     _defaults, _d,     // default settings       
@@ -32,6 +34,7 @@ var /* entry point */
         
         _renderZone = document.getElementById('render-zone');
         _chatZone = document.getElementById('chat-zone');
+        _$indicator = $("#turn-indicator");
         
         /* add the helper svg element */
         var _helper = d3.select(document.body).append("svg"),
@@ -57,8 +60,8 @@ var /* entry point */
         _games[game.uid] = game;
             
         /* set the two users */
-        game.challenger = User(conf.challenger);
-        game.visitor = ( conf.visitor ) ? User(conf.visitor) : false;
+        game.challenger = hexo.User(conf.challenger);
+        game.visitor = ( conf.visitor ) ? hexo.User(conf.visitor) : false;
             
         if( game.visitor && game.visitor.active && !game.challenger.active )
             _userTurn = 2;
@@ -75,10 +78,10 @@ var /* entry point */
         var cevts = { events : {'update' : _.bind( game.updateChat, game ) } },
             cconf = $.extend( {}, cevts, conf.chatroom );
             
-        game.chatroom = Chat( cconf );
+        game.chatroom = hexo.Chat( cconf );
         
         /* make a new socket */
-        game.socket = Socket({ 
+        game.socket = hexo.Socket({ 
             url : _d['gameserver'].socket, 
             token : game.token,
             events : { 
@@ -139,6 +142,8 @@ var /* entry point */
         
         dom.svg = svg;
         dom.layers = layers;
+        
+        game.draw( );
     };
 
 /* Unique layer initialization functions */
@@ -466,7 +471,7 @@ Game.ns = Game.prototype =  (function ( ) {
         
         if( this.visitor === false && data.visitor != false ){
             U.l("The visitor has joined");
-            var visitor = User( data.visitor ),
+            var visitor = hexo.User( data.visitor ),
                 $domInfo = $("#visitor-info");
                 
             $domInfo.find("h1.name").text( visitor.username );
@@ -491,6 +496,21 @@ Game.ns = Game.prototype =  (function ( ) {
     */
     _ns.draw = function ( ) {
         U.l("redrawing the game");  
+        var indicatorDest = 20;
+        switch( this.turn ) {
+            case 1:
+                indicatorDest = 20;
+                break;
+            case 2:
+                indicatorDest = 540;
+                break;
+            default:
+                break;     
+        }
+        _$indicator.stop().animate({
+            "left" : indicatorDest + "px"
+        }, U.anTime, U.anEase );
+            
         _.each( this.tiles, function( tile ){ 
             tile.draw( );
         });
@@ -556,8 +576,8 @@ domEntry = function( cusr, csrf ) {
 };
 
 /* expose the game to the window */
-w.Game = Game;
+hexo.Game = Game;
 
-Entry( domEntry );
+hexo.Entry( domEntry );
     
 })( window );

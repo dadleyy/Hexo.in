@@ -1,4 +1,7 @@
-<div id="geo-zone" class="r" style="display:none;"></div>
+<div id="geo-container" class="r">
+    <div id="geo-tooltip" class="gr3"></div>
+    <div id="geo-zone" style="display:none;"></div>
+</div>
 <div class="r menu" id="settings-menu">
     <button class="toggle"></button>
     <div class="dropable t">

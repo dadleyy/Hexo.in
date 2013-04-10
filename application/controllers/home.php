@@ -26,6 +26,18 @@ class Home_Controller extends Base_Controller {
         $output['success'] = true;
         $output['code'] = 2;
         
+        /* check for lat/long updates */
+        if( Input::get("lat") !== null && Input::get("lng") !== null ){
+            $lat = floatval( Input::get("lat") );
+            $lon = floatval( Input::get("lng") );
+            
+            $a_user = Auth::user( );
+            $a_user->latitude = $lat;
+            $a_user->longitude = $lon;
+            $a_user->save( );
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
         /* ************************************************** *
          * SOCKET STATE - raw update required                 *
          * The client has specifically asked for an update    *
@@ -81,37 +93,18 @@ class Home_Controller extends Base_Controller {
             $loops++;
             usleep( 500000 );
         }
-           
+        
     }
     
     public function action_debug( ){
         
-        if( (int)Auth::user()->privileges !== 1 ){
-            return Redirect::to( '/home' );
+        $users = User::where("latitude","!=","0")->get( );
+        $clean = array( );
+        foreach( $users as $usr ) {
+            $clean[] = $usr->original;
         }
         
-        $output = array();
-        
-        $output['users'] = array();
-        $output['games'] = array();
-        
-        foreach( Game::all() as $game ) {
-            $output['games'][] = json_decode( $game->publicJSON( ), true );
-        }
-        
-        foreach( User::all() as $user ) {
-            
-            $u_array = array();
-            $u_array['username'] = $user->username;
-            $u_array['notes'] = array();
-            foreach( $user->notifications()->get() as $note ) {
-                $u_array['notes'][] = json_decode( $note->publicJSON(), true );
-            }
-            
-            $output['users'][] = $u_array;
-        }
-
-        return json_encode( $output );
+        return json_encode( $clean );
             
     }
         

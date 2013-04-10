@@ -15,6 +15,7 @@ class Make_Test_Users {
             'privileges'   => 1,
             'created_at'   => $date,
             'updated_at'   => $date,
+            'last_update'  => $date,
             'wins'         => $wins,
             'losses'       => $losses,
             'games'        => $games
@@ -30,6 +31,7 @@ class Make_Test_Users {
             'privileges'   => 1,
             'created_at'   => $date,
             'updated_at'   => $date,
+            'last_update'  => $date,
             'wins'         => $wins,
             'losses'       => $losses,
             'games'        => $games
@@ -44,6 +46,7 @@ class Make_Test_Users {
             'password'     => Hash::make('password'),
             'created_at'   => $date,
             'updated_at'   => $date,
+            'last_update'  => $date,
             'wins'         => $wins,
             'losses'       => $losses,
             'games'        => $games
@@ -58,6 +61,7 @@ class Make_Test_Users {
             'password'     => Hash::make('password'),
             'created_at'   => $date,
             'updated_at'   => $date,
+            'last_update'  => $date,
             'wins'         => $wins,
             'losses'       => $losses,
             'games'        => $games
@@ -72,6 +76,7 @@ class Make_Test_Users {
             'password'     => Hash::make('password'),
             'created_at'   => $date,
             'updated_at'   => $date,
+            'last_update'  => $date,
             'wins'         => $wins,
             'losses'       => $losses,
             'games'        => $games
@@ -86,6 +91,7 @@ class Make_Test_Users {
             'password'     => Hash::make('testpass'),
             'created_at'   => $date,
             'updated_at'   => $date,
+            'last_update'  => $date,
             'wins'         => $wins,
             'losses'       => $losses,
             'games'        => $games

@@ -88,10 +88,13 @@ class User extends Tokened {
         $token = sha1( $this->id . $this->username );
         $public['username'] = $this->username;
         $public['active']   = false;
+        $public['location'] = array( "lat" => $this->latitude, "lng" => $this->longitude );
+        
         if( Auth::check() && $this->id === Auth::user()->id ){ 
             $public['active'] = true;
             $public['token'] = $this->encodeToken( $token );
         }
+        
         $public['wins'] = $this->wins;
         $public['losses'] = $this->losses;
         

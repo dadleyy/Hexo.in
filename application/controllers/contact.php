@@ -5,7 +5,7 @@ class Contact_Controller extends Base_Controller {
     public function action_index( ) {
         $view = View::make('layouts.common')
                     ->nest("content", "home.contact")
-                    ->with("title", "Contact");
+                    ->with("title", "contact");
         return $view; 
     }
     

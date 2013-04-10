@@ -48,6 +48,6 @@ domReady = function( ) {
     });
 };
     
-Entry( domReady );
+hexo.Entry( domReady );
     
 })( );

@@ -17,6 +17,9 @@
         <?php $challenger = $game->challenger(); ?>
             <h4 class="position">Challenger</h4>
             <h1 class="name blue c">{{ $challenger->username }}</h1>
+            <div class="score cf">
+                <h1 class="darkg r c">0</h1>
+            </div>
             <div class="cf stats">
                 <dl class="r wins">
                     <dt>Wins</dt>
@@ -35,6 +38,7 @@
         <section class="game-zone f">
             
             <div class="game-title">
+                <span id="turn-indicator" class="icon"></span>
                 @if( $game->is_private )
                 <h1><em>Pivate</em>game</h1>
                 @else
@@ -75,6 +79,9 @@
         <?php $visitor = $game->visitor(); ?>
             <h4 class="position">Visitor</h4>
             <h1 class="name red c">{{ ($visitor != null) ? $visitor->username : "waiting" }}</h1>
+            <div class="score cf">
+                <h1 class="darkg f c">0</h1>
+            </div>
             <div class="cf stats">
                 <dl class="f wins">
                     <dt>Wins</dt>
@@ -103,7 +110,7 @@
     @render('globals.scripts')
     <script type="text/javascript" src="/js/IV.js"></script>
     <script type="text/javascript" src="/js/game.js"></script>
-    <script type="text/javascript">Game({{ $game_js }})</script>
+    <script type="text/javascript">hexo.Game({{ $game_js }})</script>
     
     <script type="text/template" data-name="game-messagebox">
         <div class="pad">

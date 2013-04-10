@@ -321,10 +321,10 @@ class Game extends Tokened {
      * @param {int} the target tile value
      * @param {int} the new tile state
     */
-    public function moveTile( $tile_value, $tile_state ) {
+    public function moveTile( $tile_value, $tile_state, $pop_turn = true ) {
         
         /* set the tile state */
-        $status = $this->setTileState( $tile_value, $tile_state, true );
+        $status = $this->setTileState( $tile_value, $tile_state, $pop_turn );
         if( !is_array($status) ){ return false; }
     
         /* check the neighbors */
@@ -346,7 +346,7 @@ class Game extends Tokened {
                 $nn_arr[] = array( "value" => $nn_value, "state" => $nn_state );
             }
             if( count($nn_arr) > 3 ) {
-                $this->moveTile( (int)$n_value, (int)$tile_state );
+                $this->moveTile( (int)$n_value, (int)$tile_state, false );
             }
             $r_neighbors[$n_value] = $nn_arr;
         }
