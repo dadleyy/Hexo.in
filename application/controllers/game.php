@@ -125,15 +125,19 @@ class Game_Controller extends Base_Controller {
                 
         $current_user = Auth::user( );
         $current_game = $current_user->game( );
-        $output = array( "success" => false );
+        $output = array( "success" => false, "code" => 4, "type"=>"game" );
         $headers = array( 'Content-type' => 'application/json' );
         
         if( Request::forged( ) ) {
-            return Response::make( json_encode( array("success"=>false,"csrf"=>true) ), 204, $headers );
+            $output['success'] = false;
+            $output['code'] = 4;
+            return Response::make( json_encode( $output ), 204, $headers );
         }
                 
         if( $current_game == null || !Input::get("token") ){ 
-            return Response::make( json_encode( array("success"=>false,"csrf"=>true) ), 204, $headers );
+            $output['success'] = false;
+            $output['code'] = 4;
+            return Response::make( json_encode( $output ), 204, $headers );
         }   
         
         $game_token = $current_game->token; 
@@ -141,7 +145,9 @@ class Game_Controller extends Base_Controller {
         $decoded_param = $current_game->decodeTokenArray( $param_token );
         
         if( $game_token !== $decoded_param ) {
-            return Response::make( json_encode( array("success"=>false,"csrf"=>true) ), 204, $headers );
+            $output['success'] = false;
+            $output['code'] = 4;
+            return Response::make( json_encode( $output ), 204, $headers );
         }
         
         /* at this point - the game is definitely legitimate */
@@ -153,14 +159,10 @@ class Game_Controller extends Base_Controller {
          * ************************************************** */
         if( Input::get("raw") && Input::get("raw") == "raw" ) {  
             $package = json_decode( $current_game->publicJSON( ), true );        
-            $output = array( 
-                "success" => true,
-                "code" => 1,
-                "type" => "game",
-                "new_flag" => $current_game->getFlag( ),
-                "request" => Request::forged( ),
-                "package" => $package
-            );
+            $output["success"] = true;
+            $output["code"] = 1;
+            $output["flag"] = $current_game->getFlag( );
+            $output["package"] = $package;
             return Response::make( json_encode($output), 200, $headers );
         }
         
@@ -181,12 +183,9 @@ class Game_Controller extends Base_Controller {
              * the file for it doesnt exist anymore               *
              * ************************************************** */
             if( $current_game == null || $current_game->isOver( ) ) {
-                $output = array(
-                    "success" => true,
-                    "code" => 4,
-                    "new_flag" => $current_game->getFlag( ),
-                    "type" => "game"
-                );
+                $output["success"] = true;
+                $output["code"]    = 4;
+                $output["flag"]    = "dead";
                 return Response::make( json_encode($output), 200, $headers );
             }
             
@@ -196,12 +195,8 @@ class Game_Controller extends Base_Controller {
              * it is time to let the client know to make a new rq *
              * ************************************************** */
             if( ($c_time - $s_time) >  10 || $loops > 10000 ){     
-                $output = array(
-                    "success" => true,
-                    "code" => 2,
-                    "type" => "game",
-                    "ulup" => $current_user->last_update
-                );
+                $output["success"] = true;
+                $output["code"]    = 2;
                 return Response::make( json_encode($output), 200, $headers );
             }
             
@@ -213,20 +208,15 @@ class Game_Controller extends Base_Controller {
              * ************************************************** */
             if( $current_game->getFlag( ) !== $original_flag ){
                 $package = json_decode( $current_game->publicJSON( ), true );
-                $output = array( 
-                    "success" => true,
-                    "code" => 1,
-                    "type" => "game",
-                    "new_flag" => $current_game->getFlag( ),
-                    "package" => $package,
-                    "request" => Request::forged( )
-                );
+                $output["success"] = true;
+                $output["code"]    = 1;
+                $output["package"] = $package;
                 return Response::make( json_encode($output), 200, array() );
             }
             
             /* loop and sleep */
             $loops++;
-            time_nanosleep( 0, 9000000 );
+            usleep( 500000 );
         }
         
         return Response::make( json_encode( array("success"=>false,"csrf"=>true) ), 404, array() );

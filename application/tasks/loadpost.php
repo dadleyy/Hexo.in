@@ -22,6 +22,7 @@ class Loadpost_Task {
             echo "make sure there is a title and content in the json";
             return false;
         }
+    
         $timestring = ( isset( $contents['time'] ) ) ? $contents['time'] : "now";
         $date = new DateTime( $timestring );
         DB::table('blogpost')->insert( array(
