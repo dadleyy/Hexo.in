@@ -17,7 +17,7 @@ class Home_Controller extends Base_Controller {
     
     public function action_heartbeat( ) {
         $headers = array( 'Content-type' => 'application/json' );
-        $output = array( "success" => false, "code" => 4 );
+        $output = array( "success" => false, "code" => 4, "type"=>"heartbeat" );
         
         if( Request::forged( ) ) {
             return Response::make( json_encode($output), 200, $headers );
@@ -63,7 +63,6 @@ class Home_Controller extends Base_Controller {
              * it is time to let the client know to make a new rq *
              * ************************************************** */
             if( $c_time - $s_time > 10 || $loops > 1000 ) {
-                $output['updates'] = count( $current_user->getUpdates( ) );
                 return Response::make( json_encode($output), 200, $headers );
             }
                     
@@ -80,7 +79,7 @@ class Home_Controller extends Base_Controller {
              }
                     
             $loops++;
-            time_nanosleep( 0, 9000000 );
+            usleep( 500000 );
         }
            
     }

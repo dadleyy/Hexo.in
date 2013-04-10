@@ -10,8 +10,8 @@ class Blog_Controller extends Base_Controller {
     }     
     
     public function action_post( $postid = 0 ) {
-        
-        $post = Blogpost::find( $postid );
+    
+        $post = Blogpost::find( $postid );        
         if( $post == null ) {
             return Redirect::to( '/blog' );
         }
