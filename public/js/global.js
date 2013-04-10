@@ -30,6 +30,7 @@ var /* global entry point */
     _efn,   // empty function
     
     /* Public: */
+    hexo = { },
     Heartbeat,
     Geo,
     U, Utils,
@@ -427,8 +428,7 @@ Utils = U = {
             
         return function ( ) { return _rn( ) + (++_id); };
     })( ),
-    
-    
+        
     /* U.tsm
      * Translation string maker 
      * @param {{int}} xpos The x position of translation
@@ -551,84 +551,170 @@ Utils = U = {
         };
     })( !!_w.console ),
     
+    
+    /* Global default properties */
+    anTime : 500,
+    anEase : "easeOutCubic",
+    
 };
 
 Geo = (function( able ) {
 
     if( !able )
         return { init : _efn };
-        
-
+    
     var _ns = { },
-        _able = false,
+        _prepped = false,
         
         _g = navigator.geolocation, // shortcut for geo obj
         _position = null,           // the saved position
         _map = null,                // constructed map object
-        _marker = null,
+        _marker = null,             // the active person's marker
+        _otherMarkers = [ ],        // an array of markers for the other people
         _container = null,          // the div container
         
         /* default settings for the map */
         _defs = { 
-            zoom : 5,
+            zoom : 3,
             zoomControl : false,
             mapTypeId : google.maps.MapTypeId.ROADMAP,
             disableDefaultUI : true,
-            styles : [{
-                "elementType": "labels",
-                "stylers": [ { "visibility": "off" } ]
-            },{
-                "featureType": "road",
-                "elementType": "geometry",
-                "stylers": [
-                    { "hue": "#0088ff" },
-                    { "saturation": -71 },
-                    { "visibility": "off" }
-                ]
-            },{
-                "elementType": "geometry.fill",
-                "stylers": [
-                    { "hue": "#ff0000" },
-                    { "saturation": -99 },
-                    { "lightness": -7 }
-                ]
-            }]
-        },
+            styles : [{"elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"landscape","stylers":[{"color":"#4f4c44"}]},{"featureType":"water","stylers":[{"color":"#000000"}]},{"featureType":"road","stylers":[{"visibility":"off"}]},{"featureType":"administrative","stylers":[{"visibility":"off"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"transit","stylers":[{"visibility":"off"}]},{"featureType":"administrative.province","stylers":[{"visibility":"on"},{"color":"#ffffff"},{"weight":0.7}]},{"featureType":"administrative.province","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"administrative.country","stylers":[{"visibility":"on"},{"weight":1.4},{"color":"#ffffff"}]},{"featureType":"administrative.country","elementType":"labels","stylers":[{"visibility":"off"}]}]
+            },
         
         /* event blocking */
         _block = function ( e ) { 
             e.cancelBubble = true; 
             if ( e.stopPropagation ) 
                 e.stopPropagation( ); 
-        }; 
-
+        },
     
+        /* Geo._renderMarkers
+         * used to set the map for the markers that 
+         * were added from the online list
+        */
+        _renderMarkers = function ( ) {
+            _.each( _otherMarkers, function( marker ) { 
+                marker.setMap( _map ); 
+            });
+        },
+        
+        /* Geo._markerHover
+         * called with the marker on mouse over 
+        */
+        _markerHover = function ( ) {
+            $("#geo-tooltip")
+                .text( this.title )
+                .stop().animate({
+                    "bottom" : "-30px"
+                }, U.anTime, U.anEase );
+                
+        },
+        
+        /* Geo._markerUnHover
+         * called with the marker on mouse out 
+        */
+        _markerUnHover = function ( ) {
+            $("#geo-tooltip")
+                .stop().animate({
+                    "bottom" : "0px"
+                }, U.anTime, U.anEase );
+        },
+        
+        _resize = function ( ) {
+            google.maps.event.trigger( _map, 'resize' );   
+        },
+        
+        _mapHover = function ( ) {
+            $(this).stop().animate({
+                "height" : "200px"
+            }, U.anTime, U.anEase, _resize );
+        },
+        
+        _mapUnHover = function ( ) {
+            $(this).stop().animate({
+                "height" : "65px"
+            }, U.anTime, U.anEase, _resize );
+        };
+    
+    /* Geo.addMarker
+     * adds a marker to the private array
+     * @param {object} the lat/lng val
+    */
+    _ns.addMarker = function( location, name ) {
+        var lat = parseFloat( location.lat ),
+            lng = parseFloat( location.lng );
+        if( lat === 0 || lng === 0 ){
+            return false;
+        }
+        var latlng  = new google.maps.LatLng(lat,lng),
+            omarker = new google.maps.Marker({ 
+                map : _map, 
+                position : latlng, 
+                icon : "http://hexo.in/img/other-marker.png",
+                title : name
+            });
+        
+        google.maps.event.addListener( omarker, "mouseover", _markerHover ); 
+        google.maps.event.addListener( omarker, "mouseout", _markerUnHover); 
+        
+        _otherMarkers.push( omarker );
+    };
+    
+    /* Geo.clearMarkers
+     * removes the markers from the map and
+     * resets the marker array
+    */
+    _ns.clearMarkers = function ( ) {
+        _.each( _otherMarkers, function( marker ) { 
+            U.l("clearing");
+            marker.setMap(null); 
+        });
+        _otherMarkers = [ ];
+    };
+    
+    /* Geo.setPosition
+     * receives the position from the html5 api
+     * function and initializes the map/marker
+    */
     _ns.setPosition = function ( position ) { 
         
-        _container = $("#geo-zone").css("display","block").get()[0];
+        $("#geo-container").css("display","block");
+        _container = $("#geo-zone").css("display","block").hover( _mapHover, _mapUnHover ).get()[0];
+        
         
         var options = { },
             lat = position.coords.latitude,
             lng = position.coords.longitude,
-            latlng = new google.maps.LatLng(lat,lng);   
+            latlng = new google.maps.LatLng(lat,lng); 
+        
+        $.post( "/home/heartbeat", { lat : lat, lng : lng, csrf_token : _csrf }, _efn );
         
         options.center = latlng;
         
-        _map = new google.maps.Map( _container, $.extend({},_defs,options) );
+        _map = new google.maps.Map( _container, $.extend( {}, _defs, options ) );
         _marker = new google.maps.Marker({ 
             map : _map, 
             position : latlng, 
-            icon : "http://hexo.in/img/marker.png" 
+            icon : "http://hexo.in/img/marker.png",
         });  
         
+        _renderMarkers( );
+            
         google.maps.event.addDomListener( _container, 'mousedown', _block ); 
         google.maps.event.addDomListener( _container, 'click', _block ); 
         google.maps.event.addDomListener( _container, 'dblclick', _block ); 
         google.maps.event.addDomListener( _container, 'contextmenu', _block ); 
     };
     
+    /* Geo.init 
+     * prepares the geo namespace for stuff
+    */
     _ns.init = function ( ) {
-        _g.getCurrentPosition( _ns.setPosition );
+        if( !_prepped )
+            _g.getCurrentPosition( _ns.setPosition );
+        
+        _prepped = true;
     };
     
     return _ns;
@@ -806,13 +892,16 @@ domReady = function ( ) {
 
 
 /* open up some variables to the window */
-window.U = window.Utils = U;
-window.C = window.Chat = C;
-window.User = User;
-window.Socket = Socket;
-window.Entry = U.Entry;
+hexo.Utils = U; 
+hexo.Chat = Chat; 
+hexo.Socket = Socket; 
+hexo.User = User; 
+hexo.Entry = U.Entry;
+hexo.Geo = Geo;
+
+window.hexo = hexo;
 
 /* set the dom ready function */
-Entry( domReady );
+hexo.Entry( domReady );
     
 })( window );

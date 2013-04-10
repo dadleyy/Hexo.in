@@ -10,7 +10,7 @@ class Chat_Controller extends Base_Controller {
     
     public function post_socket( ) {
     
-        $output = array( "csrf" => true, "success" => false );
+        $output = array( "csrf" => true, "success" => false, "type" => "chat" );
         $headers = array( 'Content-type' => 'application/json' );
         
         if( Request::forged( ) || !Auth::check( ) ){
@@ -43,9 +43,6 @@ class Chat_Controller extends Base_Controller {
             return Response::make( json_encode($output), 202, $headers ); 
         }
         
-        /* everything is okay beyond this point */
-        $active_user->ping( );
-        
         /* get the flag as it is now */
         $original_flag = $chat_obj->getFlag( );
     
@@ -56,6 +53,19 @@ class Chat_Controller extends Base_Controller {
         $s_time = time( );
         $c_time = time( );
         
+        /* ************************************************** *
+         * SOCKET STATE - raw update required                 *
+         * The client has specifically asked for an update    *
+         * ************************************************** */
+        if( Input::get("raw") && Input::get("raw") == "raw" ) {  
+            $package = $chat_obj->mostRecentMessages( );
+            $output["success"]  = true;
+            $output["code"]     = 1;
+            $output["new_flag"] = $chat_obj->getFlag( );
+            $output["package"]  = $package;
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
         while ( !$changed ) { 
                     
             $c_time = time( );
@@ -64,12 +74,9 @@ class Chat_Controller extends Base_Controller {
              * SOCKET STATE - chat closed                         *
              * ************************************************** */
             if( $chat_obj == null || $chat_obj->isClosed( ) ) {
-                $output = array(
-                    "success" => false,
-                    "new_flag" => "dead",
-                    "type" => "chat",
-                    "code" => 4
-                );
+                $output["success"]  = false;
+                $output["new_flag"] = "dead";
+                $output["code"]     = 4;
                 return Response::make( json_encode($output), 200, $headers );
             }
             
@@ -78,12 +85,10 @@ class Chat_Controller extends Base_Controller {
              * This socket loop has been going on for too long,   *
              * it is time to let the client know to make a new rq *
              * ************************************************** */
-            if( ($c_time - $s_time) > 10 || $loops > 10000 ){
-                $output = array(
-                    "success" => true,
-                    "type" => "chat",
-                    "code" => 2
-                );        
+            if( ($c_time - $s_time) > 10 || $loops > 10000 ) {
+                $output["success"] = true;
+                $output["type"]    = "chat";
+                $output["code"]    = 2;
                 return Response::make( json_encode($output), 200, $headers );
             }
             
@@ -95,17 +100,13 @@ class Chat_Controller extends Base_Controller {
              * ************************************************** */
             if( $chat_obj->getFlag( ) !== $original_flag ) {
                 $package = $chat_obj->mostRecentMessages( );
-                $output = array( 
-                    "success" => true,
-                    "code" => 1,
-                    "type" => "chat",
-                    "new_flag" => $chat_obj->getFlag( ),
-                    "package" => $package
-                );
+                $output["success"]  = true;
+                $output["code"]     = 1;
+                $output["new_flag"] = $chat_obj->getFlag( );
+                $output["package"]  = $package;
                 return Response::make( json_encode($output), 200, $headers );
             }
-            
-            
+              
             $loops++;
             time_nanosleep( 0, 9000000 );
         
@@ -172,9 +173,9 @@ class Chat_Controller extends Base_Controller {
         return Response::make( json_encode($output), 200, $headers );
     }
 
-    public function post_online( ) {
+    public function post_state( ) {
         $headers = array( 'Content-type' => 'application/json' );
-        $output = array( "success" => false, "code" => 4 );
+        $output = array( "success" => false, "code" => 4, "type" => "online" );
         
         if( Request::forged( ) ) {
             return Response::make( json_encode($output), 200, $headers );
@@ -184,6 +185,16 @@ class Chat_Controller extends Base_Controller {
         $output['code'] = 2;
         
         $s_online = count( User::online( ) );
+        
+        /* ************************************************** *
+         * SOCKET STATE - raw update required                 *
+         * The client has specifically asked for an update    *
+         * ************************************************** */
+        if( Input::get("raw") && Input::get("raw") == "raw" ) {  
+            $output['code'] = 1;
+            $output['package'] = User::online( );
+            return Response::make( json_encode($output), 200, $headers );
+        }
                 
         $s_time = time( );
         $c_time = time( );

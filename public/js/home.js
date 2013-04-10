@@ -10,6 +10,7 @@ var /* entry point */
     domEntry,
     
     /* private: */
+    U = hexo.Utils,
     _user, // the current user
     _csrf, // the CSRF token 
     
@@ -26,7 +27,7 @@ OnlineList = (function ( ) {
         /* some nifty defaults */
         _defaults = {
             "container" : "#online-list",
-            "socket_url" : "/chat/online",
+            "socket_url" : "/chat/state",
             "challenge_url" : "/game/challenge",
             "template" : "online-user"
         },
@@ -67,13 +68,16 @@ OnlineList = (function ( ) {
     _ns.update = function ( data ) {
         if( U.type(data) !== "array" ) 
             return false;
-        
+                
         /* clear out old html */
         _container.html('');
+        hexo.Geo.clearMarkers( );
         var newhtml = "";
-        for( var i = 0; i < data.length; i++ ){
-            newhtml += U.template( _defaults['template'], data[i] );  
-        }
+        _.each( data, function( user ) {
+            newhtml += U.template( _defaults['template'], user );  
+            hexo.Geo.addMarker( user.location, user.username );
+        });
+        
         _container.html( newhtml );
     };
             
@@ -89,13 +93,15 @@ OnlineList = (function ( ) {
         
         
         /* create the socket that updates information */
-        _socket =  Socket({ 
+        _socket =  hexo.Socket({ 
             url : _defaults['socket_url'], 
             token : _user.token,
             events : { 'update' : _.bind( _ns.update, _ns ) }
         });
         
         _socket.open( );
+        
+        _socket.force( );
     };
     
     return _ns;
@@ -111,6 +117,6 @@ domEntry = function ( user, csrf ) {
     OnlineList.init( );
 };
 
-Entry( domEntry ); 
+hexo.Entry( domEntry ); 
     
 })( );

@@ -25,7 +25,7 @@ _gaq.push(['_trackPageview']);
 })( );
 </script>
 @if( Auth::user() !== null )
-<script type="text/javascript">User({{ Auth::user()->publicJSON() }})</script>
+<script type="text/javascript">hexo.User({{ Auth::user()->publicJSON() }})</script>
 @endif
 
 <script type="text/template" data-name="game-notification">
