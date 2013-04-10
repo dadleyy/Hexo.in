@@ -443,7 +443,7 @@ Game.ns = Game.prototype =  (function ( ) {
     _ns.postMove = function ( data ) {
         if( !data.success )
             return this.notify( data.msg );
-        
+    
         this.tiles[data.update.key].setState( data.update.state );
         
         this.turn = U.pint( data.turn );
