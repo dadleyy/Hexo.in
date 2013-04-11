@@ -57,10 +57,10 @@ section.main-content.single article.post-content div.inner{
     padding-left: 0px; padding-right: 20px;
 }
 section.main-content.single article.post-content p{ 
-    line-height: 1.5em;
+    line-height: 2.0em;
     font-size: 14px;
     font-family: 'Open Sans', sans-serif; 
-    font-weight: 400;
+    font-weight: 600;
     color: #666;
 }
 section.main-content.single article.other-posts{ margin-right: -1px; }
