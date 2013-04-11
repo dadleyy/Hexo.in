@@ -179,6 +179,29 @@ class Game extends Tokened {
         return array( "state" => $state, "key" => $indx );
     }
     
+    /* game->getScore 
+     *
+    */
+    public function getScore( ) {
+        $info = json_decode( File::get( $this->gameFile() ), true );
+        $tiles = $info['tiles'];
+        
+        $scores = array( 'visitor' => 0, 'challenger' => 0 );
+        foreach( $tiles as $key=>$tile ) {
+            switch( (int)$tile['state'] ) {
+                case 1:
+                    $scores['challenger'] += (int)$tile['value'];
+                    break;
+                case 2: 
+                    $scores['visitor'] += (int)$tile['value'];
+                    break;
+                default:
+                    break;
+            }
+        }
+        return $scores;
+    }
+    
     /* game->addUser
      * Adds the user to the game
      * @param {User} the user to be added
@@ -288,6 +311,7 @@ class Game extends Tokened {
         $public['tiles'] = $info['tiles'];
         $public['flag'] = $info['flag'];
         $public['turn'] = intval( $info['turn'] );
+        $public['score'] = $this->getScore( );
         
         $public['token'] = $this->encodeToken( $this->token );
         $public['is_private'] = $this->is_private;

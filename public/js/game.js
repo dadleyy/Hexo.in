@@ -17,10 +17,15 @@ var /* entry point */
     /* private: */
     U = hexo.Utils,
     _games = { },      // hash of game instances
+    
+    /* dom info */
     _renderZone,       // the render zone
     _$indicator,       // the turn indicator
+    _$cscore,
+    _$vscore,
     _chatInput,        // chat input box
     _chatZone,         // the chat zone
+    
     _defaults, _d,     // default settings       
     _layerInits = { }, // layer prep functions
     _userTurn = 1,     // the turn associated with the current user
@@ -35,6 +40,8 @@ var /* entry point */
         _renderZone = document.getElementById('render-zone');
         _chatZone = document.getElementById('chat-zone');
         _$indicator = $("#turn-indicator");
+        _$cscore = $("#challenger-score");
+        _$vscore = $("#visitor-score");
         
         /* add the helper svg element */
         var _helper = d3.select(document.body).append("svg"),
@@ -58,6 +65,8 @@ var /* entry point */
                 
         /* save this game above */
         _games[game.uid] = game;
+            
+        game.score = conf.score || { visitor : 0, challenger : 0 };
             
         /* set the two users */
         game.challenger = hexo.User(conf.challenger);
@@ -485,7 +494,8 @@ Game.ns = Game.prototype =  (function ( ) {
                 this.tiles[indx].state = U.pint( tile.state );
             }
         }, this );
-                
+        
+        this.score = data.score;
         this.turn = data.turn;        
         this.draw( );
     };
@@ -496,6 +506,7 @@ Game.ns = Game.prototype =  (function ( ) {
     */
     _ns.draw = function ( ) {
         U.l("redrawing the game");  
+        
         var indicatorDest = 20;
         switch( this.turn ) {
             case 1:
@@ -510,7 +521,10 @@ Game.ns = Game.prototype =  (function ( ) {
         _$indicator.stop().animate({
             "left" : indicatorDest + "px"
         }, U.anTime, U.anEase );
-            
+    
+        _$cscore.text( this.score['challenger'] );
+        _$vscore.text( this.score['visitor'] );
+        
         _.each( this.tiles, function( tile ){ 
             tile.draw( );
         });
