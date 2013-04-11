@@ -95,14 +95,15 @@ Socket.prototype = Socket.ns = (function( ) {
      * @param {object} data Server data
     */
     _delegate = function ( data ) {
-            
         /* the socket died */
-        if( data.new_flag && data.new_flag == "dead" ) {
+        if( data.flag && data.flag == "dead" ) {
             
             this.close( );
-            this.ready = false;
-            this.events['close']( );
-               
+            
+            this.ready   = false;
+            this.looping = false;
+            
+            this.events['close']( );   
             U.l("Socket #" + this.uid + ": was terminated on the server end");
             return false;
         } 

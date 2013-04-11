@@ -10,11 +10,11 @@ class Chat_Controller extends Base_Controller {
     
     public function post_socket( ) {
     
-        $output = array( "csrf" => true, "success" => false, "type" => "chat" );
+        $output = array( "code" => 4, "success" => false, "type" => "chat" );
         $headers = array( 'Content-type' => 'application/json' );
         
         if( Request::forged( ) || !Auth::check( ) ){
-            return json_encode( $output );
+            return Response::make( json_encode($output), 200, $headers );
         }
     
         /* save all the input stuff */
@@ -23,7 +23,7 @@ class Chat_Controller extends Base_Controller {
         $user_token = ( isset( $extras['user_token'] ) ) ? $extras['user_token']  : "";
                 
         if( $chat_token == null || $user_token == null ){
-            return Response::make( json_encode($output), 202, $headers );
+            return Response::make( json_encode($output), 200, $headers );
         }
     
         /* try getting a chat room from the chat_token */
@@ -31,7 +31,7 @@ class Chat_Controller extends Base_Controller {
         $chat_obj     = Chatroom::where( "token" , "=" , $decoded_chat )->first( );
         
         if( $chat_obj == null ){ 
-            return Response::make( json_encode($output), 202, $headers );   
+            return Response::make( json_encode($output), 200, $headers );   
         }
     
         /* someone is logged in - get their model */
@@ -40,7 +40,7 @@ class Chat_Controller extends Base_Controller {
         $decoded_user_token = Tokened::decodeToken( $user_token );
         
         if( $real_user_token !== $decoded_user_token ) {
-            return Response::make( json_encode($output), 202, $headers ); 
+            return Response::make( json_encode($output), 200, $headers ); 
         }
         
         /* get the flag as it is now */
@@ -61,7 +61,7 @@ class Chat_Controller extends Base_Controller {
             $package = $chat_obj->mostRecentMessages( );
             $output["success"]  = true;
             $output["code"]     = 1;
-            $output["new_flag"] = $chat_obj->getFlag( );
+            $output["flag"]     = $chat_obj->getFlag( );
             $output["package"]  = $package;
             return Response::make( json_encode($output), 200, $headers );
         }
@@ -75,7 +75,7 @@ class Chat_Controller extends Base_Controller {
              * ************************************************** */
             if( $chat_obj == null || $chat_obj->isClosed( ) ) {
                 $output["success"]  = false;
-                $output["new_flag"] = "dead";
+                $output["flag"]     = "dead";
                 $output["code"]     = 4;
                 return Response::make( json_encode($output), 200, $headers );
             }
@@ -87,7 +87,7 @@ class Chat_Controller extends Base_Controller {
              * ************************************************** */
             if( ($c_time - $s_time) > 10 || $loops > 10000 ) {
                 $output["success"] = true;
-                $output["type"]    = "chat";
+                $output["flag"]    = "to";
                 $output["code"]    = 2;
                 return Response::make( json_encode($output), 200, $headers );
             }
@@ -102,7 +102,7 @@ class Chat_Controller extends Base_Controller {
                 $package = $chat_obj->mostRecentMessages( );
                 $output["success"]  = true;
                 $output["code"]     = 1;
-                $output["new_flag"] = $chat_obj->getFlag( );
+                $output["flag"]     = $chat_obj->getFlag( );
                 $output["package"]  = $package;
                 return Response::make( json_encode($output), 200, $headers );
             }
@@ -116,7 +116,7 @@ class Chat_Controller extends Base_Controller {
             "success" => true,
             "code" => 2
         );
-        return Response::make( json_encode($output), 202, array() );
+        return Response::make( json_encode($output), 200, array() );
         
     }
     
@@ -125,7 +125,7 @@ class Chat_Controller extends Base_Controller {
         $headers = array( 'Content-type' => 'application/json' );
         
         if( Request::forged( ) || !Auth::check( ) ){
-            return Response::make( json_encode($output), 202, $headers );   
+            return Response::make( json_encode($output), 200, $headers );   
         }
         
         /* save all the input stuff */
@@ -134,7 +134,7 @@ class Chat_Controller extends Base_Controller {
         $message    = Input::get("msg");
         
         if( $chat_token == null || $user_token == null || $message == null ){
-            return Response::make( json_encode($output), 202, $headers );
+            return Response::make( json_encode($output), 200, $headers );
         }        
         
         /* try getting a chat room from the chat_token */
@@ -142,7 +142,7 @@ class Chat_Controller extends Base_Controller {
         $chat_obj     = Chatroom::where( "token" , "=" , $decoded_chat )->first( );
         
         if( $chat_obj == null ){ 
-            return Response::make( json_encode($output), 202, $headers );   
+            return Response::make( json_encode($output), 200, $headers );   
         }
         
         /* someone is logged in - get their model */
@@ -151,7 +151,7 @@ class Chat_Controller extends Base_Controller {
         $decoded_user_token = Tokened::decodeToken( $user_token );
         
         if( $real_user_token !== $decoded_user_token ) {
-            return Response::make( json_encode($output), 202, $headers ); 
+            return Response::make( json_encode($output), 200, $headers ); 
         }
         
         $chat_contents = File::get( $chat_obj->chatFile( ) );

@@ -37,6 +37,19 @@ class User extends Tokened {
         return $this->has_many('Notification');
     }
     
+    public function addWin( $inc = 1 ) {
+        $this->wins  = ( (int)$this->wins ) + (int)$inc;
+        $this->games = ( (int)$this->games ) + (int)$inc;
+        $this->save( );
+    }
+    
+    public function addLoss( $inc = 1 ) {
+        $this->losses = ( (int)$this->losses ) + (int)$inc;
+        $this->games  = ( (int)$this->games ) + (int)$inc;
+        $this->save( );
+    }
+    
+    
     public function game( ) {
         $current_game = Game::where("challenger_id", "=", $this->id )->take(1)->first( );
         
