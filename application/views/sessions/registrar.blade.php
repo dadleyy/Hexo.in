@@ -29,7 +29,7 @@
 </div>
 
 <div class="input cf">
-<input type="password" name="pass" class="t IValidate" data-filter="min" data-minlength="10" autocomplete="off">
+<input type="password" name="pass" class="t IValidate" data-filter="min" data-minlength="9" autocomplete="off">
 <span class="placeholder">Password (min 10 chars)</span>
 </div>
 
