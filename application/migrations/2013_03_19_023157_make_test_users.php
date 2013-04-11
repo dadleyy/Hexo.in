@@ -5,8 +5,8 @@ class Make_Test_Users {
     public function up( ){
         $date = new DateTime( );
         
-        $wins = rand(5,40);
-        $losses = rand(5,40);
+        $wins   = 0;
+        $losses = 0;
         $games = $wins + $losses;  
         DB::table('users')->insert( array(
             'username'     => "Dadleyy",
@@ -21,8 +21,8 @@ class Make_Test_Users {
             'games'        => $games
         ));
         
-        $wins = rand(5,40);
-        $losses = rand(5,40);
+        $wins   = 0;
+        $losses = 0;
         $games = $wins + $losses;
         DB::table('users')->insert( array(
             'username'     => "Admin",
@@ -37,8 +37,8 @@ class Make_Test_Users {
             'games'        => $games
         ));
         
-        $wins = rand(5,40);
-        $losses = rand(5,40);
+        $wins   = 0;
+        $losses = 0;
         $games = $wins + $losses;
         DB::table('users')->insert( array(
             'username'     => "Teddy",
@@ -52,8 +52,8 @@ class Make_Test_Users {
             'games'        => $games
         ));
         
-        $wins = rand(5,40);
-        $losses = rand(5,40);
+        $wins   = 0;
+        $losses = 0;
         $games = $wins + $losses;
         DB::table('users')->insert( array(
             'username'     => "Frank",
@@ -67,8 +67,8 @@ class Make_Test_Users {
             'games'        => $games
         ));
         
-        $wins = rand(5,40);
-        $losses = rand(5,40);
+        $wins   = 0;
+        $losses = 0;
         $games = $wins + $losses;
         DB::table('users')->insert( array(
             'username'     => "George",
@@ -82,8 +82,8 @@ class Make_Test_Users {
             'games'        => $games
         ));
         
-        $wins = rand(5,40);
-        $losses = rand(5,40);
+        $wins   = 0;
+        $losses = 0;
         $games = $wins + $losses;
         DB::table('users')->insert( array(
             'username'     => "Tester",

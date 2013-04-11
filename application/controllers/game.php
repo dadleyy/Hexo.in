@@ -49,13 +49,32 @@ class Game_Controller extends Base_Controller {
         $current_game = $current_user->game( );
     
         if( $current_game !== false ) {
-        
+            
+            /* get the chatroom for this game */
             $current_chat = $current_game->chatroom( );
+            
+            /* if there was an invite associated with this game - delete it */
             $notification = Notification::where( "item_id", "=", $current_game->id )->first( );
             if( $notification !== null ) {
                 $notification->delete( );
             }
+            
+            if( $current_game->visitor() !== null ) {
+            
+                $current_user->addLoss( );
                 
+                /* if the quitter was the visitor - give the win to the challenger */
+                if( $current_game->visitor()->id === $current_user->id ){
+                    $current_game->challenger()->addWin( );
+                } 
+                /* if not - give the win to the visitor */
+                else {
+                    $current_game->visitor()->addWin( );
+                }
+            
+            }
+            
+            /* delete everything else */
             File::delete( $current_game->gameFile( ) );
             File::delete( $current_chat->chatfile( ) );
             DB::table('chatroom_user')->where( 'chatroom_id', '=', $current_chat->id )->delete( );
@@ -131,13 +150,13 @@ class Game_Controller extends Base_Controller {
         if( Request::forged( ) ) {
             $output['success'] = false;
             $output['code'] = 4;
-            return Response::make( json_encode( $output ), 204, $headers );
+            return Response::make( json_encode( $output ), 200, $headers );
         }
                 
         if( $current_game == null || !Input::get("token") ){ 
             $output['success'] = false;
             $output['code'] = 4;
-            return Response::make( json_encode( $output ), 204, $headers );
+            return Response::make( json_encode( $output ), 200, $headers );
         }   
         
         $game_token = $current_game->token; 
@@ -147,7 +166,7 @@ class Game_Controller extends Base_Controller {
         if( $game_token !== $decoded_param ) {
             $output['success'] = false;
             $output['code'] = 4;
-            return Response::make( json_encode( $output ), 204, $headers );
+            return Response::make( json_encode( $output ), 200, $headers );
         }
         
         /* at this point - the game is definitely legitimate */
@@ -183,7 +202,7 @@ class Game_Controller extends Base_Controller {
              * the file for it doesnt exist anymore               *
              * ************************************************** */
             if( $current_game == null || $current_game->isOver( ) ) {
-                $output["success"] = true;
+                $output["success"] = false;
                 $output["code"]    = 4;
                 $output["flag"]    = "dead";
                 return Response::make( json_encode($output), 200, $headers );

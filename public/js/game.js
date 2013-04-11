@@ -471,7 +471,7 @@ Game.ns = Game.prototype =  (function ( ) {
     */
     _ns.update = function( data ) {
         if( !data || data.state === null ){ this.end( ); }
-        
+            
         /* someone joined the game */
         if( data.state === 1 && this.state === 0 ){
             this.state = 1;
