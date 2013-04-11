@@ -6,9 +6,11 @@
 <script type="text/javascript" src="/js/dependencies.js"></script>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqLAjnUApy5HiwwPTj_Oq9WIiQo-plM1A&sensor=false"></script>
 <script type="text/javascript" src="/js/global.js"></script>
+
 <script type="text/javascript">
 var _gaq = _gaq || [];
 _gaq.push(['_setAccount', 'UA-39532711-1']);
+_gaq.push(['_setDomainName', 'hexo.in']);
 _gaq.push(['_trackPageview']);
 
 (function() {
