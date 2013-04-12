@@ -253,12 +253,12 @@ class Game extends Tokened {
         return true;
     }
     
-    /* Game->isOver
+    /* Game->isDead
      * Checks to see if the game file has been
-     * deleted, which would mean the game is over 
+     * deleted, which would mean the game is dead 
      * @return {boolean}
     */
-    public function isOver( ) { return !file_exists( $this->gameFile( ) ); }
+    public function isDead( ) { return !file_exists( $this->gameFile( ) ); }
     
     /* Game->gameFile
      * Returns the location of the game file
@@ -270,6 +270,24 @@ class Game extends Tokened {
      * @return {timestamp} the timestamp of the latest update
     */
     public function getLastTime( ) { return strtotime( $this->updated_at ); }
+    
+    public function isComplete( ) {
+        $info = json_decode( File::get( $this->gameFile() ), true );
+        $tiles = $info['tiles'];
+        $complete = true;
+    
+        if( (int)$info['state'] === 3 ){
+            return true;
+        }
+        
+        foreach( $tiles as $tile ) {
+            if( (int)$tile['state'] === 0 ){
+                $complete = false;
+            }
+        }
+        
+        return $complete;
+    }
     
     /* Game->getFlag 
      * Returns the current flag from the game file
@@ -285,13 +303,32 @@ class Game extends Tokened {
         return $info['flag'];
     }
     
+    public function resolve( ) { 
+        $scores = $this->getScore( );
+        if( (int)$scores['visitor'] > (int)$scores['challenger'] ){
+            $this->visitor( )->addWin( );
+            $this->challenger( )->addLoss( );
+        } else {
+            $this->challenger( )->addWin( );
+            $this->visitor( )->addLoss( );
+        }
+    }
+    
     /* Game->updateFlag
      * Updates the game file with a new random flag to 
      * trigger any needed socket updates
     */
     public function updateFlag( ) {
         $info = json_decode( File::get( $this->gameFile() ), true );    
-        $info['flag'] = base_convert( rand( 1000000, 1000000000 ), 10, 36 );
+
+        if( $this->isComplete( ) === true && (int)$info['state'] !== 3 ){
+            $info['flag'] = "complete";
+            $info['state'] = 3;
+            $this->resolve( );
+        } else {
+            $info['flag'] = base_convert( rand( 1000000, 1000000000 ), 10, 36 );
+        }
+        
         File::put( $this->gameFile(), json_encode( $info ) );
     }
     

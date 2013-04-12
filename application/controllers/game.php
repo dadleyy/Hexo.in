@@ -59,7 +59,7 @@ class Game_Controller extends Base_Controller {
                 $notification->delete( );
             }
             
-            if( $current_game->visitor() !== null ) {
+            if( $current_game->visitor() !== null && !$current_game->isComplete( ) ) {
             
                 $current_user->addLoss( );
                 
@@ -201,7 +201,7 @@ class Game_Controller extends Base_Controller {
              * The game is over if the game reference is null, or *
              * the file for it doesnt exist anymore               *
              * ************************************************** */
-            if( $current_game == null || $current_game->isOver( ) ) {
+            if( $current_game == null || $current_game->isDead( ) ) {
                 $output["success"] = false;
                 $output["code"]    = 4;
                 $output["flag"]    = "dead";
