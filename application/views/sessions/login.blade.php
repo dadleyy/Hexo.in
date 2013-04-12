@@ -31,7 +31,7 @@
 
 <div class="actions cf">
     <input type="submit" value="login" class="t IValidator gr3 f">
-    <a class="f gr3 t" href="/session/registrar" title="">Register</a>
+    <!-- <a class="f gr3 t" href="/session/registrar" title="">Register</a> -->
 </div>
 
 <?php echo Form::close( ); ?>

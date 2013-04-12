@@ -115,7 +115,12 @@
     <script type="text/template" data-name="game-messagebox">
         <div class="pad">
             <p><%= message %></p>
-            <button class="middle gr3 closer">close</button>
+            <div class="actions middle cf">
+                <button class="middle gr3 closer <% if( !!homebtn ) { %> f <% } %>">close</button>
+                <% if( !!homebtn ) { %> 
+                <a href="/game/quit" title="" class="gr3 f">return to lobby</a>
+                <% } %>
+            </div>
         </div>
     </script>
     

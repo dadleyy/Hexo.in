@@ -152,6 +152,10 @@ var /* entry point */
         dom.svg = svg;
         dom.layers = layers;
         
+        if( game.state == 3 ){
+            game.resolve( );
+        }
+        
         game.draw( );
     };
 
@@ -300,8 +304,10 @@ GameMessageBox.ns = GameMessageBox.prototype = (function( ) {
             .on("click", "button.closer", _.bind( _close, this ) );
     };
     
-    _ns.notify = function( message ) { 
-        var html = U.template( "game-messagebox", { message: message } );
+    _ns.notify = function( message, tohome ) { 
+        var homebtn = ( tohome === true ) ? true : false,
+            html = U.template( "game-messagebox", { message: message, homebtn : homebtn } );
+            
         this.container.html( html );
         _open.call( this );
     };
@@ -454,7 +460,7 @@ Game.ns = Game.prototype =  (function ( ) {
     _ns.resolve = function ( ) {
         var winner = ( this.score.visitor > this.score.challenger ) ? this.visitor : this.challenger;
         this.end( );
-        return this.notify( winner.username + " has won the game!" );
+        return this.notify( winner.username + " has won the game!", true );
     };
     
     /* Game.postMove 
@@ -560,8 +566,8 @@ Game.ns = Game.prototype =  (function ( ) {
      * Takes a message and displays it to the user 
      * @param {{string}} message The message to display
     */
-    _ns.notify = function ( message ) { 
-        this.msgbox.notify( message );
+    _ns.notify = function ( message, homebutton ) { 
+        this.msgbox.notify( message, homebutton );
     };
     
     /* Game.updateChat
