@@ -120,6 +120,14 @@ class Chat_Controller extends Base_Controller {
         
     }
     
+    public function post_message( ) {
+        $output = array( "csrf" => true, "success" => false );
+        $headers = array( 'Content-type' => 'application/json' );
+        if( Request::forged( ) || !Auth::check( ) ){
+            return Response::make( json_encode($output), 200, $headers );   
+        }
+    }
+    
     public function post_send( ){
         $output = array( "csrf" => true, "success" => false );
         $headers = array( 'Content-type' => 'application/json' );
@@ -185,6 +193,8 @@ class Chat_Controller extends Base_Controller {
         $output['code'] = 2;
         
         $s_online = count( User::online( ) );
+        Auth::user( )->ping( );
+        
         
         /* ************************************************** *
          * SOCKET STATE - raw update required                 *

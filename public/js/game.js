@@ -444,11 +444,17 @@ Game.ns = Game.prototype =  (function ( ) {
     
     /* Game.end
     */
-    _ns.end = function( ) {
+    _ns.end = function ( ) {
         if( this.state !== 3 )
             this.notify("the other player has quit the game");
     
         this.socket.close( );
+    };
+    
+    _ns.resolve = function ( ) {
+        var winner = ( this.score.visitor > this.score.challenger ) ? this.visitor : this.challenger;
+        this.end( );
+        return this.notify( winner.username + " has won the game!" );
     };
     
     /* Game.postMove 
@@ -471,7 +477,7 @@ Game.ns = Game.prototype =  (function ( ) {
     */
     _ns.update = function( data ) {
         if( !data || data.state === null ){ this.end( ); }
-            
+
         /* someone joined the game */
         if( data.state === 1 && this.state === 0 ){
             this.state = 1;
@@ -496,7 +502,13 @@ Game.ns = Game.prototype =  (function ( ) {
         }, this );
         
         this.score = data.score;
-        this.turn = data.turn;        
+        this.turn = data.turn;    
+        
+        if( data.state === 3 && data.flag === "complete" ){
+            this.state = 3;
+            this.resolve( );
+        }
+            
         this.draw( );
     };
     
