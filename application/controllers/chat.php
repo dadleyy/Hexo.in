@@ -14,6 +14,7 @@ class Chat_Controller extends Base_Controller {
         $headers = array( 'Content-type' => 'application/json' );
         
         if( Request::forged( ) || !Auth::check( ) ){
+            $output['msg'] = "nouser";
             return Response::make( json_encode($output), 200, $headers );
         }
     
@@ -23,6 +24,7 @@ class Chat_Controller extends Base_Controller {
         $user_token = ( isset( $extras['user_token'] ) ) ? $extras['user_token']  : "";
                 
         if( $chat_token == null || $user_token == null ){
+            $output['msg'] = "notoken";
             return Response::make( json_encode($output), 200, $headers );
         }
     
@@ -31,6 +33,7 @@ class Chat_Controller extends Base_Controller {
         $chat_obj     = Chatroom::where( "token" , "=" , $decoded_chat )->first( );
         
         if( $chat_obj == null ){ 
+            $output['msg'] = "nochat";
             return Response::make( json_encode($output), 200, $headers );   
         }
     
@@ -40,6 +43,9 @@ class Chat_Controller extends Base_Controller {
         $decoded_user_token = Tokened::decodeToken( $user_token );
         
         if( $real_user_token !== $decoded_user_token ) {
+            $output['msg'] = "badtoken";
+            $output['decoded'] = $decoded_user_token;
+            $output['original'] = $real_user_token;
             return Response::make( json_encode($output), 200, $headers ); 
         }
         

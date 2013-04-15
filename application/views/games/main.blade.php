@@ -108,7 +108,6 @@
    
     <script type="text/javascript" src="/js/d3.js"></script>
     @render('globals.scripts')
-    <script type="text/javascript" src="/js/IV.js"></script>
     <script type="text/javascript" src="/js/game.js"></script>
     <script type="text/javascript">hexo.Game({{ $game_js }})</script>
     

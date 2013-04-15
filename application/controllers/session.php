@@ -21,6 +21,7 @@ class Session_Controller extends Base_Controller {
             $date = new DateTime('1970-01-01');
             Auth::user()->last_update = $date;
             Auth::user()->save( );
+            Chatroom::find(1)->removeUser( Auth::user() );
         }
     
         Auth::logout();

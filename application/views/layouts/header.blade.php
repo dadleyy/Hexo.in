@@ -1,3 +1,8 @@
+@if ( Auth::check() )
+<section id="chatroom-pullout">
+
+</section>
+@endif
 <header class="whole middle cf gr1">
     <article class="middle pw cf">
         <div class="f cf left-menu ribbon-title">
@@ -6,14 +11,16 @@
             
                 <div class="gr2 home-link">
                 <div class="inner qt gr3">
-                    <a href="/home" title="" class="home"></a>
+                    <a href="/home" title="" class="home">
+                        <img src="/img/logo_large.png" alt="">
+                    </a>
                 </div>
                 </div>
                 
-                @if ( Auth::check() )
-                @render( "layouts.chatmenu" )
-                @endif    
-            
+                @if( Auth::check() )
+                @render('layouts.chatmenu')
+                @endif
+                
             </article>
             
         </div>

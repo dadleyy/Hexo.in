@@ -109,7 +109,7 @@ Socket.prototype = Socket.ns = (function( ) {
         } 
         
         /* something traumatic happened */
-        else if( !data.success ) { 
+        else if( !data.success ) {
             U.l("Socket #" + this.uid + ": the socket was unsuccessful", "err"); 
             this.ready = false;
             return false;
@@ -139,7 +139,6 @@ Socket.prototype = Socket.ns = (function( ) {
         if( data !== undefined && U.type(data) === "object" ) { 
             _delegate.call( this, data );
         }
-        
         /* make the xhr call */
         if( this.looping === true && this.ready === true ) {
             _socketXHRs[this.uid] = _j.post( this.url, _data.call( this ), _.bind( _loop, this ), "json" );
@@ -243,7 +242,7 @@ User.ns.rig.prototype = User.ns;
 //////////////////////
 // NAMESPACE : Chat //
 //////////////////////
-C = Chat = function( conf ){ return new Chat.ns.rig(conf); };
+C = Chat = function( conf, isgame ){ return new Chat.ns.rig( conf, isgame ); };
 Chat.ns = Chat.prototype = (function ( ) {
     
     var _ns = {
@@ -324,11 +323,11 @@ Chat.ns = Chat.prototype = (function ( ) {
         return f;
     };
         
-    _ns.rig = function( conf ) {
+    _ns.rig = function( conf, isgame ) {
         if( !conf || conf == undefined ) { return false; }
         
         this.ready = false;
-        
+
         /* basic identifying properties */
         this.name = conf.name || "N/A";
         this.uid = U.uid( );
@@ -340,11 +339,13 @@ Chat.ns = Chat.prototype = (function ( ) {
         this.chat_token = conf.chat_token || false;
         this.user_token = conf.user_token || false;
         this.messages = conf.messages || [ ];
+        this.count = conf.count;
         
         /* if there weren't tokens, stop immediately */
         if( this.chat_token === false || this.user_token === false )
             return false;
         
+    
         /* open up the socket */
         this.socket = Socket({ 
             url : "/chat/socket", 
@@ -352,10 +353,11 @@ Chat.ns = Chat.prototype = (function ( ) {
             token : this.chat_token,
             extras : { chat_token : this.chat_token, user_token : this.user_token }
         });
-        
+          
         /* save this chatroom in the private hash */
-        _chatRooms[this.uid] = this;
-        
+        if( !isgame )
+            _chatRooms[this.uid] = this;
+                
         this.ready = true;
     };
     
@@ -363,6 +365,100 @@ Chat.ns = Chat.prototype = (function ( ) {
     
 })( );
 Chat.ns.rig.prototype = Chat.ns;
+
+/* Chat.renderAll
+ * Loops through all the chatrooms and renders them
+ * into the pulldown
+ * @param {selection} the render zone
+*/
+Chat.renderAll = (function ( ) {
+    var _finished = false,
+        $r_context, 
+        $l_context,
+        
+        /* event functions: */
+        _openChat,
+        _closeChat,
+        _updateRoom;
+    
+    _closeChat = function ( ) {
+        var $btn = $(this),
+            uid  = $btn.data("uid"),
+            ele  = $r_context.find('section.chatroom[data-uid="'+uid+'"]');
+    
+        ele.stop().animate({
+            "top" : "-1900px",
+            "opacity" : "0.0"
+        }, U.anTime, "easeInQuad", function ( ) {
+            $(this).css("display","none");
+            $("#chatroom-pullout").css("display","none");
+        });
+    };
+    
+    _openChat = function ( ) {
+        var $btn = $(this),
+            uid  = $btn.data("uid"),
+            ele  = $r_context.find('section.chatroom[data-uid="'+uid+'"]');
+        
+        $("#chatroom-pullout").css("display","block");
+        ele.stop().css("display","block").animate({
+            "top" : "0px",
+            "opacity" : "1.0"
+        }, U.anTime, U.anEase );
+    };
+    
+    _updateRoom = function ( messages ) {
+        var ele  = $r_context.find('section.chatroom[data-uid="'+this.uid+'"]'),
+            target = ele.find("section.chat-window");
+        
+        target.html('');
+        for( var i = 0; i < messages.length; i++ ){
+            var msg = messages[i],
+                author = msg.user || "",
+                text = msg.message || "",
+                html = U.template( "chat-message-template",{ user : author, text : text } );
+            
+            target.get()[0].innerHTML += html;
+        }
+        
+        target.scrollTop( target.height( ) + 1000 );
+        
+    };
+    
+    return function ( $render_context, $list_context ) {
+        
+        if( _finished ) 
+            return false;
+            
+        $r_context = $render_context;
+        $l_context = $list_context;
+        
+        var c_html = "",
+            l_html = "";
+            
+        _.each( _chatRooms, function( room ) {
+            var ln = room.name.replace(/\s+/g, '_').toLowerCase(),
+                e  = { room_id : ln + "-" + room.uid };
+            
+            room.events['update'] = _.bind( _updateRoom, room );
+            
+            c_html += U.template( "chatroom-tempate", $.extend( {} , e, room ) );
+            l_html += U.template( "charoom-listitem-template", $.extend( {} , e, room ) );
+            
+            $r_context.get()[0].innerHTML += c_html;
+            $l_context.get()[0].innerHTML += l_html;
+            
+            room.registerForm( e.room_id + "-form" );
+            room.start( );
+        });
+        
+        $r_context.on( "click", "button.closer", _closeChat );
+        $l_context.on("click", "button.opener", _openChat );
+        
+        _finished = true;
+    };
+    
+})( );
 
 ///////////////////////////
 // NAMESPACE : Utilities //
@@ -889,6 +985,10 @@ domReady = function ( ) {
     
     if( _doc.getElementById("geo-zone") !== null )
         Geo.init( );
+    
+    if( _doc.getElementById("chatroom-pullout") !== null )
+        Chat.renderAll( _j("#chatroom-pullout"), _j("#chatlist-menu-list") );
+    
 };
 
 
@@ -900,7 +1000,7 @@ hexo.User = User;
 hexo.Entry = U.Entry;
 hexo.Geo = Geo;
 
-window.hexo = hexo;
+_w.hexo = hexo;
 
 /* set the dom ready function */
 hexo.Entry( domReady );

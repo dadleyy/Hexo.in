@@ -26,6 +26,9 @@
     text-transform: uppercase;
     margin-bottom: 10px;
 }
+dl.message{ }
+dl.message dt{ overflow: hidden; margin-right: 10px; }
+dl.message dd{ overflow: hidden; }
 
 span.icon{ display: block; background-repeat: no-repeat; background-position: center center; }
 span.icon.busy{
@@ -132,13 +135,22 @@ header div.left-menu div.home-link > div.inner:hover{ top: 5px; }
 
 header div.left-menu div.home-link > div.inner a{
     display: block;
+    position: relative;
     width: 160px;
     height: 160px;
+    /*
     background-image: url(../img/logo_large.png); 
     background-position: center center;
     background-repeat: no-repeat;
     background-size: cover;
+    */
     margin: 0px auto 0px;
+}
+header div.left-menu div.home-link > div.inner a img{
+    position: absolute;
+    display: block;
+    width: 100%; height: 100%;
+    top: 0px; left: 0px;
 }
 
 header div.left-menu div.chat-list {
@@ -679,6 +691,77 @@ article.other-contact dl{ display: block; }
 article.other-contact dl dd, 
 article.other-contact dl dt{ display: inline-block; margin: 0px; padding: 0px; }
 article.other-contact dl dt{ color: #aaa; margin-right: 5px; }
+#chatroom-pullout{
+    position: fixed;
+    top: 0px; left: 0px;
+    width: 100%; height: 100%;
+    z-index: 10000;
+    display: none;
+    overflow: scroll;
+}
+#chatroom-pullout section.chatroom{ 
+    margin: 1px; padding: 1px; 
+    position: absolute; 
+    top: -500px; left: -2px; 
+    opacity: 0.0; 
+    display: none;
+}
+#chatroom-pullout section.chatroom > article.middle{ margin: 20px auto; width: 400px; position: relative; }
+#chatroom-pullout section.chatroom div.inner{ 
+    background-color: #eee;
+    padding: 20px; 
+    border-radius: 2px;
+    margin-bottom: 20px;
+    box-shadow: 0px 2px 10px rgba(0,0,0,0.67);
+    position: relative;
+    z-index: 90;
+}
+#chatroom-pullout section.chatroom button.closer{
+    width: 20px; height: 20px;
+    position: absolute; 
+    right: -10px; top: -10px;
+    border-radius: 10px;
+    z-index: 100; 
+    line-height: 12px;
+    font-size: 14px;
+    display: block;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.6);
+}
+#chatroom-pullout section.chatroom button.closer:hover{ box-shadow: 0px 0px 3px rgba(0,0,0,0.6); }
+#chatroom-pullout section.chatroom section.chat-window{
+    min-height: 400px; 
+    background-color: #b5b5b5;
+    border-radius: 2px;
+    padding: 1px;
+    color: #555;
+    box-shadow: 0px 0px 2px 1px rgba(255,255,255,0.76),
+                inset 0px 0px 2px rgba(0,0,0,0.6);
+}
+#chatroom-pullout section.chatroom section.chat-window dl{
+    margin: 15px;
+    font-weight: 600;
+}
+#chatroom-pullout section.chatroom input[type="text"]{
+    background: transparent;
+    display: block;
+    height: 35px;
+    width: 100%;
+    display: block;
+    background-color: #b5b5b5;
+    border-radius: 2px;
+    text-indent: 10px;
+    color: #858585;
+    font-family: 'Raleway', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 9;
+    text-shadow: 1px 1px rgba(255,255,255,0.1);
+    box-shadow: 0px 0px 2px 1px rgba(255,255,255,0.76),
+                inset 0px 0px 2px rgba(0,0,0,0.6);
+}
+#chatroom-pullout section.chatroom input[type="text"]:focus{ color: #656565; }
 
 
 #to-top{ color: black; height: 28px; line-height: 28px; font-family: 'Open Sans', sans-serif; font-weight: 300; padding: 0px 10px; font-size: 10px; text-transform: uppercase; margin-top: -1px; box-shadow: 0px 0px 5px rgba(0,0,0,0.55); }
