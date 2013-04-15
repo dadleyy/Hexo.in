@@ -12,6 +12,8 @@ class Home_Controller extends Base_Controller {
         $view = View::make('layouts.common')
                     ->nest("content", "home.index")
                     ->with("title", "home");
+        
+        Chatroom::find(1)->addUser( Auth::user() );
         return $view;
     }
     
@@ -98,14 +100,16 @@ class Home_Controller extends Base_Controller {
     
     public function action_debug( ){
         
-        $users = User::where("latitude","!=","0")->get( );
-        $clean = array( );
-        foreach( $users as $usr ) {
-            $clean[] = $usr->original;
+        if( (int)Auth::user()->privileges !== 1 ){
+            return Redirect::to( '/home' );
         }
-        
-        return json_encode( $clean );
-            
+    
+        $chats = Chatroom::all( );
+        $out=array();
+        foreach( $chats as $chat ){
+            $out[] = json_decode( $chat->publicJSON( ), true );
+        }
+        return json_encode( $out );
     }
         
 }

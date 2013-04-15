@@ -87,7 +87,7 @@ var /* entry point */
         var cevts = { events : {'update' : _.bind( game.updateChat, game ) } },
             cconf = $.extend( {}, cevts, conf.chatroom );
             
-        game.chatroom = hexo.Chat( cconf );
+        game.chatroom = hexo.Chat( cconf, true );
         
         /* make a new socket */
         game.socket = hexo.Socket({ 

@@ -15,7 +15,13 @@ class Chatroom extends Tokened {
     public function addUser( $user ) {
         
         $date = new DateTime( );
-                    
+        
+        foreach( $this->users()->get() as $e_user ) {
+            if( (int)$user->id === (int)$e_user->id ){ 
+                return false;
+            }
+        }
+                
         /* update the table in the db to show this user in chat */
         DB::table('chatroom_user')->insert( array(
             'chatroom_id' => $this->id,
@@ -25,6 +31,10 @@ class Chatroom extends Tokened {
             'updated_at'  => $date
         ));    
         
+    } 
+    
+    public function removeUser( $user ) {
+        DB::table('chatroom_user')->where( "user_id", "=", $user->id )->delete();
     } 
         
     public function getFlag( ) {
@@ -61,22 +71,33 @@ class Chatroom extends Tokened {
         return $recent;
     }
     
+    /* chatroom->publicJSON
+     * Returns a json encoded array of information that is 
+     * usable on the client side for communication
+     * @returns {string} json ecoded array
+    */
     public function publicJSON( ) {
         $public = array( );
         
         $chat_info = json_decode( File::get( $this->chatFile( ) ), true );
         
         $active_user = $this->users( )->where( "user_id", "=", Auth::user()->id )->first( );    
-        $usr_token   = ( $active_user !== NULL ) ? $active_user->getChatToken( $this->id ) : false;
+        $usr_token   = ( $active_user !== NULL ) 
+                            ? $active_user->getChatToken( $this->id ) 
+                            : false;
         
         $public['name'] = $this->name;
         $public['messages'] = $this->mostRecentMessages( );
+        $public['count'] = count( $this->users()->get() );
         $public['user_token'] = $this->encodeToken( $usr_token );
         $public['chat_token'] = $this->encodeToken( $this->token );
         
         return json_encode( $public );         
     }
     
+    /* chatroom->createJSON
+     * Sets up the json file for future use
+    */
     public function createJSON( ) {
         
         $chat_location = $this->chatfile( );

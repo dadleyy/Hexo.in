@@ -1,5 +1,4 @@
 @section('scripts')
-<script type="text/javascript" src="/js/IV.js"></script>
 <script type="text/javascript" src="/js/session.js"></script>
 @endsection
 

@@ -246,6 +246,7 @@ class Game_Controller extends Base_Controller {
         /* try to find the game the current user is playing (if any) */
         $current_user = Auth::user( );
         $current_game = $current_user->game( );
+        Chatroom::find(1)->removeUser( $current_user );
         if( $current_game !== false ) {
             return Redirect::to( '/game/play' );
         }

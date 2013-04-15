@@ -1,7 +1,7 @@
 @section('scripts')
 
 <script type="text/javascript" src="/js/home.js"></script>
-    
+
 <script type="text/template" data-name="online-user">
     <li class="user cf"> 
         <% if (busy) { %><span class="icon busy f"></span><% } else { %>
