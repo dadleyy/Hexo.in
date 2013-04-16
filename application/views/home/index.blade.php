@@ -12,7 +12,7 @@
         <h1 class="amount r"><%= wins %></h2>
     </li>
 </script>
-    
+
 @endsection
 
 @section('content')

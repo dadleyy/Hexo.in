@@ -12,12 +12,23 @@ class Chat_Controller extends Base_Controller {
     
         $output = array( "code" => 4, "success" => false, "type" => "chat" );
         $headers = array( 'Content-type' => 'application/json' );
-        
+            
         if( Request::forged( ) || !Auth::check( ) ){
             $output['msg'] = "nouser";
             return Response::make( json_encode($output), 200, $headers );
         }
-    
+        
+        if( !Input::get('usr') ){
+            $output['msg'] = "nouser";
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $p_usr = Input::get('usr');
+        $p_token = $p_usr['token'];
+        if( !Auth::user( )->checkToken( $p_token ) ){
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
         /* save all the input stuff */
         $extras     = ( is_array( Input::get("extras") ) ) ? Input::get("extras") : array( );
         $chat_token = ( isset( $extras['chat_token'] ) ) ? $extras['chat_token']  : "";
@@ -64,7 +75,7 @@ class Chat_Controller extends Base_Controller {
          * The client has specifically asked for an update    *
          * ************************************************** */
         if( Input::get("raw") && Input::get("raw") == "raw" ) {  
-            $package = $chat_obj->mostRecentMessages( );
+            $package = json_decode( $chat_obj->publicJSON( ), true );
             $output["success"]  = true;
             $output["code"]     = 1;
             $output["flag"]     = $chat_obj->getFlag( );
@@ -105,7 +116,7 @@ class Chat_Controller extends Base_Controller {
              * client.                                            *
              * ************************************************** */
             if( $chat_obj->getFlag( ) !== $original_flag ) {
-                $package = $chat_obj->mostRecentMessages( );
+                $package = json_decode( $chat_obj->publicJSON( ), true );
                 $output["success"]  = true;
                 $output["code"]     = 1;
                 $output["flag"]     = $chat_obj->getFlag( );
@@ -195,20 +206,31 @@ class Chat_Controller extends Base_Controller {
             return Response::make( json_encode($output), 200, $headers );
         }
         
+        $p_usr = Input::get('usr');
+        $p_token = $p_usr['token'];
+        if( !Auth::user( )->checkToken( $p_token ) ){
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
         $output['success'] = true;
         $output['code'] = 2;
         
         $s_online = count( User::online( ) );
+        $r_open   = count( Chatroom::publicRooms( ) );
         Auth::user( )->ping( );
-        
-        
+    
         /* ************************************************** *
          * SOCKET STATE - raw update required                 *
          * The client has specifically asked for an update    *
          * ************************************************** */
         if( Input::get("raw") && Input::get("raw") == "raw" ) {  
             $output['code'] = 1;
-            $output['package'] = User::online( );
+            
+            $output['package'] = array(
+                "users" => User::online( ),
+                "rooms" => Chatroom::publicRooms( ) 
+            );
+            
             return Response::make( json_encode($output), 200, $headers );
         }
                 
@@ -237,10 +259,13 @@ class Chat_Controller extends Base_Controller {
              * socket hit this iteration, send the update to the  *
              * client.                                            *
              * ************************************************** */
-             if( count( User::online() ) !== $s_online ){
-                 $output['code'] = 1;
-                 $output['package'] = User::online( );
-                 return Response::make( json_encode($output), 200, $headers );
+             if( (count( User::online( ) ) !== $s_online) || (count( Chatroom::publicRooms( ) ) !== $r_open ) ){
+                $output['code'] = 1;
+                $output['package'] = array(
+                    "users" => User::online( ),
+                    "rooms" => Chatroom::publicRooms( ) 
+                );
+                return Response::make( json_encode($output), 200, $headers );
              }
                     
             $loops++;
@@ -249,6 +274,89 @@ class Chat_Controller extends Base_Controller {
 
         
         return Response::make( json_encode($output), 200, $headers );
+    }
+    
+    public function post_open( ) {
+        $headers = array( 'Content-type' => 'application/json' );
+        $output = array( "success" => "false", "code" => 4 );
+        
+        if( Request::forged( ) || !Auth::check( ) ){
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $a_usr = Auth::user();
+        $p_usr = Input::get("usr");
+        $p_name = Input::get("name");
+        
+        if( !is_array( $p_usr ) ){
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $p_token = $p_usr['token'];
+        if( !$a_usr->checkToken( $p_token ) ){
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        //////////////////////////////
+        // CHATROOM INITIALIZATION  //
+        $chat = new Chatroom;
+        
+        $chat->game_id = 0;
+        $chat->token = sha1( time() . $p_name );
+        $chat->name = $p_name;
+        
+        $chat->createJSON( );
+        $chat->save( );
+        
+        /* add the current user to that chatroom */
+        $date = new DateTime( );
+        DB::table('chatroom_user')->insert( array(
+            'chatroom_id' => $chat->id,
+            'user_id'     => Auth::user( )->id,
+            'token'       => sha1( $chat->id . Auth::user( )->id ),
+            'created_at'  => $date,
+            'updated_at'  => $date
+        ));
+        
+        
+        $output["success"] = true;
+        $output["code"] = 1;
+        $output["package"] = json_decode( $chat->publicJSON( ), true );
+        return json_encode( $output );
+            
+    }
+    
+    public function post_join( ){
+        $headers = array( 'Content-type' => 'application/json' );
+        $output = array( "success" => "false", "code" => 4 );
+        
+        if( Request::forged( ) || !Auth::check( ) ){
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $a_usr = Auth::user();
+        $p_usr = Input::get("usr");
+        $p_cid = Input::get("cid");
+        
+        if( !is_array( $p_usr ) || !$p_cid ){
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $p_token = $p_usr['token'];
+        if( !$a_usr->checkToken( $p_token ) ){
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $c_room = Chatroom::find( $p_cid );
+        if( !$c_room ){
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $c_room->addUser( Auth::user() );
+        
+        $output["success"] = true;
+        $output["code"] = 1;
+        return json_encode( $output );
     }
 
 }

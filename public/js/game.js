@@ -577,14 +577,17 @@ Game.ns = Game.prototype =  (function ( ) {
     _ns.updateChat = function ( messages ) { 
         U.l("updating game chat");
         $(_chatZone).html('');
-        for( var i = 0; i < messages.length; i++ ){
-            var msg = messages[i],
-                author = msg.user || "",
+        
+        _.each( messages, function ( msg ) {
+        
+            var author = msg.user || "",
                 text = msg.message || "",
                 html = U.template( _d["chattemplate"], { user : author, text : text } );
             
             _chatZone.innerHTML += html;
-        }
+        
+        });
+        
         $( _chatZone ).scrollTop( $( _chatZone ).height( ) + 1000 );
     };
 
@@ -605,6 +608,7 @@ domEntry = function( cusr, csrf ) {
     for( var uid in _games ){
         _render( _games[uid] );
     }
+    
 };
 
 /* expose the game to the window */

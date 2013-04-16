@@ -24,7 +24,7 @@ class Home_Controller extends Base_Controller {
         if( Request::forged( ) ) {
             return Response::make( json_encode($output), 200, $headers );
         }
-        
+                
         $output['success'] = true;
         $output['code'] = 2;
         
@@ -37,6 +37,14 @@ class Home_Controller extends Base_Controller {
             $a_user->latitude = $lat;
             $a_user->longitude = $lon;
             $a_user->save( );
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $p_usr = Input::get('usr');
+        $p_token = $p_usr['token'];
+        if( !Auth::user( )->checkToken( $p_token ) ){
+            $output['msg'] = 'bad_token';
+            $output['in'] = Input::all( );
             return Response::make( json_encode($output), 200, $headers );
         }
         

@@ -82,6 +82,7 @@ Socket.prototype = Socket.ns = (function( ) {
     */
     _data = function ( ) {
         return {
+            usr : _cusr,
             csrf_token : _csrf,
             token : this.token,
             extras : this.extras,
@@ -270,8 +271,8 @@ Chat.ns = Chat.prototype = (function ( ) {
      * @param {{object}} data The data sent back from the server
     */
     _ns.receive = function( data ) { 
-        if( !data || !data.length ) { return false; }
-        this.messages = data;
+        if( !data || !data['messages'] || !data['messages'].length ) { return false; }
+        this.messages = data['messages'];
         this.events['update']( this.messages );
     };
         
@@ -381,30 +382,25 @@ Chat.renderAll = (function ( ) {
         _closeChat,
         _updateRoom;
     
-    _closeChat = function ( ) {
+    _closeChat = function ( evt ) {
+        if( evt.keyCode && evt.keyCode !== 27 )
+            return;
+            
         var $btn = $(this),
-            uid  = $btn.data("uid"),
-            ele  = $r_context.find('section.chatroom[data-uid="'+uid+'"]');
-    
-        ele.stop().animate({
-            "top" : "-1900px",
-            "opacity" : "0.0"
-        }, U.anTime, "easeInQuad", function ( ) {
-            $(this).css("display","none");
-            $("#chatroom-pullout").css("display","none");
-        });
+            uid  = $btn.data("uid");
+        
+        Chat.closeRoom( uid );
+        
+        $(document).off("keydown", _.bind( _closeChat, this ) );
     };
     
     _openChat = function ( ) {
         var $btn = $(this),
-            uid  = $btn.data("uid"),
-            ele  = $r_context.find('section.chatroom[data-uid="'+uid+'"]');
+            uid  = $btn.data("uid");
+            
+        Chat.openRoom( uid );
         
-        $("#chatroom-pullout").css("display","block");
-        ele.stop().css("display","block").animate({
-            "top" : "0px",
-            "opacity" : "1.0"
-        }, U.anTime, U.anEase );
+        $(document).on("keydown", _.bind( _closeChat, this ) );
     };
     
     _updateRoom = function ( messages ) {
@@ -412,14 +408,14 @@ Chat.renderAll = (function ( ) {
             target = ele.find("section.chat-window");
         
         target.html('');
-        for( var i = 0; i < messages.length; i++ ){
-            var msg = messages[i],
-                author = msg.user || "",
+        _.each( messages, function ( msg ) { 
+            var author = msg.user || "",
                 text = msg.message || "",
                 html = U.template( "chat-message-template",{ user : author, text : text } );
             
             target.get()[0].innerHTML += html;
-        }
+        
+        });
         
         target.scrollTop( target.height( ) + 1000 );
         
@@ -429,7 +425,8 @@ Chat.renderAll = (function ( ) {
         
         if( _finished ) 
             return false;
-            
+        
+        
         $r_context = $render_context;
         $l_context = $list_context;
         
@@ -444,12 +441,24 @@ Chat.renderAll = (function ( ) {
             
             c_html += U.template( "chatroom-tempate", $.extend( {} , e, room ) );
             l_html += U.template( "charoom-listitem-template", $.extend( {} , e, room ) );
+
+        });
+        
+        $r_context.get()[0].innerHTML = c_html;
+        $l_context.get()[0].innerHTML = l_html;
             
-            $r_context.get()[0].innerHTML += c_html;
-            $l_context.get()[0].innerHTML += l_html;
+        _.each( _chatRooms, function( room ) {
             
+            var ln = room.name.replace(/\s+/g, '_').toLowerCase(),
+                e  = { room_id : ln + "-" + room.uid };
+         
             room.registerForm( e.room_id + "-form" );
             room.start( );
+            
+        });
+        
+        $r_context.children().each(function( indx ) {
+            $(this).css("left", (indx*400) + "px" );
         });
         
         $r_context.on( "click", "button.closer", _closeChat );
@@ -459,6 +468,72 @@ Chat.renderAll = (function ( ) {
     };
     
 })( );
+
+Chat.closeRoom = function ( uid ) {
+    var ele  = _j("#chatroom-pullout").find('section.chatroom[data-uid="'+uid+'"]');
+    
+    ele.stop().animate({
+        "bottom" : (ele.height()*-2)+"px"
+    }, 600, function ( ) {
+        _j(this).css("display","none");
+        _j("#chatroom-pullout").css("display","none");
+    });
+};
+
+Chat.makeRoom = (function ( ) {
+    
+    var _made = 0,
+        _busy = false;
+    
+    function _receive( data ) {
+    
+        if( !data['success'] ){ return false; }
+        _made ++;
+        setTimeout( function( ) { _busy = false; }, 3000 );
+    };
+    
+    return (function ( name ) {
+    
+        if( _csrf === "" || _cusr === null || _busy )
+            return false;  
+    
+        _busy = true;
+        $.post("/chat/open", { name : name, usr : _cusr, csrf_token : _csrf }, _receive, "json" );
+        
+    });
+    
+})( );
+
+Chat.joinRoom = (function ( ) {
+
+    var _busy = false;
+
+    function _receive( data ) {
+        _busy = false;
+    };
+    
+    return (function ( cid ) {
+        
+        if( _csrf === "" || _cusr === null || _busy )
+            return false;  
+    
+        _busy = true;
+        $.post("/chat/join", { cid : cid, usr : _cusr, csrf_token : _csrf }, _receive );
+        
+    });
+    
+})( );
+
+Chat.openRoom = function ( uid ) {
+    var ele  = _j("#chatroom-pullout").find('section.chatroom[data-uid="'+uid+'"]');
+    
+    _j("#chatroom-pullout").css("display","block");
+    ele.stop().css("display","block").animate({
+        "bottom" : "0px",
+        "opacity" : "1.0"
+    }, U.anTime, U.anEase );
+    
+};
 
 ///////////////////////////
 // NAMESPACE : Utilities //
