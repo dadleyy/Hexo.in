@@ -11,7 +11,7 @@
             <button class="add-new slick r gr3" data-type="chat-room">+</button>
         </div>
         <div class="bottom cf">
-            <ul class="listing">
+            <ul class="listing" id="open-chat-listing">
             <?php
             $rooms = Chatroom::where("game_id","=","0")->get();
             foreach( $rooms as $room ) {

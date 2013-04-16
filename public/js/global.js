@@ -282,8 +282,12 @@ Chat.ns = Chat.prototype = (function ( ) {
     _ns.start = function ( ) {
         if( !this.ready ){ U.l("chat room not ready to make calls","err"); return false; }     
         this.events['update']( this.messages );
-        /* open up the socket */
-        this.socket.open( );  
+        
+        if( !this.open ) {
+            this.open = true;
+            /* open up the socket */
+            this.socket.open( );  
+        }
     };
     
     _ns.sendCheck = function ( data ) {
@@ -323,6 +327,14 @@ Chat.ns = Chat.prototype = (function ( ) {
         this.input = f;
         return f;
     };
+    
+    /* Chat.close
+     * Closes the chat room
+    */
+    _ns.close = function ( ) {
+        this.socket.close( ); 
+        this.ready = false;
+    };
         
     _ns.rig = function( conf, isgame ) {
         if( !conf || conf == undefined ) { return false; }
@@ -332,6 +344,7 @@ Chat.ns = Chat.prototype = (function ( ) {
         /* basic identifying properties */
         this.name = conf.name || "N/A";
         this.uid = U.uid( );
+        this.id = conf.id || -1;
     
         /* set the events property up */
         this.events = _j.extend( { }, _defaultEvents, conf.events );
@@ -360,6 +373,7 @@ Chat.ns = Chat.prototype = (function ( ) {
             _chatRooms[this.uid] = this;
                 
         this.ready = true;
+        this.open = false;
     };
     
     return _ns;
@@ -374,13 +388,22 @@ Chat.ns.rig.prototype = Chat.ns;
 */
 Chat.renderAll = (function ( ) {
     var _finished = false,
+        _length = 0,
         $r_context, 
         $l_context,
         
         /* event functions: */
         _openChat,
         _closeChat,
-        _updateRoom;
+        _updateRoom,
+        _leaveChat;
+        
+    _leaveChat = function ( ) {
+        var $btn = $(this),
+            uid  = $btn.data("uid");
+                        
+        Chat.leaveRoom( uid )
+    };
     
     _closeChat = function ( evt ) {
         if( evt.keyCode && evt.keyCode !== 27 )
@@ -423,12 +446,20 @@ Chat.renderAll = (function ( ) {
     
     return function ( $render_context, $list_context ) {
         
+        var l = 0;
+        _.each( _chatRooms, function( ) { l++; } );
+        
+        if( l !== _length ){
+            _finished = false; 
+            _length = l;
+        }
+        
         if( _finished ) 
             return false;
         
         
-        $r_context = $render_context;
-        $l_context = $list_context;
+        $r_context = $render_context || $r_context;
+        $l_context = $list_context || $l_context;
         
         var c_html = "",
             l_html = "";
@@ -461,8 +492,15 @@ Chat.renderAll = (function ( ) {
             $(this).css("left", (indx*400) + "px" );
         });
         
-        $r_context.on( "click", "button.closer", _closeChat );
-        $l_context.on("click", "button.opener", _openChat );
+        
+        $r_context
+            .off( "click", _closeChat )
+            .on( "click", "button.closer", _closeChat );
+            
+        $l_context
+            .off( "click", _openChat )
+            .on("click", "button.opener", _openChat )
+            .on("click", "button.closer", _leaveChat );
         
         _finished = true;
     };
@@ -483,19 +521,29 @@ Chat.closeRoom = function ( uid ) {
 Chat.makeRoom = (function ( ) {
     
     var _made = 0,
-        _busy = false;
+        _busy = false,
+        _cb = false;
     
     function _receive( data ) {
     
         if( !data['success'] ){ return false; }
         _made ++;
+        
+        var room = Chat( data['package'] );
+        Chat.renderAll( );
+        
+        if( _cb && U.type(_cb) === "function" )
+            _cb( room );
+            
         setTimeout( function( ) { _busy = false; }, 3000 );
     };
     
-    return (function ( name ) {
+    return (function ( name, fn ) {
     
         if( _csrf === "" || _cusr === null || _busy )
             return false;  
+            
+        _cb = ( !!fn ) ? fn : false;
     
         _busy = true;
         $.post("/chat/open", { name : name, usr : _cusr, csrf_token : _csrf }, _receive, "json" );
@@ -504,27 +552,81 @@ Chat.makeRoom = (function ( ) {
     
 })( );
 
+Chat.getUID = function ( name ) {
+    var _match = false;
+    _.each( _chatRooms, function ( room ) {
+        if( room.name === name )
+            _match = room.uid;
+    });
+    return _match;
+};
+
+Chat.leaveRoom = (function ( ) {
+    
+    var _busy = false,
+        _room = null;
+    
+    function _receive( data ) {
+        _room.close( );
+        delete _chatRooms[_room.uid];
+        
+        Chat.renderAll( );
+        
+        _busy = false;
+    };
+    
+    return (function ( uid ) {
+        var room = ( _chatRooms.hasOwnProperty(uid) ) ? _chatRooms[uid] : false,
+            cid = false;
+        
+        if( !room || _busy )
+            return false;
+        
+        cid   = room.id;
+        _room = room;
+        _busy = true;
+        $.post( "/chat/leave",  { cid : cid, usr : _cusr, csrf_token : _csrf }, _receive, "json" )
+    });
+    
+})( );
+
+Chat.count = function ( ) {
+    var l = 0;
+    _.each( _chatRooms, function ( room ) { console.log( room.uid ); l++; });  
+    return l;
+};
+
 Chat.joinRoom = (function ( ) {
 
     var _busy = false;
 
     function _receive( data ) {
         _busy = false;
+        
+        if( data.code == 6 )
+            return Chat.openRoom( Chat.getUID(data.name) );
+        
+        Chat( data['package'] );
+        
+        return Chat.renderAll( );
     };
     
     return (function ( cid ) {
         
         if( _csrf === "" || _cusr === null || _busy )
             return false;  
-    
+            
         _busy = true;
-        $.post("/chat/join", { cid : cid, usr : _cusr, csrf_token : _csrf }, _receive );
+        $.post("/chat/join", { cid : cid, usr : _cusr, csrf_token : _csrf }, _receive, "json" );
         
     });
     
 })( );
 
 Chat.openRoom = function ( uid ) {
+    if( !uid ) 
+        return false;
+        
     var ele  = _j("#chatroom-pullout").find('section.chatroom[data-uid="'+uid+'"]');
     
     _j("#chatroom-pullout").css("display","block");
@@ -723,6 +825,9 @@ Utils = U = {
         };
     })( !!_w.console ),
     
+    notify : function ( message ) {
+          
+    },
     
     /* Global default properties */
     anTime : 500,

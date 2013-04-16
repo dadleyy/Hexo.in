@@ -19,13 +19,21 @@ var /* entry point */
     _closeRoomFactory,
     _joinRoom,
     _makeRoom,
+    _addRoom,
     
     OnlineList; // handles the online people
     
+
+_addRoom = function( room ) {
+    var ctx = { room_id : room.id, room_count : room.count, room_name : room.name },
+        html = U.template( "chatroom-list-item", ctx );
+    document.getElementById("open-chat-listing").innerHTML += html;
+};
+
 _makeRoom = function ( inputs ) {
     var roomname = inputs['room_name'];
     _closeRoomFactory( );
-    return hexo.Chat.makeRoom( roomname );
+    return hexo.Chat.makeRoom( roomname, _addRoom );
 }; 
 
 _closeRoomFactory = function ( evt ) {
