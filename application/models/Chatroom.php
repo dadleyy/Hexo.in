@@ -4,6 +4,15 @@ class Chatroom extends Tokened {
 
     public static $table = 'chatrooms';
     
+    public static function publicRooms( ) {
+        $rooms = Chatroom::where("game_id","=","0")->get( ); 
+        $output = array( );
+        foreach( $rooms as $room ) {
+            $output[] = json_decode( $room->publicJSON( ), true );
+        }
+        return $output;
+    }
+    
     public function users( ) {
         return $this->has_many_and_belongs_to('User');
     }
@@ -11,7 +20,7 @@ class Chatroom extends Tokened {
     public function isClosed( ) {
         return !file_exists( $this->chatFile( ) );   
     }
-    
+
     public function addUser( $user ) {
         
         $date = new DateTime( );
@@ -89,6 +98,7 @@ class Chatroom extends Tokened {
         $public['name'] = $this->name;
         $public['messages'] = $this->mostRecentMessages( );
         $public['count'] = count( $this->users()->get() );
+        $public['id'] = $this->id;
         $public['user_token'] = $this->encodeToken( $usr_token );
         $public['chat_token'] = $this->encodeToken( $this->token );
         
@@ -104,6 +114,7 @@ class Chatroom extends Tokened {
         $chat_contents = array(
             "messages" => array( ),
             "token" => $this->token,
+            "id"    => $this->id,
             "flag"  => rand( 0, 100000 )
         );
         File::put( $chat_location, json_encode( $chat_contents ) );

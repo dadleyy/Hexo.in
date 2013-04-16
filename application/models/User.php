@@ -53,6 +53,22 @@ class User extends Tokened {
     */
     public function joined( ) { return date( 'M j, Y H:i', strtotime($this->created_at) ); }
     
+    /* user->checkToken
+     * Attempts to validate a token array sent in from a request
+     * to see if it is in the proper format
+     * @param [array] the encoded token array from the client
+     * @returns {boolean} true or false
+    */
+    public function checkToken( $token_arr ) {
+        if( !is_array($token_arr) ){
+            return false;
+        }
+        
+        $de_token = User::decodeToken( $token_arr );
+        $real_token = sha1( $this->id . $this->username );
+        
+        return ( $de_token == $real_token );
+    }
     
     /* user->publicChats
      * Gets all of the cahtrooms for the user that are open 

@@ -84,9 +84,9 @@
 .whole{ width: 100%; }
 .pw{ width: 1080px; }
 .spw{ width: 880px; padding-left: 200px; }
-.spw > .two > .f { width: 440px; }
-.spw > .two > .f.right .inner{ padding: 0px 0px 0px 20px; }
-.spw > .two > .f.left .inner{ padding: 0px 20px 0px 0px; }
+.spw > .two > .f { width: 440px; position: relative; overflow: hidden; }
+.spw > .two > .f.right .inner{ padding: 0px 0px 0px 20px; position: relative; }
+.spw > .two > .f.left .inner{ padding: 0px 20px 0px 0px; position: relative; }
 .fourth > .three{ width: 75%; }
 .fourth > .one{ width: 25%; }
 .fourth > .three div.inner,

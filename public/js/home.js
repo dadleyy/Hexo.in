@@ -12,10 +12,46 @@ var /* entry point */
     /* private: */
     U = hexo.Utils,
     _user, // the current user
-    _csrf, // the CSRF token 
+    _csrf, // the CSRF token     
+    
+    _roomValidator,
+    _openRoomFactory,
+    _closeRoomFactory,
+    _joinRoom,
+    _makeRoom,
     
     OnlineList; // handles the online people
+    
+_makeRoom = function ( inputs ) {
+    var roomname = inputs['room_name'];
+    _closeRoomFactory( );
+    return hexo.Chat.makeRoom( roomname );
+}; 
 
+_closeRoomFactory = function ( evt ) {
+    if( evt && evt.keyCode && evt.keyCode !== 27 )
+        return;
+    
+    $("#new-room-factory").stop().animate({
+        "bottom" : "-400px"
+    }, U.anTime, U.anEase, function(){ });  
+    
+    $(document).off( "keydown", _closeRoomFactory );
+};
+
+_openRoomFactory = function ( ) {
+    $("#new-room-factory").stop().animate({
+        "bottom" : "0px"
+    }, U.anTime, U.anEase, function(){ });  
+    
+    $(document).on( "keydown", _closeRoomFactory );
+};
+
+_joinRoom = function ( ) {
+    var $btn = $(this),
+        cid = $btn.data("id");
+    hexo.Chat.joinRoom( cid );
+};
 
 ////////////////////////////
 // NAMESPACE : OnlineList //
@@ -66,19 +102,21 @@ OnlineList = (function ( ) {
     };
         
     _ns.update = function ( data ) {
-        if( U.type(data) !== "array" ) 
+        if( U.type(data) !== "object" ) 
             return false;
                 
         /* clear out old html */
         _container.html('');
         hexo.Geo.clearMarkers( );
         var newhtml = "";
-        _.each( data, function( user ) {
+        _.each( data.users, function( user ) {
             newhtml += U.template( _defaults['template'], user );  
             hexo.Geo.addMarker( user.location, user.username );
         });
-        
         _container.html( newhtml );
+        _.each( data.rooms, function ( room ) {
+             
+        });
     };
             
     _ns.init = function ( opts ) {
@@ -115,6 +153,13 @@ domEntry = function ( user, csrf ) {
     _csrf = csrf;
         
     OnlineList.init( );
+    _roomValidator = new IV({
+        form : document.getElementById('new-room-form'),
+        callback : _makeRoom
+    });
+    
+    $("article.chat-rooms").on( "click", "button.add-new", _openRoomFactory );
+    $("article.chat-rooms").on( "click", "button.quick-join", _joinRoom );
 };
 
 hexo.Entry( domEntry ); 
