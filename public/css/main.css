@@ -506,7 +506,11 @@ section.main-content section.basic article.block ul.listing li button.slick{
     margin-left: -20px;
     line-height: 20px;
     margin-right: 0px;
-    
+}
+header div.left-menu div.chat-list li button.slick.closer{
+    color: #ce334c;
+    font-size: 22px;
+    font-family: 'helvetica', Arial, sans-serif;
 }
 
 header div.left-menu div.chat-list li:hover button.slick,
@@ -517,6 +521,7 @@ section.main-content section.basic article.block ul.listing li:hover a.slick{
     opacity: 1.0;
     margin-left: 0px;
 }
+header div.left-menu div.chat-list li:hover h2.count{ display: none; }
 header div.left-menu div.chat-list ul{ 
     padding: 5px 0px 5px 0px; 
     background: rgba(0,0,0,0.1); 
@@ -731,7 +736,7 @@ article.other-contact dl dt{ color: #aaa; margin-right: 5px; }
 #chatroom-pullout section.chatroom button.closer:hover{ box-shadow: 0px 0px 3px rgba(0,0,0,0.6); }
 #chatroom-pullout section.chatroom section.chat-window{
     max-height: 400px; 
-    overflow: scroll;
+    overflow-y: scroll;
     background-color: #b5b5b5;
     border-radius: 2px;
     padding: 1px;

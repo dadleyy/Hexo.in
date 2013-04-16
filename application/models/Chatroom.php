@@ -40,6 +40,7 @@ class Chatroom extends Tokened {
             'updated_at'  => $date
         ));    
         
+        return true;
     } 
     
     public function removeUser( $user ) {

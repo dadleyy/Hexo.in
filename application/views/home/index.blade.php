@@ -13,6 +13,17 @@
     </li>
 </script>
 
+<script type="text/template" data-name="chatroom-list-item">
+    <li class="obj chat-room cf">
+        <button class="t quick-join slick f gr3" data-id="<%= room_id %>" data-type="chat-room">+</button>
+        <h1 class="name f"><%= room_name %></h1>
+        <h2 class="count r cf">
+            <span class="f">Population:</span>
+            <span class="f count"><%= room_count %></span>
+        </h2>
+    </li>
+</script>
+
 @endsection
 
 @section('content')

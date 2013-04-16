@@ -71,6 +71,7 @@ _gaq.push(['_trackPageview']);
 <script type="text/template" data-name="charoom-listitem-template">
     <li class="active-room t cf">
         <button class="t opener slick f gr3" data-name="<%= name %>" data-uid="<%= uid %>">+</button>
+        <button class="t closer slick f gr3" data-name="<%= name %>" data-uid="<%= uid %>">-</button> 
         <h1 class="f name"><%= name %></h1>
         <h2 class="count cf r">
             <span class="f">users:</span>

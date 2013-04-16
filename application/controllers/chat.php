@@ -352,11 +352,52 @@ class Chat_Controller extends Base_Controller {
             return Response::make( json_encode($output), 200, $headers );
         }
         
-        $c_room->addUser( Auth::user() );
+        if( !$c_room->addUser( Auth::user() ) ){
+            $output["code"] = 6;
+            $output["name"] = $c_room->name;
+            $output["message"] = "already in the room!";
+            return Response::make( json_encode($output), 200, $headers );   
+        }
         
         $output["success"] = true;
         $output["code"] = 1;
+        $output["package"] = json_decode( $c_room->publicJSON( ), true );
+        
         return json_encode( $output );
+    }
+
+    public function post_leave( ){
+        $headers = array( 'Content-type' => 'application/json' );
+        $output = array( "success" => "false", "code" => 4 );
+        
+        if( Request::forged( ) || !Auth::check( ) ){
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $a_usr = Auth::user();
+        $p_usr = Input::get("usr");
+        $p_cid = Input::get("cid");
+        
+        if( !is_array( $p_usr ) || !$p_cid ){
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $p_token = $p_usr['token'];
+        if( !$a_usr->checkToken( $p_token ) ){
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $c_room = Chatroom::find( $p_cid );
+        if( !$c_room ){
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        $c_room->removeUser( $a_usr );
+        
+        
+        $output['success'] = true;
+        $output['code'] = 1;
+        return Response::make( json_encode($output), 200, $headers );
+        
     }
 
 }

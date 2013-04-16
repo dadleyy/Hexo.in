@@ -37,6 +37,7 @@ class Make_Test_Users {
             'games'        => $games
         ));
         
+        /*
         $wins   = 0;
         $losses = 0;
         $games = $wins + $losses;
@@ -96,16 +97,19 @@ class Make_Test_Users {
             'losses'       => $losses,
             'games'        => $games
         ));
+        */
         
     }
 
 	public function down( ){
 		DB::table('users')->where('id','=',"1")->delete( );
 		DB::table('users')->where('id','=',"2")->delete( );
+		/*
 		DB::table('users')->where('id','=',"3")->delete( );
 		DB::table('users')->where('id','=',"4")->delete( );
 		DB::table('users')->where('id','=',"5")->delete( );
 		DB::table('users')->where('id','=',"6")->delete( );
+		*/
 	}
 
 }
