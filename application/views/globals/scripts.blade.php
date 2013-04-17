@@ -5,8 +5,8 @@
 <!-- start global js scripts -->
 <script type="text/javascript" src="{{ asset("js/dependencies.js") }}"></script>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqLAjnUApy5HiwwPTj_Oq9WIiQo-plM1A&sensor=false"></script>
-<script type="text/javascript" src="{{ asset("js/IV.js") }}"></script>
-<script type="text/javascript" src="{{ asset("js/global.js") }}"></script>
+<script type="text/javascript" src="{{ asset("js/IV.min.js") }}"></script>
+<script type="text/javascript" src="{{ asset("js/global.min.js") }}"></script>
 
 <script type="text/javascript">
 var _gaq = _gaq || [];
