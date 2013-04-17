@@ -141,6 +141,10 @@ class User extends Tokened {
                     ->where( 'chatroom_id', '=', $chatroom_id )
                     ->where( 'user_id', '=', $this->id )->first( );
         
+        if( $test === null ){
+            return false;
+        }
+        
         return $test->token;
     }
     
