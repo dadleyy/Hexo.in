@@ -109,7 +109,6 @@ OnlineList = (function ( ) {
     _challengeUser = function ( ) {
         var $btn = $(this),
             usr = $btn.data("user");
-        console.log( usr );
         $.post( _defaults['challenge_url'], _makeChallengeData( usr ), _checkChallenge );  
     };
         
@@ -176,6 +175,7 @@ domEntry = function ( user, csrf ) {
         form : document.getElementById('new-room-form'),
         callback : _makeRoom
     });
+    hexo.Chat.openRoom( hexo.Chat.getUID("General Chat") );
 };
 
 hexo.Entry( domEntry ); 
