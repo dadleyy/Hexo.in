@@ -298,11 +298,8 @@ class Game_Controller extends Base_Controller {
         $p_token  = Input::get('token');
         
         /* check the tokens */
-        $current_user = Auth::user( );
-        $r_token = sha1( $current_user->id . $current_user->username );
-        $d_token = User::decodeToken( $p_token );
-        
-        if( $r_token !== $d_token ){
+        $current_user = Auth::user( );       
+        if( !$current_user->checkToken( $p_token ) ){
             $output['msg'] = 'invalid input';
             return Response::make( json_encode($output), 200, $headers );
         }

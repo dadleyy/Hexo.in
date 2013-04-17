@@ -712,7 +712,7 @@ article.other-contact dl dt{ color: #aaa; margin-right: 5px; }
     width: 400px;
     display: none;
 }
-#chatroom-pullout section.chatroom > article.middle{ margin: 20px auto 0px; width: 400px; position: relative; }
+#chatroom-pullout section.chatroom > article.middle{ margin: 20px auto 0px; width: 320px; position: relative; }
 #chatroom-pullout section.chatroom div.inner{ 
     background-color: #eee;
     padding: 10px; 

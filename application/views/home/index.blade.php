@@ -1,6 +1,6 @@
 @section('scripts')
 
-<script type="text/javascript" src="/js/home.js"></script>
+<script type="text/javascript" src="{{ asset("js/home.js") }}"></script>
 
 <script type="text/template" data-name="online-user">
     <li class="user cf"> 
@@ -13,7 +13,7 @@
     </li>
 </script>
 
-<script type="text/template" data-name="chatroom-list-item">
+<script type="text/template" data-name="chatroom-list-item-template">
     <li class="obj chat-room cf">
         <button class="t quick-join slick f gr3" data-id="<%= room_id %>" data-type="chat-room">+</button>
         <h1 class="name f"><%= room_name %></h1>

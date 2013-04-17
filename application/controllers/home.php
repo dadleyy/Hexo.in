@@ -107,15 +107,12 @@ class Home_Controller extends Base_Controller {
     }
     
     public function action_debug( ){
-        
-        if( (int)Auth::user()->privileges !== 1 ){
-            return Redirect::to( '/home' );
-        }
     
         $chats = Chatroom::all( );
         $out=array();
         foreach( $chats as $chat ){
             $out[] = json_decode( $chat->publicJSON( ), true );
+            $out[]['decoded'] = Chatroom::decodeCID( $chat->cid() );
         }
         return json_encode( $out );
     }

@@ -342,7 +342,7 @@ Tile.ns = Tile.prototype = (function ( ){
     
         else if( this.state !== 0 )
             return this.game.notify("this tile is already flipped");
-
+        
         this.game.move( this );
     };
         
@@ -437,7 +437,9 @@ Game.ns = Game.prototype =  (function ( ) {
                 token : this.token,
                 tile : tile
             };
-        };
+        },
+        
+        _isBusy = false;
 
     /* Game.rig 
      * @param {object} conf Intial information about the game
@@ -467,13 +469,16 @@ Game.ns = Game.prototype =  (function ( ) {
      *
     */
     _ns.postMove = function ( data ) {
+        
         if( !data.success )
             return this.notify( data.msg );
     
         this.tiles[data.update.key].setState( data.update.state );
         
-        this.turn = U.pint( data.turn );
         this.draw( );
+        setTimeout( function ( ) {
+            _isBusy = false;
+        }, 1000 );
     };
     
     /* Game.update
@@ -553,12 +558,17 @@ Game.ns = Game.prototype =  (function ( ) {
      * @param {Tile} the tile that was flipped
     */
     _ns.move = function ( tile ) {
+    
+        if( _isBusy )
+            return false;
+            
+        _isBusy = true;
         var data = _moveData.apply( this, [tile] );
         $.post( _d['gameserver'].moves, {
             "csrf_token" : _csrf,   
             "token" : this.token,
             "tile" : { "value" : tile.value, "state" : _userTurn }
-        }, _.bind( this.postMove, this) );
+        }, _.bind( this.postMove, this ) );
         
     };
     

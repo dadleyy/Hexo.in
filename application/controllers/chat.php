@@ -162,6 +162,12 @@ class Chat_Controller extends Base_Controller {
         $user_token = Input::get("user_token");
         $message    = Input::get("msg");
         
+        $p_usr = Input::get('usr');
+        $p_token = $p_usr['token'];
+        if( !Auth::user( )->checkToken( $p_token ) ){
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
         if( $chat_token == null || $user_token == null || $message == null ){
             $output['msg'] = "noinput";
             return Response::make( json_encode($output), 200, $headers );
@@ -354,6 +360,7 @@ class Chat_Controller extends Base_Controller {
             return Response::make( json_encode($output), 200, $headers );
         }
         
+        $p_cid  = Chatroom::decodeCID( $p_cid );
         $c_room = Chatroom::find( $p_cid );
         if( !$c_room ){
             return Response::make( json_encode($output), 200, $headers );
@@ -394,13 +401,19 @@ class Chat_Controller extends Base_Controller {
             return Response::make( json_encode($output), 200, $headers );
         }
         
+        $p_cid  = Chatroom::decodeCID( $p_cid );
         $c_room = Chatroom::find( $p_cid );
         if( !$c_room ){
             return Response::make( json_encode($output), 200, $headers );
         }
         $c_room->removeUser( $a_usr );
         
-        $output['left_room'] = $c_room->id;
+        /* remove the room if it is donezoes */
+        if( count( $c_room->users( )->get( ) ) === 0 ){
+            File::delete( $c_room->chatFile( ) );
+            $c_room->delete( );
+        }
+        
         $output['success'] = true;
         $output['code'] = 1;
         return Response::make( json_encode($output), 200, $headers );
