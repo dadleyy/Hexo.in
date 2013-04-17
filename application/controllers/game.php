@@ -88,7 +88,7 @@ class Game_Controller extends Base_Controller {
     
     public function action_move( ) {
         
-        $headers = array( 'Content-type' => 'application/json' );
+        $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
         $output = array( "success" => false );
         
         $current_user = Auth::user( );
@@ -144,8 +144,8 @@ class Game_Controller extends Base_Controller {
                 
         $current_user = Auth::user( );
         $current_game = $current_user->game( );
+        $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
         $output = array( "success" => false, "code" => 4, "type"=>"game" );
-        $headers = array( 'Content-type' => 'application/json' );
         
         if( Request::forged( ) ) {
             $output['success'] = false;
@@ -288,7 +288,7 @@ class Game_Controller extends Base_Controller {
     public function action_challenge( ) {
         
         $output = array( 'success' => false, 'code' => 4 );
-        $headers = array( 'Content-type' => 'application/json' );
+        $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
         
         if( Request::forged( ) ) {
             return Response::make( json_encode($output), 200, $headers );

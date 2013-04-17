@@ -40,7 +40,7 @@ class Session_Controller extends Base_Controller {
         $passw = Input::get('passw');
         
         if ( Request::forged( ) || !$email || !$passw ) { 
-            return Response::error('404');
+            return Redirect::to( '/home' );
         }
         
         if ( Auth::attempt( array( "username"=>$email, "password"=>$passw ) ) ) {
@@ -55,7 +55,7 @@ class Session_Controller extends Base_Controller {
     public function action_register( ) {
         
         if ( Request::forged( ) ) { 
-            return Response::error('404');
+            return Redirect::to( '/home' );
         }
         
         $info = array( 

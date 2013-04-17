@@ -9,9 +9,8 @@ class Chat_Controller extends Base_Controller {
     }
     
     public function post_socket( ) {
-    
+        $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
         $output = array( "code" => 4, "success" => false, "type" => "chat" );
-        $headers = array( 'Content-type' => 'application/json' );
             
         if( Request::forged( ) || !Auth::check( ) ){
             $output['msg'] = "nouser";
@@ -143,15 +142,15 @@ class Chat_Controller extends Base_Controller {
     
     public function post_message( ) {
         $output = array( "csrf" => true, "success" => false );
-        $headers = array( 'Content-type' => 'application/json' );
+        $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
         if( Request::forged( ) || !Auth::check( ) ){
             return Response::make( json_encode($output), 200, $headers );   
         }
     }
     
     public function post_send( ){
+        $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
         $output = array( "csrf" => true, "success" => false );
-        $headers = array( 'Content-type' => 'application/json' );
         
         if( Request::forged( ) || !Auth::check( ) ){
             $output['msg'] = "noauth";
@@ -207,7 +206,7 @@ class Chat_Controller extends Base_Controller {
     }
 
     public function post_state( ) {
-        $headers = array( 'Content-type' => 'application/json' );
+        $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
         $output = array( "success" => false, "code" => 4, "type" => "online" );
         
         if( Request::forged( ) ) {
@@ -285,7 +284,7 @@ class Chat_Controller extends Base_Controller {
     }
     
     public function post_open( ) {
-        $headers = array( 'Content-type' => 'application/json' );
+        $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
         $output = array( "success" => "false", "code" => 4 );
         
         if( Request::forged( ) || !Auth::check( ) ){
@@ -335,7 +334,7 @@ class Chat_Controller extends Base_Controller {
     }
     
     public function post_join( ){
-        $headers = array( 'Content-type' => 'application/json' );
+        $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
         $output = array( "success" => "false", "code" => 4 );
         
         if( Request::forged( ) || !Auth::check( ) ){
