@@ -590,14 +590,21 @@ Chat.leaveRoom = (function ( ) {
         _room = null;
     
     function _receive( data ) {
+    
         if( !data['success'] )
             return false;
-        
+    
+        /* save the uid from the room */
         var uid = _room.uid;
+        /* close up the socket */
         _room.close( );
+        /* delete the memory of the chatroom */
         delete _chatRooms[_room.uid];
+        /* make sure we know we aren't busy */
         _busy = false;
+        /* close the DOM room */
         return Chat.closeRoom( uid );
+        
     };
     
     return (function ( uid ) {
