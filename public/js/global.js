@@ -508,6 +508,16 @@ Chat.renderAll = (function ( ) {
     
 })( );
 
+/* Chat.openUIDs 
+ * The list of open chatroom uids
+*/
+Chat.openUIDs = [ ];
+
+/* Chat.closeRoom
+ * Closes the chat window specified by
+ * the given uid
+ * @param {string} uid 
+*/
 Chat.closeRoom = function ( uid ) {
     var ele  = _j("#chatroom-pullout").find('section.chatroom[data-uid="'+uid+'"]');
     
@@ -515,22 +525,40 @@ Chat.closeRoom = function ( uid ) {
         "bottom" : (ele.height()*-2)+"px"
     }, 600, function ( ) {
         _j(this).css("display","none");
-        _j("#chatroom-pullout").css("display","none");
+        Chat.openUIDs.splice( Chat.openUIDs.indexOf( uid ), 1 );
+        _.each( Chat.openUIDs, function ( o_uid ) { 
+            Chat.openRoom( o_uid, true ); 
+        });
     });
 };
 
-Chat.openRoom = function ( uid ) {
+/* Chat.openRoom
+ * Opens the chat window specified by
+ * the given uid
+ * @param {string} uid 
+*/
+Chat.openRoom = function ( uid, nopush ) {
     if( !uid ) 
         return false;
+
+    if( Chat.openUIDs.indexOf( uid ) !== -1 && nopush !== true )
+        return false;
         
-    var ele  = _j("#chatroom-pullout").find('section.chatroom[data-uid="'+uid+'"]');
-    
+    var ele  = _j("#chatroom-pullout").find('section.chatroom[data-uid="'+uid+'"]'),
+        indx = ( nopush !== true ) ? Chat.openUIDs.length : Chat.openUIDs.length - 1;
+        
     _j("#chatroom-pullout").css("display","block");
-    ele.stop().css("display","block").animate({
-        "bottom" : "0px",
-        "opacity" : "1.0"
-    }, U.anTime, U.anEase );
+    ele.stop()
+        .css({
+            "display":"block",
+            "left" : ( 320 * indx ) + "px"
+        }).animate({
+            "bottom" : "0px",
+            "opacity" : "1.0"
+        }, U.anTime, U.anEase );
     
+    if( nopush !== true )
+        Chat.openUIDs.push( uid );
 };
 
 Chat.makeRoom = (function ( ) {
@@ -598,6 +626,7 @@ Chat.leaveRoom = (function ( ) {
         if( !room || _busy )
             return false;
         
+        Chat.closeRoom( uid );
         cid   = room.id;
         _room = room;
         _busy = true;
