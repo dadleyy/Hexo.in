@@ -51,7 +51,7 @@ _gaq.push(['_trackPageview']);
 </script>
 
 <script type="text/template" data-name="chatroom-tempate">
-    <section class="chatroom t whole" data-name="<%= name %>" data-uid="<%= uid %>">
+    <section class="chatroom whole" data-name="<%= name %>" data-uid="<%= uid %>">
         <article class="middle">
             <button class="closer t slick gr3" data-uid="<%= uid %>">x</button>
             <div class="inner">
