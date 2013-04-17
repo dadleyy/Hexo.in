@@ -71,9 +71,11 @@ OnlineList = (function ( ) {
         /* some nifty defaults */
         _defaults = {
             "container" : "#online-list",
+            "roomcontainer" : "#open-chat-listing",
             "socket_url" : "/chat/state",
             "challenge_url" : "/game/challenge",
-            "template" : "online-user"
+            "template" : "online-user",
+            "roomtemplate" : "chatroom-list-item-template"
         },
         
         /* _makeChallengeData
@@ -91,7 +93,8 @@ OnlineList = (function ( ) {
         },
         
         _socket,         // the update socket
-        _container,      // the container for rendering
+        _userContainer,  // the container for rendering
+        _roomContainer,  //
         _challengeUser,  // event handler for button clicks
         _checkChallenge; // data receiver for /game/challenge calls
         
@@ -106,6 +109,7 @@ OnlineList = (function ( ) {
     _challengeUser = function ( ) {
         var $btn = $(this),
             usr = $btn.data("user");
+        console.log( usr );
         $.post( _defaults['challenge_url'], _makeChallengeData( usr ), _checkChallenge );  
     };
         
@@ -114,17 +118,22 @@ OnlineList = (function ( ) {
             return false;
                 
         /* clear out old html */
-        _container.html('');
+        _userContainer.html('');
         hexo.Geo.clearMarkers( );
         var newhtml = "";
         _.each( data.users, function( user ) {
             newhtml += U.template( _defaults['template'], user );  
             hexo.Geo.addMarker( user.location, user.username );
         });
-        _container.html( newhtml );
+        _userContainer.html( newhtml );
+        
+        _roomContainer.html('');
+        newhtml = "";
         _.each( data.rooms, function ( room ) {
-             
+            var c = { room_id : room.id, room_count : room.count, room_name : room.name };
+            newhtml += U.template( _defaults['roomtemplate'], c );     
         });
+        _roomContainer.html( newhtml );
     };
             
     _ns.init = function ( opts ) {
@@ -132,12 +141,14 @@ OnlineList = (function ( ) {
         
         $.extend( _defaults, opts );
         
-        /* get the dom container */
-        _container = $(_defaults['container']);
-        /* attatch events to the container */
-        _container.on("click", "button.challenge", _challengeUser );
-        
-        
+        /* get the dom containers */
+        _userContainer = $(_defaults['container']);
+        _roomContainer = $(_defaults['roomcontainer']);
+        /* attatch events to the containers */
+        _userContainer.on("click", "button.challenge", _challengeUser );
+        _roomContainer.parent().parent().on( "click", "button.add-new", _openRoomFactory );
+        _roomContainer.on( "click", "button.quick-join", _joinRoom );
+            
         /* create the socket that updates information */
         _socket =  hexo.Socket({ 
             url : _defaults['socket_url'], 
@@ -165,9 +176,6 @@ domEntry = function ( user, csrf ) {
         form : document.getElementById('new-room-form'),
         callback : _makeRoom
     });
-    
-    $("article.chat-rooms").on( "click", "button.add-new", _openRoomFactory );
-    $("article.chat-rooms").on( "click", "button.quick-join", _joinRoom );
 };
 
 hexo.Entry( domEntry ); 

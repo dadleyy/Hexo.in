@@ -82,7 +82,7 @@ Socket.prototype = Socket.ns = (function( ) {
     */
     _data = function ( ) {
         return {
-            usr : _cusr,
+            usr : { token : _cusr.token },
             csrf_token : _csrf,
             token : this.token,
             extras : this.extras,
@@ -260,6 +260,7 @@ Chat.ns = Chat.prototype = (function ( ) {
                 msg : input.message || false,
                 chat_token : this.chat_token,
                 user_token : this.user_token,
+                usr : { token : _cusr.token },
                 csrf_token : _csrf
             };     
             return d;
@@ -489,7 +490,7 @@ Chat.renderAll = (function ( ) {
         });
         
         $r_context.children().each(function( indx ) {
-            $(this).css("left", (indx*400) + "px" );
+            $(this).css("left", (indx*320) + "px" );
         });
         
         
@@ -518,6 +519,20 @@ Chat.closeRoom = function ( uid ) {
     });
 };
 
+Chat.openRoom = function ( uid ) {
+    if( !uid ) 
+        return false;
+        
+    var ele  = _j("#chatroom-pullout").find('section.chatroom[data-uid="'+uid+'"]');
+    
+    _j("#chatroom-pullout").css("display","block");
+    ele.stop().css("display","block").animate({
+        "bottom" : "0px",
+        "opacity" : "1.0"
+    }, U.anTime, U.anEase );
+    
+};
+
 Chat.makeRoom = (function ( ) {
     
     var _made = 0,
@@ -532,6 +547,7 @@ Chat.makeRoom = (function ( ) {
         var room = Chat( data['package'] );
         Chat.renderAll( );
         
+        Chat.openRoom( room.uid );
         if( _cb && U.type(_cb) === "function" )
             _cb( room );
             
@@ -546,7 +562,7 @@ Chat.makeRoom = (function ( ) {
         _cb = ( !!fn ) ? fn : false;
     
         _busy = true;
-        $.post("/chat/open", { name : name, usr : _cusr, csrf_token : _csrf }, _receive, "json" );
+        $.post("/chat/open",{name:name,usr:{token:_cusr.token},csrf_token:_csrf},_receive,"json");
         
     });
     
@@ -600,36 +616,22 @@ Chat.joinRoom = (function ( ) {
         if( data.code == 6 )
             return Chat.openRoom( Chat.getUID(data.name) );
         
-        Chat( data['package'] );
-        
-        return Chat.renderAll( );
+        var nc = Chat( data['package'] );
+        Chat.renderAll( );
+        Chat.openRoom( nc.uid );
     };
     
     return (function ( cid ) {
         
         if( _csrf === "" || _cusr === null || _busy )
             return false;  
-            
+                
         _busy = true;
-        $.post("/chat/join", { cid : cid, usr : _cusr, csrf_token : _csrf }, _receive, "json" );
+        $.post("/chat/join",{cid:cid,usr:{token:_cusr.token},csrf_token:_csrf},_receive,"json");
         
     });
     
 })( );
-
-Chat.openRoom = function ( uid ) {
-    if( !uid ) 
-        return false;
-        
-    var ele  = _j("#chatroom-pullout").find('section.chatroom[data-uid="'+uid+'"]');
-    
-    _j("#chatroom-pullout").css("display","block");
-    ele.stop().css("display","block").animate({
-        "bottom" : "0px",
-        "opacity" : "1.0"
-    }, U.anTime, U.anEase );
-    
-};
 
 ///////////////////////////
 // NAMESPACE : Utilities //

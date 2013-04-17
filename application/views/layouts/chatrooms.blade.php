@@ -18,7 +18,7 @@
             $users = $room->users( )->get( );
             ?>
     <li class="obj chat-room cf">
-        <button class="t join-old quick-join slick f gr3" data-id="<?php echo $room->id; ?>" data-type="chat-room">+</button>
+        <button class="t join-old quick-join slick f gr3" data-id="<?php echo $room->cid(); ?>" data-type="chat-room">+</button>
         <h1 class="name f"><?php echo $room->name; ?></h1>
         <h2 class="count r cf">
             <span class="f">Population:</span>

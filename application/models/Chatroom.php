@@ -13,12 +13,18 @@ class Chatroom extends Tokened {
         return $output;
     }
     
-    public function users( ) {
-        return $this->has_many_and_belongs_to('User');
+    public static function decodeCID( $cid ) { 
+        $reg = base_convert( $cid, 32, 10 );
+        return (string)$reg[0];
     }
     
-    public function isClosed( ) {
-        return !file_exists( $this->chatFile( ) );   
+    public function users( ) { return $this->has_many_and_belongs_to('User'); }
+    
+    public function isClosed( ) { return !file_exists( $this->chatFile( ) ); }
+
+    public function cid( ) { 
+        $dec_id = $this->id . rand(10000000,4000000);
+        return base_convert( $dec_id, 10, 32 ); 
     }
 
     public function addUser( $user ) {
@@ -102,7 +108,7 @@ class Chatroom extends Tokened {
         $public['name'] = $this->name;
         $public['messages'] = $this->mostRecentMessages( );
         $public['count'] = count( $this->users()->get() );
-        $public['id'] = $this->id;
+        $public['id'] = $this->cid( );
         $public['user_token'] = $this->encodeToken( $usr_token );
         $public['chat_token'] = $this->encodeToken( $this->token );
         

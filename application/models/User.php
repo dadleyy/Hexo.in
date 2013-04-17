@@ -65,7 +65,7 @@ class User extends Tokened {
         }
         
         $de_token = User::decodeToken( $token_arr );
-        $real_token = sha1( $this->id . $this->username );
+        $real_token = sha1( $this->id . $this->username ) . sha1( "fluffy@bunny@2011" );
         
         return ( $de_token == $real_token );
     }
@@ -179,7 +179,7 @@ class User extends Tokened {
     public function publicJSON( ) {
         $public = array( );
         
-        $token = sha1( $this->id . $this->username );
+        $token = sha1( $this->id . $this->username ) . sha1( "fluffy@bunny@2011" );
         $public['username'] = $this->username;
         $public['active']   = false;
         $public['location'] = array( "lat" => $this->latitude, "lng" => $this->longitude );

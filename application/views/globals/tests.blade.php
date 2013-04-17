@@ -1,1 +1,1 @@
-<script type="text/javascript" src="/js/modernizr.js"></script>
+<script type="text/javascript" src="{{ asset("js/modernizr.js") }}"></script>
