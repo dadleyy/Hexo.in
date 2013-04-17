@@ -18,7 +18,7 @@ class Home_Controller extends Base_Controller {
     }
     
     public function action_heartbeat( ) {
-        $headers = array( 'Content-type' => 'application/json' );
+        $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
         $output = array( "success" => false, "code" => 4, "type"=>"heartbeat" );
         
         if( Request::forged( ) ) {
