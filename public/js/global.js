@@ -590,12 +590,6 @@ Chat.leaveRoom = (function ( ) {
     
 })( );
 
-Chat.count = function ( ) {
-    var l = 0;
-    _.each( _chatRooms, function ( room ) { console.log( room.uid ); l++; });  
-    return l;
-};
-
 Chat.joinRoom = (function ( ) {
 
     var _busy = false;

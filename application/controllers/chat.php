@@ -52,11 +52,15 @@ class Chat_Controller extends Base_Controller {
         $active_user        = Auth::user( );    
         $real_user_token    = $active_user->getChatToken( $chat_obj->id );
         $decoded_user_token = Tokened::decodeToken( $user_token );
+        if( $real_user_token == false ) {
+            $output['code'] = 4;
+            $output['success'] = false;
+            $output['flag'] = 'dead';
+            return Response::make( json_encode($output), 200, $headers ); 
+        }
         
         if( $real_user_token !== $decoded_user_token ) {
             $output['msg'] = "badtoken";
-            $output['decoded'] = $decoded_user_token;
-            $output['original'] = $real_user_token;
             return Response::make( json_encode($output), 200, $headers ); 
         }
         
@@ -150,6 +154,7 @@ class Chat_Controller extends Base_Controller {
         $headers = array( 'Content-type' => 'application/json' );
         
         if( Request::forged( ) || !Auth::check( ) ){
+            $output['msg'] = "noauth";
             return Response::make( json_encode($output), 200, $headers );   
         }
         
@@ -159,6 +164,7 @@ class Chat_Controller extends Base_Controller {
         $message    = Input::get("msg");
         
         if( $chat_token == null || $user_token == null || $message == null ){
+            $output['msg'] = "noinput";
             return Response::make( json_encode($output), 200, $headers );
         }        
         
@@ -167,6 +173,7 @@ class Chat_Controller extends Base_Controller {
         $chat_obj     = Chatroom::where( "token" , "=" , $decoded_chat )->first( );
         
         if( $chat_obj == null ){ 
+            $output['msg'] = "noobj";
             return Response::make( json_encode($output), 200, $headers );   
         }
         
@@ -176,6 +183,7 @@ class Chat_Controller extends Base_Controller {
         $decoded_user_token = Tokened::decodeToken( $user_token );
         
         if( $real_user_token !== $decoded_user_token ) {
+            $output['msg'] = "notoken";
             return Response::make( json_encode($output), 200, $headers ); 
         }
         
@@ -393,7 +401,7 @@ class Chat_Controller extends Base_Controller {
         }
         $c_room->removeUser( $a_usr );
         
-        
+        $output['left_room'] = $c_room->id;
         $output['success'] = true;
         $output['code'] = 1;
         return Response::make( json_encode($output), 200, $headers );

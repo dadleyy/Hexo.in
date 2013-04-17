@@ -44,7 +44,10 @@ class Chatroom extends Tokened {
     } 
     
     public function removeUser( $user ) {
-        DB::table('chatroom_user')->where( "user_id", "=", $user->id )->delete();
+        DB::table('chatroom_user')
+                ->where( "user_id", "=", $user->id )
+                ->where( "chatroom_id", "=", $this->id )
+                ->delete();
     } 
         
     public function getFlag( ) {
