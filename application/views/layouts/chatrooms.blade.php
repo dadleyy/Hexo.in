@@ -2,7 +2,7 @@
     <section id="new-room-factory">
         <h1>Create a new chatroom</h1>
         <form id="new-room-form" class="IValidate">
-<input name="room_name" type="text" data-placeholder="room name" data-filter="minmax" data-minlength="3" data-maxlength="9" class="IValidate">
+<input name="room_name" type="text" data-placeholder="room name" data-filter="minmax" data-minlength="3" data-maxlength="20" class="IValidate">
         </form>
     </section>
     <div class="inner">

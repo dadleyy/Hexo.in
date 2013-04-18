@@ -55,9 +55,13 @@ _gaq.push(['_trackPageview']);
         <article class="middle">
             <button class="closer t slick gr3" data-uid="<%= uid %>">x</button>
             <div class="inner">
+            <h1 class="room-name rale darkg c"><%= room_name %></h1>
+            <div class="chat-scroll-track"><span class="chat-scroll-bar"></span></div>
+            <div class="chat-scroll-area">
             <section id="<%= room_id %>-window" class="chat-window"> 
             
             </section>
+            </div>
             </div>
             <div class="inner">
             <form id="<%= room_id %>-form" action="/chat/post" method="post" class="IValidate">
@@ -69,7 +73,7 @@ _gaq.push(['_trackPageview']);
 </script>
 
 <script type="text/template" data-name="charoom-listitem-template">
-    <li class="active-room t cf">
+    <div class="active-room t cf">
         <button class="t opener slick f gr3" data-name="<%= name %>" data-uid="<%= uid %>">+</button>
         <button class="t closer slick f gr3" data-name="<%= name %>" data-uid="<%= uid %>">-</button> 
         <h1 class="f name"><%= name %></h1>
@@ -77,7 +81,7 @@ _gaq.push(['_trackPageview']);
             <span class="f">users:</span>
             <span class="f count"><%= count %></span>
         </h2>
-    </li>    
+    </div>    
 </script>
 
 <script type="text/template" data-name="chat-message-template">

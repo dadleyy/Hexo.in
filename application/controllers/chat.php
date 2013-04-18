@@ -310,13 +310,26 @@ class Chat_Controller extends Base_Controller {
             return Response::make( json_encode($output), 200, $headers );
         }
         
+        if( strlen( $p_name ) < 4 || strlen( $p_name ) > 19 ){
+            $output['msg'] = "room name was too long";
+            return Response::make( json_encode($output), 200, $headers );
+        }  
+        
+        $exists = Chatroom::where( "name", "=", HTML::entities( $p_name ) )->get( );
+        if( count( $exists ) !== 0 ){
+            $output['cid'] = $exists[0]->cid( );
+            $output['code'] = 6;
+            $output["success"] = true;
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
         //////////////////////////////
         // CHATROOM INITIALIZATION  //
         $chat = new Chatroom;
         
         $chat->game_id = 0;
         $chat->token = sha1( time() . $p_name );
-        $chat->name = $p_name;
+        $chat->name = HTML::entities( $p_name );
         
         $chat->createJSON( );
         $chat->save( );
