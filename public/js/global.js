@@ -23,6 +23,8 @@ var /* global entry point */
     _csrf = "",                     // reference to the crsf token
     _cusr = null,                   // reference to current user
     _chatRooms = { },               // private hash of chatrooms
+    $chatroomZone = false,
+    $chatroomList = false,
     
     /* functions */
     _toTop, // scrolls window to top
@@ -264,7 +266,79 @@ Chat.ns = Chat.prototype = (function ( ) {
                 csrf_token : _csrf
             };     
             return d;
-        };    
+        },
+        
+        _updateScrollbar = function ( evt ) {
+            var sa = this.dom.$scrollArea,
+                sb = this.dom.$scrollBar,
+                tp = sa.scrollTop( ),
+                mh = this.dom.$messageZone.height( ),
+                am = tp / ( mh - 160 ),
+                rel = am * 200 + "px";
+            
+            sb.css( "top", rel );    
+        },
+        
+        _updateRoom = function ( messages ) {
+                    
+            var ele = this.dom.$room,
+                scroll = this.dom.$scrollArea,
+                target = this.dom.$messageZone;
+            
+            target.html('');
+            _.each( messages, function ( msg ) { 
+            
+                var author = msg.user || "",
+                    text = msg.message || "",
+                    html = U.template( "chat-message-template", { user : author, text : text } );
+            
+                target.get()[0].innerHTML += html;
+            });
+            
+            scroll.scrollTop( target.height( ) + 1000 );
+       
+        },
+        
+        /* Chat._renderRoom
+         * Called for chatrooms that are not a part
+         * of a game. Puts them into the container
+        */
+        _renderRoom = function ( ) {
+        
+            _chatRooms[this.uid] = this;
+            
+            var ln = this.name.replace(/\s+/g, '_').toLowerCase(),
+                e  = { room_id : ln + "-" + this.uid, room_name : this.name },
+                dom = { }, r, l;
+            
+            dom.roomHTML = U.template( "chatroom-tempate", $.extend( {} , e, this ) );
+            dom.listHTML = U.template( "charoom-listitem-template", $.extend( {} , e, this ) );
+            
+            if( $chatroomZone === false ) {
+                $chatroomZone = _j("#chatroom-pullout");
+                $chatroomList = _j("#chatlist-menu-list");
+            }
+            
+            r = $("<section>").html( dom.roomHTML ),
+            l = $("<li>").addClass("active-room t cf").html( dom.listHTML );
+            
+            $chatroomZone.append( r );
+            $chatroomList.append( l );
+            
+            dom.$room = r;        
+            dom.$listItem = l;
+            dom.$scrollArea = r.find("div.chat-scroll-area").on( "scroll", _.bind( _updateScrollbar, this ) );
+            dom.$scrollBar = r.find("span.chat-scroll-bar");
+            dom.$messageZone = r.find("section.chat-window");
+            
+            this.dom   = dom;
+            this.ready = true;
+            
+            this.events['update'] = _.bind( _updateRoom, this );
+            this.registerForm( ln + "-" + this.uid + "-form" );
+            this.start( );
+        
+        };
 
     /* Chat.receive
      * the callback for the 'update' event of
@@ -320,12 +394,11 @@ Chat.ns = Chat.prototype = (function ( ) {
                 callback : _.bind( this.send, this )
             });       
         } else {  
-            f = new IV({
-                callback : _efn 
-            });
+            f = new IV({ callback : _efn });
         }
         
         this.input = f;
+        
         return f;
     };
     
@@ -333,6 +406,11 @@ Chat.ns = Chat.prototype = (function ( ) {
      * Closes the chat room
     */
     _ns.close = function ( ) {
+        if( this.dom !== false ){ 
+            this.dom.$room.remove( );    
+            this.dom.$listItem.remove( );
+        }
+    
         this.socket.close( ); 
         this.ready = false;
     };
@@ -341,7 +419,8 @@ Chat.ns = Chat.prototype = (function ( ) {
         if( !conf || conf == undefined ) { return false; }
         
         this.ready = false;
-
+        this.dom = false;
+        
         /* basic identifying properties */
         this.name = conf.name || "N/A";
         this.uid = U.uid( );
@@ -371,7 +450,7 @@ Chat.ns = Chat.prototype = (function ( ) {
           
         /* save this chatroom in the private hash */
         if( !isgame )
-            _chatRooms[this.uid] = this;
+            U.Entry( _.bind( _renderRoom, this ) );
                 
         this.ready = true;
         this.open = false;
@@ -390,13 +469,10 @@ Chat.ns.rig.prototype = Chat.ns;
 Chat.renderAll = (function ( ) {
     var _finished = false,
         _length = 0,
-        $r_context, 
-        $l_context,
         
         /* event functions: */
         _openChat,
         _closeChat,
-        _updateRoom,
         _leaveChat;
         
     _leaveChat = function ( ) {
@@ -423,74 +499,37 @@ Chat.renderAll = (function ( ) {
         return Chat.openRoom( uid );
     };
     
-    _updateRoom = function ( messages ) {
-        var ele  = $r_context.find('section.chatroom[data-uid="'+this.uid+'"]'),
-            target = ele.find("section.chat-window");
+    return function ( ) {
         
-        target.html('');
-        _.each( messages, function ( msg ) { 
-            var author = msg.user || "",
-                text = msg.message || "",
-                html = U.template( "chat-message-template",{ user : author, text : text } );
-            
-            target.get()[0].innerHTML += html;
+        _.each( _chatRooms, function ( room ) {
         
-        });
-        
-        target.scrollTop( target.height( ) + 1000 );
-        
-    };
-    
-    return function ( $render_context, $list_context ) {
-        
-        $r_context = $render_context || $r_context;
-        $l_context = $list_context || $l_context;
-        
-        var c_html = "",
-            l_html = "";
-            
-        _.each( _chatRooms, function( room ) {
-            var ln = room.name.replace(/\s+/g, '_').toLowerCase(),
-                e  = { room_id : ln + "-" + room.uid };
-            
-            room.events['update'] = _.bind( _updateRoom, room );
-            
-            c_html += U.template( "chatroom-tempate", $.extend( {} , e, room ) );
-            l_html += U.template( "charoom-listitem-template", $.extend( {} , e, room ) );
-
-        });
-        
-        $r_context.get()[0].innerHTML = c_html;
-        $l_context.get()[0].innerHTML = l_html;
-            
-        _.each( _chatRooms, function( room ) {
-            
-            var ln = room.name.replace(/\s+/g, '_').toLowerCase(),
-                e  = { room_id : ln + "-" + room.uid };
-         
-            room.registerForm( e.room_id + "-form" );
-            room.start( );
-        
-        });
-        
-        _.each( Chat.openUIDs, function ( uid, indx ) {
-            var ele = $r_context.find('section.chatroom[data-uid="'+ uid +'"]');
+            var ele = $chatroomZone.find('section.chatroom[data-uid="'+ room.uid +'"]'),
+                indx = Chat.openUIDs.indexOf( room.uid ),
+                bottom = ( indx !== -1 ) ? "0px" : "-800px",
+                left = ( indx < 1 ) ? "0px" : (indx * 320) + "px";
+                
             ele.css({
                 "display" : "block",
-                "bottom"  : "0px",
                 "opacity" : "1.0",
-                "left"    : ( indx * 320 ) + "px"
-            });
-        });
-                
-        $r_context
-            .off( "click", _closeChat )
-            .on( "click", "button.closer", _closeChat );
+                "left"    : left
+            }).stop().animate({
+                "bottom"  : bottom
+            }, U.anTime, U.anEase );
             
-        $l_context
-            .off( "click", _openChat )
-            .on("click", "button.opener", _openChat )
-            .on("click", "button.closer", _leaveChat );
+        });
+    
+    
+        if( !_finished ) {
+        
+            $chatroomZone
+                .off( "click", _closeChat )
+                .on( "click", "button.closer", _closeChat );
+                
+            $chatroomList
+                .off( "click", _openChat )
+                .on("click", "button.opener", _openChat )
+                .on("click", "button.closer", _leaveChat );
+        }
         
         _finished = true;
     };
@@ -523,8 +562,10 @@ Chat.closeRoom = function ( uid ) {
 Chat.openRoom = function ( uid ) {
     if( !uid ) 
         return false;
+    
+    if( Chat.openUIDs.indexOf( uid ) === -1 )
+        Chat.openUIDs.push( uid );
         
-    Chat.openUIDs.push( uid );
     return Chat.renderAll( );
 };
 
@@ -542,11 +583,13 @@ Chat.makeRoom = (function ( ) {
     function _receive( data ) {
     
         if( !data['success'] ){ return false; }
-    
+        
+        // the chatroom already exists
+        if( data.code === 6 )
+            return Chat.joinRoom( data.cid );
+        
         var room = Chat( data['package'] );
-        if( _cb && U.type(_cb) === "function" )
-            _cb( room );
-            
+                    
         setTimeout( function( ) { _busy = false; }, 3000 );
         
         return Chat.openRoom( room.uid );
@@ -788,13 +831,12 @@ Utils = U = {
          * pushes a callback into the stack
          * @param {function} fn The callback to push   
         */
-        entry = function ( fn ) {
+        entry = function ( fn, push ) {
             if( U.type(fn) !== "function" )
                 return false;
-            
+                
             // push callback into private array
-            _callbacks.push( fn );
-            
+            _callbacks.push( fn ); 
             // if the document was faster than the call
             if( _finished )
                 fn( _cusr );
@@ -802,7 +844,7 @@ Utils = U = {
             return true;
         };
         
-        _j(_doc).ready( _onready );
+        _j( _doc ).ready( _onready );
                
         return entry;
         
@@ -1163,6 +1205,9 @@ _Menu = (function ( ) {
 /* entry point */
 domReady = function ( ) {
     
+    $chatroomZone = _j("#chatroom-pullout");
+    $chatroomList = _j("#chatlist-menu-list");
+    
     if( _doc.getElementById( String(_time ).substring( 0, 5 ) ) !== null ) 
         _csrf = _j("#"+String(_time ).substring( 0, 5 )).find('input[type="hidden"]').val( );
 
@@ -1182,7 +1227,7 @@ domReady = function ( ) {
         Geo.init( );
     
     if( _doc.getElementById("chatroom-pullout") !== null )
-        Chat.renderAll( _j("#chatroom-pullout"), _j("#chatlist-menu-list") );
+        Chat.renderAll( );
     
 };
 
