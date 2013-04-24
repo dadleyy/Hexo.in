@@ -88,7 +88,8 @@ Socket.prototype = Socket.ns = (function( ) {
             csrf_token : _csrf,
             token : this.token,
             extras : this.extras,
-            raw : "raw"
+            flag : this.flag,
+            raw : (this.raw === true) ? "raw" : false
         };
     },
     
@@ -98,8 +99,13 @@ Socket.prototype = Socket.ns = (function( ) {
      * @param {object} data Server data
     */
     _delegate = function ( data ) {
-        /* the socket died */
-        if( data.flag && data.flag == "dead" ) {
+        
+        /* if there is a new flag, update mine p*/
+        if( data.flag )
+            this.flag = data.flag;
+            
+        /* the socket died */    
+        if( data.flag == "dead" ) {
             
             this.close( );
             
@@ -109,6 +115,7 @@ Socket.prototype = Socket.ns = (function( ) {
             this.events['close']( );   
             U.l("Socket #" + this.uid + ": was terminated on the server end");
             return false;
+        
         } 
         
         /* something traumatic happened */
@@ -164,6 +171,7 @@ Socket.prototype = Socket.ns = (function( ) {
         
         /* set all of the other goodies */
         this.token = conf.token;
+        this.flag = conf.flag;
         this.extras = conf.extras || { };
         this.uid = U.uid( );
         this.raw = false;
@@ -230,6 +238,7 @@ User.ns = User.prototype = (function( ) {
         this.wins = ( U.pint( conf.wins ) ) ? U.pint( conf.wins ) : 0;
         this.losses = ( U.pint( conf.losses ) ) ? U.pint( conf.losses ) : 0;
         
+        this.hb_flag = conf.hb_flag || false;
         this.active = conf.active || false;
         
         if( this.active !== false )
@@ -444,7 +453,8 @@ Chat.ns = Chat.prototype = (function ( ) {
     
         /* open up the socket */
         this.socket = Socket({ 
-            url : "/chat/socket", 
+            flag : conf.flag,
+            url : "/socket/chat", 
             events : { 'update' : _.bind( this.receive, this ) },
             token : this.chat_token,
             extras : { chat_token : this.chat_token, user_token : this.user_token }
@@ -1024,7 +1034,7 @@ Geo = (function( able ) {
             lng = position.coords.longitude,
             latlng = new google.maps.LatLng(lat,lng); 
         
-        $.post( "/home/heartbeat", { lat : lat, lng : lng, csrf_token : _csrf }, _efn );
+        $.post( "/socket/heartbeat", { lat : lat, lng : lng, csrf_token : _csrf }, _efn );
         
         options.center = latlng;
         
@@ -1065,7 +1075,7 @@ Heartbeat = (function( ) {
     var _ns = { },
         _defaults = { 
             "menu_id" : "#heartbeat-menu",
-            "socket_url" : "/home/heartbeat",
+            "socket_url" : "/socket/heartbeat",
             "container" : "#notification-list"
         },
         /* vars: */
@@ -1120,6 +1130,7 @@ Heartbeat = (function( ) {
         _socket =  Socket({ 
             url : _defaults['socket_url'], 
             token : _cusr.token,
+            flag : _cusr.hb_flag,
             events : { 'update' : _.bind( _ns.update, _ns ) }
         });
         _socket.open( );

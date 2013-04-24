@@ -92,6 +92,7 @@ var /* entry point */
         /* make a new socket */
         game.socket = hexo.Socket({ 
             url : _d['gameserver'].socket, 
+            flag : conf.flag,
             token : game.token,
             events : { 
                 'update' : _.bind( game.update, game ),
@@ -226,7 +227,7 @@ _defaults = _d = {
         width : "540px",
         height : "440px"
     },
-    gameserver : { socket : "/game/socket", moves : "/game/move" },
+    gameserver : { socket : "/socket/game", moves : "/game/move" },
     helpersvg : {
         width : "0px",
         height : "0px",
