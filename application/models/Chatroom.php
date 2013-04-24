@@ -105,6 +105,7 @@ class Chatroom extends Tokened {
                             ? $active_user->getChatToken( $this->id ) 
                             : false;
         
+        $public['flag'] = $this->getFlag( );
         $public['name'] = $this->name;
         $public['messages'] = $this->mostRecentMessages( );
         $public['count'] = count( $this->users()->get() );

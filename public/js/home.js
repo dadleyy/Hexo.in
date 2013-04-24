@@ -72,7 +72,7 @@ OnlineList = (function ( ) {
         _defaults = {
             "container" : "#online-list",
             "roomcontainer" : "#open-chat-listing",
-            "socket_url" : "/chat/state",
+            "socket_url" : "/socket/online",
             "challenge_url" : "/game/challenge",
             "template" : "online-user",
             "roomtemplate" : "chatroom-list-item-template"

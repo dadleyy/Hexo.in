@@ -28,7 +28,7 @@ class User extends Tokened {
                 $user_info = json_decode( $user->publicJSON( ), true );
                 $user_info['busy'] = ( $user->game( ) !== false ) ? true : false; 
                 $online[] = $user_info;
-            }
+            } 
         }
            
         return $online;
@@ -52,7 +52,7 @@ class User extends Tokened {
      * @returns {string} A clean string for user join date
     */
     public function joined( ) { return date( 'M j, Y H:i', strtotime($this->created_at) ); }
-    
+        
     /* user->checkToken
      * Attempts to validate a token array sent in from a request
      * to see if it is in the proper format
@@ -187,6 +187,7 @@ class User extends Tokened {
         if( Auth::check() && $this->id === Auth::user()->id ){ 
             $public['active'] = true;
             $public['token'] = $this->encodeToken( $token );
+            $public['hb_flag'] = sha1( count( $this->getUpdates( ) ) );
         }
         
         $public['wins'] = $this->wins;
