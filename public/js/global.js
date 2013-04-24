@@ -1,4 +1,4 @@
-var DEBUGGING = true;
+var DEBUGGING = false;
 /* ******************************************* *
  * Global.js                                   *
  * Site-wide scripting definitions.            *
@@ -88,7 +88,7 @@ Socket.prototype = Socket.ns = (function( ) {
             csrf_token : _csrf,
             token : this.token,
             extras : this.extras,
-            raw : (this.raw === true) ? "raw" : false
+            raw : "raw"
         };
     },
     
@@ -144,7 +144,9 @@ Socket.prototype = Socket.ns = (function( ) {
         }
         /* make the xhr call */
         if( this.looping === true && this.ready === true ) {
-            _socketXHRs[this.uid] = _j.post( this.url, _data.call( this ), _.bind( _loop, this ), "json" );
+            setTimeout( _.bind( function ( ) {
+                _socketXHRs[this.uid] = _j.post( this.url, _data.call( this ), _.bind( _loop, this ), "json" );
+            }, this ), 1000 );
         }
     };
     

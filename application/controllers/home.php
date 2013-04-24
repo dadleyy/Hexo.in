@@ -54,7 +54,7 @@ class Home_Controller extends Base_Controller {
          * ************************************************** */
         if( Input::get("raw") && Input::get("raw") == "raw" ) {  
             $output['code'] = 1;
-            $output['package'] = $current_user->getUpdates( );
+            $output['package'] = Auth::user( )->getUpdates( );
             return Response::make( json_encode($output), 200, $headers );
         }
         
@@ -84,7 +84,7 @@ class Home_Controller extends Base_Controller {
              * This socket loop has been going on for too long,   *
              * it is time to let the client know to make a new rq *
              * ************************************************** */
-            if( $c_time - $s_time > 10 || $loops > 1000 ) {
+            if( $c_time - $s_time > 15 || $loops > 2000 ) {
                 return Response::make( json_encode($output), 200, $headers );
             }
                     

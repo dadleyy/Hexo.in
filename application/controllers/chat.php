@@ -429,6 +429,8 @@ class Chat_Controller extends Base_Controller {
         
         $output['success'] = true;
         $output['code'] = 1;
+        $output['msg'] = "left";
+        $output['count'] =  count( $c_room->users( )->get( ) );
         return Response::make( json_encode($output), 200, $headers );
         
     }

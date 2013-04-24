@@ -213,7 +213,7 @@ class Game_Controller extends Base_Controller {
              * This socket loop has been going on for too long,   *
              * it is time to let the client know to make a new rq *
              * ************************************************** */
-            if( ($c_time - $s_time) >  10 || $loops > 10000 ){     
+            if( ($c_time - $s_time) >  15 || $loops > 20000 ){     
                 $output["success"] = true;
                 $output["code"]    = 2;
                 return Response::make( json_encode($output), 200, $headers );
