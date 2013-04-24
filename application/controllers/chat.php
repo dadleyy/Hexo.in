@@ -105,7 +105,7 @@ class Chat_Controller extends Base_Controller {
              * This socket loop has been going on for too long,   *
              * it is time to let the client know to make a new rq *
              * ************************************************** */
-            if( ($c_time - $s_time) > 10 || $loops > 10000 ) {
+            if( ($c_time - $s_time) > 15 || $loops > 20000 ) {
                 $output["success"] = true;
                 $output["flag"]    = "to";
                 $output["code"]    = 2;
@@ -128,7 +128,7 @@ class Chat_Controller extends Base_Controller {
             }
               
             $loops++;
-            time_nanosleep( 0, 9000000 );
+            usleep( 500000 );
         
         }
         
@@ -262,7 +262,7 @@ class Chat_Controller extends Base_Controller {
              * This socket loop has been going on for too long,   *
              * it is time to let the client know to make a new rq *
              * ************************************************** */
-            if( $c_time - $s_time > 10 || $loops > 1000 ) {
+            if( $c_time - $s_time > 15 || $loops > 2000 ) {
                 return Response::make( json_encode($output), 200, $headers );
             }
             
@@ -282,7 +282,7 @@ class Chat_Controller extends Base_Controller {
              }
                     
             $loops++;
-            time_nanosleep( 0, 9000000 );
+            usleep( 500000 );
         }
 
         
