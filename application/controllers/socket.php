@@ -225,9 +225,6 @@ class Socket_Controller extends Base_Controller {
         // * Send back a minimum amount of data                *
         // * ************************************************* //
         else {
-            $output['flag'] = $flag;
-            $output['u_onine'] = $s_online;
-            $output['r_open'] = $r_open;
             $output['success'] = true;
             $output['code'] = 2;
             return Response::make( json_encode($output), 200, $headers );
