@@ -13,7 +13,7 @@
         <div class="bottom cf">
             <ul class="listing" id="open-chat-listing">
             <?php
-            $rooms = Chatroom::where( "game_id", "=", "-1" )->get();
+            $rooms = Chatroom::where( "game_id", "=", -1 )->get();
             foreach( $rooms as $room ) {
             $users = $room->users( )->get( );
             ?>
