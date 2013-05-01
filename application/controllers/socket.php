@@ -247,6 +247,7 @@ class Socket_Controller extends Base_Controller {
         if( $current_game == null || !Input::get("token") ){ 
             $output['success'] = false;
             $output['code'] = 4;
+            $output['nogame'] = true;
             return Response::make( json_encode( $output ), 200, $headers );
         }   
         
@@ -304,22 +305,10 @@ class Socket_Controller extends Base_Controller {
         $output = array( "success" => false, "code" => 4, "type" => "debug" );
         if( Auth::user( )->privileges != 1 )
             return Response::make( json_encode($output), 200, $headers );
-            
-        $users = User::all( );
-        $times = array( );
-        $current_time = time( );
         
-        foreach( $users as $user ) {
-            $last_time = strtotime( $user->last_update );
-            $time_diff = $current_time - $last_time;
-            $times[] = array( 
-                "name" => $user->username,
-                "lup" => $user->last_update,
-                "diff" => $time_diff
-            );    
-        }
-        
-        $output['package'] = $times;
+        $open = Game::getOpen( );
+             
+        $output['package'] = ( $open === false ) ? false : json_decode( $open->publicJSON( ), true );
         $output['success'] = true;
         $output['code']    = 1;
         return Response::make( json_encode($output), 200, $headers );

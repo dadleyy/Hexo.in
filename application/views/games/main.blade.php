@@ -10,7 +10,7 @@
     
     @include('layouts.header')
     
-    <section class="content whole cf">
+    <section class="content pw whole cf">
     <section class="main-content spw middle cf">
     
         <article class="f player-name challenger" id="challenger-info">
