@@ -73,7 +73,8 @@ class Game_Controller extends Base_Controller {
         
         /* flag this game as over */
         $current_game->updateFlag( "dead", 3 );
-        $current_game->resolve( );
+        $current_game->complete = true;
+        $current_game->save( );
     
         return Redirect::to( '/home' );
     }
