@@ -103,10 +103,10 @@ Socket.prototype = Socket.ns = (function( ) {
         /* if there is a new flag, update mine p*/
         if( data.flag )
             this.flag = data.flag;
-            
+        
         /* the socket died */    
         if( data.flag == "dead" ) {
-            
+            console.log( data );
             this.close( );
             
             this.ready   = false;
@@ -121,6 +121,7 @@ Socket.prototype = Socket.ns = (function( ) {
         /* something traumatic happened */
         else if( !data.success ) {
             U.l("Socket #" + this.uid + ": the socket was unsuccessful", "err"); 
+            this.events['close']( );  
             this.ready = false;
             return false;
         }

@@ -47,42 +47,34 @@ class Game_Controller extends Base_Controller {
     public function action_quit( ){
         $current_user = Auth::user( );
         $current_game = $current_user->game( );
+        
+        if( $current_game === false ) {
+            return Redirect::to( '/home' );
+        }
     
-        if( $current_game !== false ) {
-            
-            /* get the chatroom for this game */
-            $current_chat = $current_game->chatroom( );
-            
-            /* if there was an invite associated with this game - delete it */
-            $notification = Notification::where( "item_id", "=", $current_game->id )->first( );
-            if( $notification !== null ) {
-                $notification->delete( );
-            }
-            
-            if( $current_game->visitor() !== null && !$current_game->isComplete( ) ) {
-            
-                $current_user->addLoss( );
-                
-                /* if the quitter was the visitor - give the win to the challenger */
-                if( $current_game->visitor()->id === $current_user->id ){
-                    $current_game->challenger()->addWin( );
-                } 
-                /* if not - give the win to the visitor */
-                else {
-                    $current_game->visitor()->addWin( );
-                }
-            
-            }
-            
-            /* delete everything else */
-            File::delete( $current_game->gameFile( ) );
-            File::delete( $current_chat->chatfile( ) );
-            DB::table('chatroom_user')->where( 'chatroom_id', '=', $current_chat->id )->delete( );
-            
-            $current_game->delete( );
-            $current_chat->delete( );
+        /* if there was an invite associated with this game - delete it */
+        $notification = Notification::where( "item_id", "=", $current_game->id )->first( );
+        if( $notification !== null ) {
+            $notification->delete( );
         }
         
+        if( $current_game->visitor() !== null ) {
+            $current_user->addLoss( );
+            /* if the quitter was the visitor - give the win to the challenger */
+            if( $current_game->visitor()->id === $current_user->id ){
+                $current_game->challenger()->addWin( );
+            }
+            /* if not - give the win to the visitor */
+            else {
+                $current_game->visitor()->addWin( );
+            }
+        
+        }
+        
+        /* flag this game as over */
+        $current_game->updateFlag( "dead", 3 );
+        $current_game->resolve( );
+    
         return Redirect::to( '/home' );
     }
     
@@ -145,6 +137,7 @@ class Game_Controller extends Base_Controller {
         /* try to find the game the current user is playing (if any) */
         $current_user = Auth::user( );
         $current_game = $current_user->game( );
+
         // Chatroom::find(1)->removeUser( $current_user );
         if( $current_game !== false ) {
             return Redirect::to( '/game/play' );

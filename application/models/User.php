@@ -118,10 +118,14 @@ class User extends Tokened {
      * @return {boolean|Game} False if no game, the game if there is one
     */
     public function game( ) {
-        $current_game = Game::where("challenger_id", "=", $this->id )->take(1)->first( );
+        $current_game = Game::where( "challenger_id", "=", $this->id )
+                            ->where( "complete", "=", false )
+                            ->take(1)->first( );
         
         if( $current_game == null ) {
-            $current_game = Game::where("visitor_id", "=", $this->id )->take(1)->first( );
+            $current_game = Game::where("visitor_id", "=", $this->id )
+                                ->where( "complete", "=", false )
+                                ->take(1)->first( );
         }
         
         if( $current_game == null ) {

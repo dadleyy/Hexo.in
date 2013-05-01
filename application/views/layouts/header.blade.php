@@ -3,7 +3,7 @@
 
 </section>
 @endif
-<header class="whole middle cf gr1">
+<header class="whole pw middle cf gr1">
     <article class="middle pw cf">
         <div class="f cf left-menu ribbon-title">
             

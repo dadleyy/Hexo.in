@@ -14,7 +14,7 @@
     
     @include('layouts.header')
     
-    <section class="content whole cf">
+    <section class="content pw whole cf">
     @yield('content')
     </section>
     

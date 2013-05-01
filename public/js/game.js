@@ -483,8 +483,7 @@ Game.ns = Game.prototype =  (function ( ) {
     };
     
     /* Game.update
-     * The callback from the socket. deals with the data
-     * send back from the long poll
+     * The callback to handle data from the socket.
      * @param {{object}} data Data object returned from server
     */
     _ns.update = function( data ) {
