@@ -117,7 +117,7 @@ class Chat_Controller extends Base_Controller {
         // CHATROOM INITIALIZATION  //
         $chat = new Chatroom;
         
-        $chat->game_id = 0;
+        $chat->game_id = -1;
         $chat->token = sha1( time() . $p_name );
         $chat->name = HTML::entities( $p_name );
         
