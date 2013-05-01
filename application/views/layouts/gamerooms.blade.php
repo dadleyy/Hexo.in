@@ -11,7 +11,7 @@
             </div>
             <ul class="listing">
             <?php
-            $games = Game::where( "visitor_id", ">", 0 )->get();
+            $games = Game::where( "visitor_id", ">", 0 )->where( "complete", "=", false )->get();
             foreach( $games as $game ) {
             $visitor    = User::find( $game->visitor_id );
             $challenger = User::find( $game->challenger_id );
