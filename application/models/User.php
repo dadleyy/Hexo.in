@@ -79,7 +79,7 @@ class User extends Tokened {
         $chatrooms = $this->chatrooms( )->get( );
         $output    = array( );
         foreach( $chatrooms as $chat ) {
-            if( (int)$chat->game_id !== 0 ) { continue; }
+            if( (int)$chat->game_id !== -1 ) { continue; }
             $output[] = $chat;
         }
         return $output;
