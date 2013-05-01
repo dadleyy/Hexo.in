@@ -234,7 +234,6 @@ class Socket_Controller extends Base_Controller {
     
     public function post_game( ) {
         $current_user = Auth::user( );
-        $current_game = $current_user->game( );
         $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
         $output = array( "success" => false, "code" => 4, "type"=>"game" );
         
@@ -244,18 +243,33 @@ class Socket_Controller extends Base_Controller {
             return Response::make( json_encode( $output ), 200, $headers );
         }
                 
-        if( $current_game == null || !Input::get("token") ){ 
+        if( !Input::get("token") ){ 
             $output['success'] = false;
             $output['code'] = 4;
-            $output['nogame'] = true;
             return Response::make( json_encode( $output ), 200, $headers );
         }   
         
-        $game_token  = $current_game->token; 
         $param_token = Input::get("token");
-        $flag        = Input::get("flag");
-        $decoded_param = $current_game->decodeTokenArray( $param_token );
+        $decoded_param = Tokened::decodeToken( $param_token );
+        $current_game = Game::where( "token", "=", $decoded_param )->first( );
         
+        if( $current_game === null || $current_game === false ) {  
+            $output['success'] = false;
+            $output['code'] = 4;
+            return Response::make( json_encode( $output ), 200, $headers );
+        } 
+            
+        if( $current_game->complete ) {
+            $package = json_decode( $current_game->publicJSON( ), true );        
+            $output["success"] = true;
+            $output["code"] = 1;
+            $output["flag"] = $current_game->getFlag( );
+            $output["package"] = $package;
+            return Response::make( json_encode($output), 200, $headers );
+        }
+
+        $game_token  = $current_game->token; 
+        $flag = Input::get("flag");        
         if( $game_token !== $decoded_param || $flag === null ) {
             $output['success'] = false;
             $output['code'] = 4;
