@@ -1,8 +1,8 @@
-@if ( Auth::check() )
-<!-- chatroom zone -->
-<section id="chatroom-pullout"></section>
-<!-- end chatroom zone -->
-@endif
+<?php if ( Auth::check() ): ?>
+<section id="chatroom-pullout">
+
+</section>
+<?php endif; ?>
 <header class="whole pw middle cf gr1">
     <article class="middle pw cf">
         <div class="f cf left-menu ribbon-title">
@@ -17,9 +17,9 @@
                 </div>
                 </div>
                 
-                @if( Auth::check() )
-                @render('layouts.chatmenu')
-                @endif
+                <?php if( Auth::check() ): ?>
+                <?php echo render('layouts.chatmenu'); ?>
+                <?php endif; ?>
                 
             </article>
             
@@ -44,9 +44,9 @@
         
         <div class="r right cf">
 
-            @if ( Auth::check() )
-            @render( "layouts.headermenu" )
-            @endif
+            <?php if ( Auth::check() ): ?>
+            <?php echo render( "layouts.headermenu" ); ?>
+            <?php endif; ?>
 
         </div>
     </article>

@@ -1,6 +1,6 @@
-@section('scripts')
+<?php \Laravel\Section::start('scripts'); ?>
 
-<script type="text/javascript" src="{{ asset("js/home.js") }}"></script>
+<script type="text/javascript" src="<?php echo  asset("js/home.min.js") ; ?>"></script>
 
 <script type="text/template" data-name="online-user">
     <li class="user cf"> 
@@ -24,27 +24,27 @@
     </li>
 </script>
 
-@endsection
+<?php \Laravel\Section::stop(); ?>
 
-@section('content')
+<?php \Laravel\Section::start('content'); ?>
     <section class="main-content spw middle">
         
         <section class="cf general basic two">
             
-            @render('layouts.leaderboard-stats')
+            <?php echo render('layouts.leaderboard-stats'); ?>
             
             
-            @render('layouts.quickmenu')
+            <?php echo render('layouts.quickmenu'); ?>
         
         </section>
         
         <section class="cf listings basic two">
             
-            @render('layouts.gamerooms')
+            <?php echo render('layouts.gamerooms'); ?>
             
-            @render('layouts.chatrooms')
+            <?php echo render('layouts.chatrooms'); ?>
     
         </section>
         
     </section>
-@endsection
+<?php \Laravel\Section::stop(); ?>

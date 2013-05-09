@@ -178,8 +178,39 @@ class Game_Controller extends Base_Controller {
         
     }
     
-    public function action_challenge( ) {
+    public function action_reset( ) {
+        $output = array( 'success' => false, 'code' => 4 );
+        $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
         
+        if( Request::forged( ) ) {
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $current_user = Auth::user( );
+        $current_game = $current_user->game( );
+    
+        if( $current_game == null || Request::forged( ) ){ 
+            $output['msg'] = "invalid request";
+            return Response::make( json_encode($output), 200, $headers );
+        }   
+        
+        /* get the two tokens */
+        $g_token = Input::get("token");
+        $r_token = $current_game->token;
+      
+        if( Game::decodeToken($g_token) !== $r_token ){
+            $output['msg'] = "invalid token";
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $current_game->restart( );
+        
+        $output['success'] = true;
+        $output['code'] = 1;        
+        return Response::make( json_encode($output), 200, $headers );
+    }
+    
+    public function action_challenge( ) {
         $output = array( 'success' => false, 'code' => 4 );
         $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
         

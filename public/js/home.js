@@ -157,7 +157,6 @@ OnlineList = (function ( ) {
         
         _socket.open( );
         
-        _socket.force( );
     };
     
     return _ns;

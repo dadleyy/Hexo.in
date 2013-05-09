@@ -1,0 +1,19 @@
+<?php \Laravel\Section::start('scripts'); ?>
+    
+<?php \Laravel\Section::stop(); ?>
+
+<?php \Laravel\Section::start('content'); ?>
+    <section class="main-content error pw middle cf">
+        <article class="dark middle spw">
+        <div class="inner">
+            <span class="plain-logo middle"></span>
+            <h1 class="red c">Whoops! That doesn't exist.</h1>
+            <h4 class="lightg c">Its possible you took a wrong turn.</h4>
+        </div>
+        </article>
+    </section>
+<?php \Laravel\Section::stop(); ?>
+
+<?php \Laravel\Section::start('styles'); ?>
+<link rel="stylesheet" type="text/css" href="/css/error.css">
+<?php \Laravel\Section::stop(); ?>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">    
+    
+    <?php echo view('globals.headerinfo')->with(get_defined_vars())->render(); ?>
+    
+    <?php echo \Laravel\Section::yield('styles'); ?>
+    
+    <?php echo render('globals.tests'); ?>
+    
+</head>
+<body>
+    
+    <?php echo view('layouts.header')->with(get_defined_vars())->render(); ?>
+    
+    <section class="content pw whole cf">
+    <?php echo \Laravel\Section::yield('content'); ?>
+    </section>
+    
+    <?php echo render('layouts.footer'); ?>
+    
+    <?php if ( Auth::check() ): ?>
+    <?php echo render( "layouts.pulldowns" ); ?>
+    <?php endif; ?>    
+   
+    <?php echo render('globals.scripts'); ?>
+    <?php echo \Laravel\Section::yield('scripts'); ?>
+    
+</body>
+</html>
