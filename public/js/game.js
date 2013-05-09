@@ -153,10 +153,11 @@ var /* entry point */
         dom.svg = svg;
         dom.layers = layers;
         
-        if( game.state == 3 ){
+        if( game.state == 3 )
             game.resolve( );
-        }
         
+        $("a.reset-game").click( _.bind( game.reset, game ) );
+            
         game.draw( );
     };
 
@@ -472,7 +473,7 @@ Game.ns = Game.prototype =  (function ( ) {
     _ns.postMove = function ( data ) {
         
         if( !data.success )
-            return this.notify( data.msg );
+            return this.notify( data );
     
         this.tiles[data.update.key].setState( data.update.state );
         
@@ -568,7 +569,7 @@ Game.ns = Game.prototype =  (function ( ) {
             "csrf_token" : _csrf,   
             "token" : this.token,
             "tile" : { "value" : tile.value, "state" : _userTurn }
-        }, _.bind( this.postMove, this ) );
+        }, _.bind( this.postMove, this ),  "json" );
         
     };
     
@@ -599,6 +600,15 @@ Game.ns = Game.prototype =  (function ( ) {
         });
         
         $( _chatZone ).scrollTop( $( _chatZone ).height( ) + 1000 );
+    };
+    
+    _ns.resetCheck = function ( data ) {
+        console.log( data );  
+    };
+    
+    _ns.reset = function ( evt ) {
+        $.post( "/game/reset", { csrf_token : _csrf, token : this.token }, _.bind( this.resetCheck, this ) );
+        return evt.preventDefault && evt.preventDefault( );  
     };
 
     return _ns;

@@ -1,12 +1,12 @@
-<div id="{{ substr( time()."", 0, 5 ) }}">
+<div id="<?php echo  substr( time()."", 0, 5 ) ; ?>">
 <?php echo Form::token( ); ?>
 </div>
 
 <!-- start global js scripts -->
-<script type="text/javascript" src="{{ asset("js/dependencies.js") }}"></script>
+<script type="text/javascript" src="<?php echo  asset("js/dependencies.js") ; ?>"></script>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqLAjnUApy5HiwwPTj_Oq9WIiQo-plM1A&sensor=false"></script>
-<script type="text/javascript" src="{{ asset("js/IV.min.js") }}"></script>
-<script type="text/javascript" src="{{ asset("js/global.js") }}"></script>
+<script type="text/javascript" src="<?php echo  asset("js/IV.min.js") ; ?>"></script>
+<script type="text/javascript" src="<?php echo  asset("js/global.js") ; ?>"></script>
 
 <script type="text/javascript">
 var _gaq = _gaq || [];
@@ -27,19 +27,15 @@ _gaq.push(['_trackPageview']);
     
 })( );
 </script>
+<?php if( Auth::user() !== null ): ?>
 
-@if( Auth::user() !== null )
+<script type="text/javascript">hexo.User(<?php echo  Auth::user()->publicJSON() ; ?>)</script>
 
-<!-- user info -->
-<script type="text/javascript">hexo.User({{ Auth::user()->publicJSON() }})</script>
-<!-- end user info -->
+<?php foreach( Auth::user()->publicChats( ) as $chatroom ): ?>
+<script type="text/javascript">hexo.Chat( <?php echo  $chatroom->publicJSON( ) ; ?>, false )</script>
+<?php endforeach; ?>
 
-<!-- chatroom infos -->
-@foreach( Auth::user()->publicChats( ) as $chatroom )
-<script type="text/javascript">hexo.Chat( {{ $chatroom->publicJSON( ) }}, false );</script>
-@endforeach
-<!-- end chatroom infos -->
-@endif
+<?php endif; ?>
 
 <script type="text/template" data-name="game-notification">
     <li class="game cf"> 

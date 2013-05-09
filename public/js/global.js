@@ -106,7 +106,6 @@ Socket.prototype = Socket.ns = (function( ) {
         
         /* the socket died */    
         if( data.flag == "dead" ) {
-            console.log( data );
             this.close( );
             
             this.ready   = false;
@@ -450,7 +449,6 @@ Chat.ns = Chat.prototype = (function ( ) {
         /* if there weren't tokens, stop immediately */
         if( this.chat_token === false || this.user_token === false )
             return false;
-        
     
         /* open up the socket */
         this.socket = Socket({ 
@@ -515,14 +513,14 @@ Chat.renderAll = (function ( ) {
     return function ( ) {
         
         _.each( _chatRooms, function ( room ) {
-        
             var ele = $chatroomZone.find('section.chatroom[data-uid="'+ room.uid +'"]'),
                 indx = Chat.openUIDs.indexOf( room.uid ),
                 bottom = ( indx !== -1 ) ? "0px" : "-800px",
+                dis = ( indx !== -1 ) ? "block" : "none",
                 left = ( indx < 1 ) ? "0px" : (indx * 320) + "px";
                 
             ele.css({
-                "display" : "block",
+                "display" : dis,
                 "opacity" : "1.0",
                 "left"    : left
             }).stop().animate({
@@ -1240,9 +1238,9 @@ domReady = function ( ) {
     if( _doc.getElementById("geo-zone") !== null )
         Geo.init( );
     
-    if( _doc.getElementById("chatroom-pullout") !== null )
+    if( _doc.getElementById("chatist-menu") !== null )
         Chat.renderAll( );
-    
+
 };
 
 
@@ -1258,5 +1256,6 @@ _w.hexo = hexo;
 
 /* set the dom ready function */
 hexo.Entry( domReady );
+$.ajaxSetup({ dataType : "json" });
     
 })( window );

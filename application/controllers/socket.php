@@ -36,6 +36,7 @@ class Socket_Controller extends Base_Controller {
         $user_token = ( isset( $extras['user_token'] ) ) ? $extras['user_token']  : "";
                 
         if( $chat_token == null || $user_token == null || $flag == null ){
+            $output['flag'] = $flag;
             $output['msg'] = "notoken";
             return Response::make( json_encode($output), 200, $headers );
         }
@@ -240,12 +241,14 @@ class Socket_Controller extends Base_Controller {
         if( Request::forged( ) ) {
             $output['success'] = false;
             $output['code'] = 4;
+            $output['msg'] = "csrf"; 
             return Response::make( json_encode( $output ), 200, $headers );
         }
                 
         if( !Input::get("token") ){ 
             $output['success'] = false;
             $output['code'] = 4;
+            $output['msg'] = "no token";
             return Response::make( json_encode( $output ), 200, $headers );
         }   
         
@@ -256,6 +259,7 @@ class Socket_Controller extends Base_Controller {
         if( $current_game === null || $current_game === false ) {  
             $output['success'] = false;
             $output['code'] = 4;
+            $output['msg'] = "no-game";
             return Response::make( json_encode( $output ), 200, $headers );
         } 
             
@@ -271,6 +275,7 @@ class Socket_Controller extends Base_Controller {
         $game_token  = $current_game->token; 
         $flag = Input::get("flag");        
         if( $game_token !== $decoded_param || $flag === null ) {
+            $output['msg'] = "bad game";
             $output['success'] = false;
             $output['code'] = 4;
             return Response::make( json_encode( $output ), 200, $headers );
@@ -322,7 +327,7 @@ class Socket_Controller extends Base_Controller {
         
         $open = Game::getOpen( );
              
-        $output['package'] = ( $open === false ) ? false : json_decode( $open->publicJSON( ), true );
+        $output['package'] = Chatroom::publicRooms( );
         $output['success'] = true;
         $output['code']    = 1;
         return Response::make( json_encode($output), 200, $headers );

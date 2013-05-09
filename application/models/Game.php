@@ -67,7 +67,7 @@ class Game extends Tokened {
                     
         return ( $open === NULL ) ? false : $open;
     }
-    
+        
     /* Game::open
      * creates a new game with the challenger and target 
      * passed in as args 
@@ -145,6 +145,35 @@ class Game extends Tokened {
             }
         }
         return -1;
+    }
+    
+    /* game->restart
+     * clears out the json file and 
+     * restarts the game
+    */
+    public function restart( ) {
+        $challenger = $this->challenger( );
+        $visitor = $this->visitor( );
+        
+        $this->complete = false;   
+        $this->turn = 1;
+        $this->createJSON( );
+        $this->save( );
+        
+        if( $visitor == null )
+            return true;
+        
+        $file_location = $this->gameFile( );
+        $file_contents = File::get( $file_location );
+        $game_info = json_decode( $file_contents, true );
+        
+        /* add this user into that game and set state to 1 (playing) */
+        $game_info['visitor_id'] = $visitor->id;
+        $game_info['state'] = 1;
+        
+        /* save the json */
+        File::put( $file_location, json_encode( $game_info ) );
+        return true;
     }
     
     private function setTileState( $tile_value, $tile_state, $flip_turn = false ) {
