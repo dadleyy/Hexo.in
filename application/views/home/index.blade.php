@@ -1,6 +1,6 @@
 @section('scripts')
 
-<script type="text/javascript" src="{{ asset("js/home.js") }}"></script>
+<script type="text/javascript" src="{{ asset("js/home.min.js") }}"></script>
 
 <script type="text/template" data-name="online-user">
     <li class="user cf"> 
