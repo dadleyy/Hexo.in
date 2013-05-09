@@ -602,9 +602,7 @@ Game.ns = Game.prototype =  (function ( ) {
         $( _chatZone ).scrollTop( $( _chatZone ).height( ) + 1000 );
     };
     
-    _ns.resetCheck = function ( data ) {
-        console.log( data );  
-    };
+    _ns.resetCheck = function ( data ) { };
     
     _ns.reset = function ( evt ) {
         $.post( "/game/reset", { csrf_token : _csrf, token : this.token }, _.bind( this.resetCheck, this ) );

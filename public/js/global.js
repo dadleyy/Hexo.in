@@ -54,7 +54,6 @@ _toTop = function ( ) {
     _j("html, body").stop( ).animate({scrollTop:"0px"}, 600);
 };
 
-
 ////////////////////////
 // NAMESPACE : Socket //
 ////////////////////////
@@ -867,13 +866,14 @@ Utils = U = {
      * @param {{string}} type The style of logging to use
     */
     l : (function ( hasConsole ) {
-        if ( hasConsole == false || !DEBUGGING ) { return _efn; }
+        if ( hasConsole == false ) { return _efn; }
         
         var _log = function( msg ) { return _w.console.log("[" + msg + "]"); },
             _dir = function( msg ) { return _w.console.dir(msg); },
             _err = function( msg ) { return _w.console.error("!! " + msg); };
         
         return function ( msg, type ) {
+            if( !DEBUGGING ){ return false; }
             if( !type ) { return _log( msg ); }
             switch( type ) {
                 case "log":
