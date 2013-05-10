@@ -404,7 +404,7 @@ class Game extends Tokened {
                                     ? json_decode( $this->visitor()->publicJSON( ), true )
                                     : false;
         
-        if( $this->chatroom( ) !== null ){
+        if( $this->chatroom( ) !== null && !$this->is_tutorial ){
             $public['chatroom'] = json_decode( $this->chatroom( )->publicJSON( ), true );
         }
         
