@@ -23,6 +23,7 @@ class Create_Users_Table {
             $table->integer('wins')->default(0);
             $table->integer('losses')->default(0);
             $table->integer('games')->default(0);
+            $table->boolean('dummy_user')->default(false);
             
             $table->timestamp('last_update')->default( $date );
             
