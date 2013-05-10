@@ -14,7 +14,7 @@
             <dd>{{ ($player != null) ? $player->losses : 0 }}</dd>
         </dl>
     </div>
-    @if( $player && Auth::user( )->id == $player->id )
+    @if( $player && Auth::check( ) && Auth::user( )->id == $player->id )
     @render('games.gamemenu')
     @endif 
 </article>
