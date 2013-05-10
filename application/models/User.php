@@ -17,9 +17,8 @@ class User extends Tokened {
         
         foreach( $all_users as $user ) {
             
-            if ( $user->id === Auth::user()->id ) {
+            if ( $user->id === Auth::user()->id || $user->dummy_user == true )
                 continue;
-            }
         
             $last_time = strtotime( $user->last_update );
             $time_diff = $current_time - $last_time;
