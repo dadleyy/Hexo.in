@@ -395,6 +395,9 @@ class Game extends Tokened {
         $public['token'] = $this->encodeToken( $this->token );
         $public['is_private'] = $this->is_private;
         
+        if( $this->is_tutorial )
+            $public['no_live'] = true;
+        
         /* output the two users */
         $public['challenger'] = json_decode( $this->challenger()->publicJSON( ), true );
         $public['visitor'] = ( $this->visitor() !== null ) 
