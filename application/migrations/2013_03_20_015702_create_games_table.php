@@ -14,6 +14,7 @@ class Create_Games_Table {
             $table->boolean('complete')->default(false);
             $table->boolean('is_private')->default(false);
             $table->integer('target_id')->default(0);
+            $table->boolean('is_tutorial')->default(false);
                          
             $table->timestamps();
         });

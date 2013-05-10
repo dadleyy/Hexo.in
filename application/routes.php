@@ -10,14 +10,6 @@ Route::any('/about', function( ) {
     return $view;
 });
 
-/* tutorial page */
-Route::any('/tutorial', function( ) {
-    $view = View::make('layouts.common')
-                    ->nest("content", "home.tutorial")
-                    ->with("title", "tutorial");
-    return $view;
-});
-
 /* upgrade page */
 Route::any('/upgrade', function( ) {
     $view = View::make('home.upgrade')

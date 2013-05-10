@@ -202,4 +202,5 @@ section.main-content section.chat-control input[type="text"]{
     z-index: 9;
 }
 
+#visitor-score{ float: left; }
 
