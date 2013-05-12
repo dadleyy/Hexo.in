@@ -11,7 +11,7 @@
             </div>
             <ul class="listing">
             <?php 
-            $winners = User::order_by('wins', 'desc')->take(3)->get();
+            $winners = User::where("dummy_user","=",false)->order_by('wins', 'desc')->take(3)->get();
             $index   = 0;
             foreach( $winners as $winner ) {
             $index++;
@@ -32,7 +32,7 @@
             </div>
             <ul class="listing">
             <?php 
-            $losers = User::order_by('losses', 'desc')->take(3)->get();
+            $losers = User::where("dummy_user","=",false)->order_by('losses', 'desc')->take(3)->get();
             $index   = 0;
             foreach( $losers as $loser ) {
             $index++;
@@ -53,7 +53,7 @@
             </div>
             <ul class="listing">
             <?php 
-            $actives = User::order_by('games', 'desc')->take(3)->get();
+            $actives = User::where("dummy_user","=",false)->order_by('games', 'desc')->take(3)->get();
             $index   = 0;
             foreach( $actives as $gamer ) {
             $index++;
@@ -79,7 +79,7 @@
         <div class="bottom cf">
             <ul class="listing">
             <?php
-            $newbs = User::where( "games", "=", 0 )->get();
+            $newbs = User::where("dummy_user","=",false)->where( "games", "=", 0 )->get();
             foreach( $newbs as $newb ) {
             ?>
     <li class="obj user cf">
