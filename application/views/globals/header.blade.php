@@ -49,5 +49,6 @@
             @endif
 
         </div>
+        
     </article>
 </header>
