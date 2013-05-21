@@ -3,9 +3,7 @@
 class Blog_Controller extends Base_Controller {
 
     public function action_index( ){
-        $view = View::make('layouts.common')
-                    ->nest("content", "blog.main")
-                    ->with("title", "blog");
+        $view = View::make('blog.main')->with('title', 'blog');
         return $view; 
     }     
     
@@ -27,9 +25,7 @@ class Blog_Controller extends Base_Controller {
         if( !Auth::check( ) || Auth::user( )->privileges != 1 ) {
             return Redirect::to( '/blog' );
         }
-        $view = View::make('layouts.common')
-                    ->nest("content", "blog.manage")
-                    ->with("title", "blog");
+        $view = View::make('blog.manage')->with('title', 'blog');
         return $view; 
     }
 

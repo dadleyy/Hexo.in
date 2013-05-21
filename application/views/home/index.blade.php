@@ -1,3 +1,5 @@
+@layout('layouts.common')
+
 @section('scripts')
 
 <script type="text/javascript" src="{{ asset("js/home.min.js") }}"></script>
@@ -31,18 +33,18 @@
         
         <section class="cf general basic two">
             
-            @render('layouts.leaderboard-stats')
+            @render('partials.leaderboard-stats')
             
             
-            @render('layouts.quickmenu')
+            @render('partials.quickmenu')
         
         </section>
         
         <section class="cf listings basic two">
             
-            @render('layouts.gamerooms')
+            @render('partials.gamerooms')
             
-            @render('layouts.chatrooms')
+            @render('partials.chatrooms')
     
         </section>
         

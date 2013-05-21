@@ -8,7 +8,7 @@
 </head>
 <body>
     
-    @include('layouts.header')
+    @include('globals.header')
     
     <section class="content pw whole cf">
     <section class="main-content spw middle cf">
@@ -22,7 +22,7 @@
     </section>
     </section>
     
-    @render('layouts.footer')
+    @render('globals.footer')
     
     <script type="text/javascript" src="/js/d3.js"></script>
     @render('globals.scripts')

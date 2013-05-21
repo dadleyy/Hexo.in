@@ -154,8 +154,8 @@ Tutorial.ns.rig.prototype = Tutorial.ns;
 /* domEntry
  * Called once the page is ready to render
 */  
-domEntry = function( ) {
-    
+domEntry = function ( csrf ) {
+    _csrf = csrf;
 };
 
 hexo.Game.Tutorial = Tutorial;

@@ -595,8 +595,8 @@ section.main-content article.form-container article.success{
     position: absolute;
     left: 0px;
     width: 100%;
-    top: -64px;
-    height: 64px;
+    top: -84px;
+    height: 84px;
     z-index: 10;
     text-align: left;
     background-color: #f5f5ef;
@@ -608,13 +608,18 @@ section.main-content article.form-container article.success > h4{
     margin: 0 0 0 10px;
     font-family: 'Raleway', sans-serif;
     font-size: 20px;
-    font-weight: 800;   
-    text-transform: uppercase;
+    font-weight: 400;   
+    text-transform: none;
     line-height: 22px;
     height: 22px;
-    color: #454545;
+    color: #757575;
 }
-section.main-content article.form-container article.success > h1{ margin-top: 10px; }
+section.main-content article.form-container article.success > h1{ 
+    text-transform: uppercase; 
+    color: #555; 
+    margin-top: 10px; 
+    font-weight: 800;
+}
 
 section.main-content article.form-container form div.input span.placeholder,
 section.main-content article.form-container form input[type="password"],
