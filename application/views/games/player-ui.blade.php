@@ -1,6 +1,6 @@
 <article class="f player-name {{ $type }}" id="{{ $type }}-info">
     <h4 class="position">{{ $type }}</h4>
-    <h1 class="name blue c">{{ ($player != null) ? $player->username : "waiting" }}</h1>
+    <h1 class="name {{ $type == "visitor" ? "red" : "blue" }} c">{{ ($player != null) ? $player->username : "waiting" }}</h1>
     <div class="score cf">
         <h1 class="darkg r c" id="{{ $type }}-score">0</h1>
     </div>
