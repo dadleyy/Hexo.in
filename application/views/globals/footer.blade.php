@@ -2,7 +2,7 @@
     <article class="middle pw cf">
         
         <div class="f">
-            <p class="cpy">&copy; Danny Hadley, 2013</p>
+            <p class="cpy">&copy; <a href="http://diddel.me" title="" class="t">DH</a>, 2013</p>
         </div>
         
         <div class="r">
