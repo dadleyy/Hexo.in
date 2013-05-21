@@ -247,7 +247,7 @@ User.ns = User.prototype = (function( ) {
     };
     
     function _receive( data ) {
-        console.log( data );    
+           
     };
 
     _ns.rig = function( conf ) {
@@ -269,7 +269,6 @@ User.ns = User.prototype = (function( ) {
     };
     
     _ns.addFriend = function( usr, fn ) {
-        console.log( _defaults['add_url'] );
         $.post( _defaults['add_url'], _makeXHRData( usr ), fn || _receive );
     };
     
