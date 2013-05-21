@@ -699,6 +699,12 @@ footer p.cpy{
     font-weight: 300;
     text-transform: uppercase;
 }
+footer div.social{
+    height: 20px;
+    margin-top: 2px;
+    padding: 0px 0px;
+    margin-right: 5px;
+}
 article.other-contact{ margin-right: -1px; }
 article.other-contact > div.inner{ padding-left: 20px; padding-right: 0px; }
 article.other-contact dl{ display: block; }

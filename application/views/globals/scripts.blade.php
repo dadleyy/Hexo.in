@@ -8,6 +8,17 @@
 <script type="text/javascript" src="{{ asset("js/IV.min.js") }}"></script>
 <script type="text/javascript" src="{{ asset("js/global.js") }}"></script>
 
+<!-- google codes -->
+<script type="text/javascript">
+(function() {
+    var po = document.createElement('script'); 
+    po.type = 'text/javascript'; 
+    po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; 
+    s.parentNode.insertBefore(po, s);
+})( );
+</script>
 <script type="text/javascript">
 var _gaq = _gaq || [];
 _gaq.push(['_setAccount', 'UA-39532711-1']);
@@ -29,13 +40,15 @@ _gaq.push(['_trackPageview']);
 </script>
 <script type="text/javascript"><!--
 google_ad_client = "ca-pub-9507342242236137";
-/* Basic */
-google_ad_slot = "6555271408";
+/* First Ads */
+google_ad_slot = "5746189401";
 google_ad_width = 728;
 google_ad_height = 90;
 //-->
 </script>
 <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"></script>
+<!-- end google analytics and adSense -->
+
 
 @if( Auth::user() !== null )
 
