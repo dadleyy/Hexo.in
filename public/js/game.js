@@ -6,19 +6,19 @@
     
 "use strict";
 
-var /* entry point */
+var // entry point
     domEntry,
 
-    /* public: */
+    // public:
     Game,
     Tile,
     GameMessageBox,
     
-    /* private: */
+    // private:
     U = hexo.Utils,
-    _games = { },      // hash of game instances
+    _active_game = null,      // private reference
     
-    /* dom info */
+    // dom info:
     _renderZone,       // the render zone
     _$indicator,       // the turn indicator
     _$cscore,
@@ -29,7 +29,30 @@ var /* entry point */
     _defaults, _d,     // default settings       
     _layerInits = { }, // layer prep functions
     _userTurn = 1,     // the turn associated with the current user
+    _cusr = null,
     _csrf = false,
+    
+    _addCheck = function ( evt ) {
+        var $btn = $(evt.target);
+        return (function ( data ) {
+            if( data.success )
+                $btn.addClass("dis"); 
+        });
+    },
+    
+    /* _addOpponent
+    */
+    _addOpponent = function ( evt ) {
+        if( _active_game.visitor == false )
+            return false;
+            
+        if( _userTurn == 2 )
+            _active_game.visitor.addFriend( _active_game.challenger.username, _addCheck( evt ) );
+        else
+            _active_game.challenger.addFriend( _active_game.visitor.username, _addCheck( evt ) );
+            
+        return evt.preventDefault && evt.preventDefault( ); 
+    },
     
     /* _prepDom
      * Gets some DOM references, creates the needed
@@ -50,6 +73,8 @@ var /* entry point */
         
         _hexo.attr( _d['hexo'] );
         _helper.attr( _d['helpersvg'] );
+        
+        $(document).on( "click", "section.ingame-menu a.add-friend", _addOpponent );
     },
     
     /* _set
@@ -64,7 +89,7 @@ var /* entry point */
         game.uid = U.uid( );
     
         /* save this game above */
-        _games[game.uid] = game;
+        _active_game = game;
             
         game.score = conf.score || { visitor : 0, challenger : 0 };
         
@@ -634,10 +659,9 @@ domEntry = function( cusr, csrf ) {
     /* prepare the needed dom stufff */
     _prepDom( );
     _csrf = csrf;
-    /* render the game(s) */
-    for( var uid in _games ){
-        _render( _games[uid] );
-    }
+    _cusr = cusr;
+    /* render the game */
+    _render( _active_game );
     
 };
 

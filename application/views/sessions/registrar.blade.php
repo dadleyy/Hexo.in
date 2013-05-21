@@ -1,3 +1,5 @@
+@layout('layouts.common')
+
 @section('scripts')
 <script type="text/javascript" src="/js/session.js"></script>
 @endsection

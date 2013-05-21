@@ -334,6 +334,26 @@ class Socket_Controller extends Base_Controller {
         
     }
     
+    public function post_addfriend( ) {
+        $current_user = Auth::user( );
+        $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
+        $output = array( "success" => false, "code" => 4, "type"=>"add" );
+        
+        if( Request::forged( ) )
+            return Response::make( json_encode( $output ), 200, $headers );
+        
+        $target = User::where( "username", "=", Input::get("target") )->first( );
+        if( $target == null ) 
+            return Response::make( json_encode( $output ), 200, $headers );
+            
+        $current_user->addFriend( $target );
+        
+        $output["success"] = true;
+        $output["code"] = 1;
+        return Response::make( json_encode( $output ), 200, $headers );
+        
+    }
+    
 }
 
 ?>
