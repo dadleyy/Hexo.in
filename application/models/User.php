@@ -37,8 +37,35 @@ class User extends Tokened {
      * Gets all of the user's friends
      * @returns [query] the query getting all the user's friends
     */
-    public function friends( ) { return Friend::where( "friender", "=", $this->id ); }
+    public function friends( ) { 
+        $friends = Friend::where( "friender", "=", $this->id )->get( ); 
+        $output = array( );
+        foreach( $friends as $friend ){
+            $output[] = User::find( $friend->friendee );
+        }
+        return $output;
+    }
     
+    /* user->addFriend
+    */
+    public function addFriend( $target ) {
+        $dups = Friend::where( "friender", "=", $this->id )->where( "friendee", "=", $target->id )->get( );
+        if( count( $dups ) > 0 )
+            return false;
+        
+        $friend = new Friend( );
+        $friend->friender = $this->id;
+        $friend->friendee = $target->id;
+        $friend->save( );
+    }
+    /* user->removeFriend
+    */
+    public function removeFriend( $target ) {
+        $matches = Friend::where( "friender", "=", $this->id )->where( "friendee", "=", $target->id )->get( );
+        foreach( $matches as $match ){
+            $match->delete( );
+        }
+    }
     
     /* user->chatrooms 
      * Queries all chatrooms that belong to the user.

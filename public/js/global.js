@@ -225,8 +225,29 @@ User = function( conf ) { return new User.ns.rig(conf); };
 User.ns = User.prototype = (function( ) {
 
     var _ns = {
-        version : "1.0",
-        constructor : User    
+            version : "1.0",
+            constructor : User    
+        },
+        _defaults = {
+            "challenge_url" : "/game/challenge",
+            "add_url" : "/socket/addfriend", 
+        };
+    
+    /* _makeXHRData
+     * returns the data needed for ajax calls
+     * @param {string} usr The username of the user being targeted
+     * @returns an obj 
+    */
+    function _makeXHRData( usr ){
+        return {
+            csrf_token : _csrf,
+            target : usr,
+            token : _cusr.token
+        };
+    };
+    
+    function _receive( data ) {
+        console.log( data );    
     };
 
     _ns.rig = function( conf ) {
@@ -245,6 +266,15 @@ User.ns = User.prototype = (function( ) {
             
         this.token  = conf.token || false; 
     
+    };
+    
+    _ns.addFriend = function( usr, fn ) {
+        console.log( _defaults['add_url'] );
+        $.post( _defaults['add_url'], _makeXHRData( usr ), fn || _receive );
+    };
+    
+    _ns.challengeUser = function( usr, fn ) {
+        $.post( _defaults['challenge_url'], _makeXHRData( usr ), fn || _receive );
     };
 
     return _ns;

@@ -5,10 +5,10 @@
 <div class="r menu" id="settings-menu">
     <button class="toggle"></button>
     <div class="dropable t">
-        <h1>Settings</h1>
+        <h1>Menu</h1>
         <ul class="links">
             <li class="t"><a class="t" href="/session/end" title="">logout</a></li>
-            <li class="t"><a class="t" href="/session/end" title="">settings</a></li>
+            <li class="t"><a class="t" href="/home/account" title="">settings</a></li>
         </ul>
     </div>
 </div>

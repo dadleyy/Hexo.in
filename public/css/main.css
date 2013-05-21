@@ -442,6 +442,9 @@ button.slick.big:hover{
                 0px 0px 3px #00ccff;
 }
 
+article.quickmenu a.slick.big,
+article.quickmenu button.slick.big{ width: 419px; }
+
 header div.left-menu div.chat-list ul,
 section.main-content section.basic article.block ul.listing{ list-style: none; }
 

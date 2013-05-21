@@ -73,23 +73,8 @@ OnlineList = (function ( ) {
             "container" : "#online-list",
             "roomcontainer" : "#open-chat-listing",
             "socket_url" : "/socket/online",
-            "challenge_url" : "/game/challenge",
             "template" : "online-user",
             "roomtemplate" : "chatroom-list-item-template"
-        },
-        
-        /* _makeChallengeData
-         * returns the data needed for ajax calls 
-         * to a challege user call
-         * @param {string} usr The username of the user being challenged
-         * @returns an obj 
-        */
-        _makeChallengeData = function ( usr ){
-            return {
-                csrf_token : _csrf,
-                target : usr,
-                token : _user.token
-            };
         },
         
         _socket,         // the update socket
@@ -109,7 +94,8 @@ OnlineList = (function ( ) {
     _challengeUser = function ( ) {
         var $btn = $(this),
             usr = $btn.data("user");
-        $.post( _defaults['challenge_url'], _makeChallengeData( usr ), _checkChallenge );  
+            
+        _user.challengeUser( usr, _checkChallenge );
     };
         
     _ns.update = function ( data ) {
