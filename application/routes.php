@@ -4,9 +4,7 @@ Route::controller( Controller::detect( ) );
 
 /* about page */
 Route::any('/about', function( ) {
-    $view = View::make('layouts.common')
-                    ->nest('content', 'home.about')
-                    ->with('title', 'about');
+    $view = View::make('home.about')->with('title', 'about');
     return $view;
 });
 
@@ -37,8 +35,7 @@ Route::get('sitemap', function(){
 
 /* upgrade page */
 Route::any('/upgrade', function( ) {
-    $view = View::make('home.upgrade')
-                ->with('title','upgrade');
+    $view = View::make('home.upgrade')->with('title','upgrade');
     return $view;
 });
 

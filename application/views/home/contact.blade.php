@@ -1,10 +1,11 @@
+@layout('layouts.common')
+
 @section('styles')
 <link rel="stylesheet" type="text/css" href="/css/about.css">
 @endsection
 
 @section('scripts')
-<script src="/js/IV.js" type="text/javascript"></script>
-<script src="/js/contact.js" type="text/javascript"></script>
+<script src="{{ asset('js/contact.min.js') }}" type="text/javascript"></script>
 @endsection
 
 @section('content')
@@ -16,9 +17,9 @@
             <p class="big">Have an idea to make the game better?</p>
             <article class="success">
                 <h1>Thank you!</h1>
-                <h3>Your feedback is appreciated</h3>
+                <h3>Your feedback is appreciated. We will be in touch soon</h3>
             </article>
-    <?php echo Form::open('/session/attempt', 'POST', array('id'=>'contact-form','class'=>'IValidate')); ?>
+    <?php echo Form::open('/contact/send', 'POST', array('id'=>'contact-form','class'=>'IValidate')); ?>
     
     <div class="input cf">
     <input type="text" name="name" class="t IValidate" data-placeholder="name" data-filter="any" autocomplete="off">
@@ -45,16 +46,6 @@
                 <li><a href="mailto:info@hexo.in">info:  <em>info@hexo.in</em></a></li>
                 <li><a href="mailto:danny@hexo.in">danny: <em>danny@hexo.in</em></a></li>
             </ul>
-<!--
-<dl class="cf">
-    <dt class="f">info:</dt>
-    <dd class="f">info@hexo.in</dd>
-</dl>
-<dl class="cf">
-    <dt class="f">danny:</dt>
-    <dd class="f">danny@hexo.in</dd>
-</dl>
--->
         </div>
         </article>
     </article>

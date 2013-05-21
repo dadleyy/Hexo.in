@@ -18,7 +18,7 @@
                 </div>
                 
                 @if( Auth::check() )
-                @render('layouts.chatmenu')
+                @render('partials.chatmenu')
                 @endif
                 
             </article>
@@ -45,7 +45,7 @@
         <div class="r right cf">
 
             @if ( Auth::check() )
-            @render( "layouts.headermenu" )
+            @render( 'partials.headermenu' )
             @endif
 
         </div>
