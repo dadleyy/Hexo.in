@@ -38,6 +38,7 @@ _gaq.push(['_trackPageview']);
     
 })( );
 </script>
+<div class="middle gads">
 <script type="text/javascript"><!--
 google_ad_client = "ca-pub-9507342242236137";
 /* First Ads */
@@ -47,6 +48,7 @@ google_ad_height = 90;
 //-->
 </script>
 <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"></script>
+</div>
 <!-- end google analytics and adSense -->
 
 

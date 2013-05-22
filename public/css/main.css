@@ -120,6 +120,7 @@ header div.left-menu div.home-link{
     position: relative;
     z-index: 1000;
 }
+.gads{ width: 730px; }
 
 header div.left-menu div.home-link > div.inner{
     width: 160px;
