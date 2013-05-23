@@ -6,14 +6,10 @@
 <link rel="shortcut icon" href="{{ asset("img/icon.ico") }}" />
 <link rel="icon" type="image/png" href="{{ asset("img/icon.png") }}" />
 <link rel="image_src" type="image/png" href="{{ asset("img/logo_large.png") }}" />
-
 <meta name="keywords" content="online, game, multiplayer, laravel, ajax, html5, d3, hexo, danny, hadley, free, javascript, turn-based, fun, 501">
 <meta name="description" content="<?php echo isset( $description ) ? $description : "Duke it out against your opponent for strategic hexagonal domination and watch as your wins (or losses) rank up. Follow the leader boards to see who is on top or chat with fellow oddballs in the chatrooms after the game."; ?>">
-    
 <link rel="stylesheet" type="text/css" href="{{ asset("css/global.css") }}">
 <link rel="stylesheet" type="text/css" href="{{ asset("css/main.css") }}">
-
-
 <!--[if IE]>
 <meta http-equiv="x-ua-compatible" content="IE=9">
 <link rel="stylesheet" type="text/css" href="/css/ie.css" />
@@ -22,5 +18,4 @@
 <link rel="stylesheet" type="text/css" href="/css/ie-low.css" />
 <script type="text/javascript" src="/js/shiv.js"></script>
 <![endif]-->
-
 <!-- end global header information -->

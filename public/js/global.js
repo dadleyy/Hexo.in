@@ -54,7 +54,6 @@ _toTop = function ( ) {
     _j("html, body").stop( ).animate({scrollTop:"0px"}, 600);
 };
 
-
 ////////////////////////
 // NAMESPACE : Socket //
 ////////////////////////
@@ -88,7 +87,8 @@ Socket.prototype = Socket.ns = (function( ) {
             csrf_token : _csrf,
             token : this.token,
             extras : this.extras,
-            raw : "raw"
+            flag : this.flag,
+            raw : (this.raw === true) ? "raw" : false
         };
     },
     
@@ -98,9 +98,13 @@ Socket.prototype = Socket.ns = (function( ) {
      * @param {object} data Server data
     */
     _delegate = function ( data ) {
-        /* the socket died */
-        if( data.flag && data.flag == "dead" ) {
-            
+        
+        /* if there is a new flag, update mine p*/
+        if( data.flag )
+            this.flag = data.flag;
+        
+        /* the socket died */    
+        if( data.flag == "dead" ) {
             this.close( );
             
             this.ready   = false;
@@ -109,11 +113,13 @@ Socket.prototype = Socket.ns = (function( ) {
             this.events['close']( );   
             U.l("Socket #" + this.uid + ": was terminated on the server end");
             return false;
+        
         } 
         
         /* something traumatic happened */
         else if( !data.success ) {
             U.l("Socket #" + this.uid + ": the socket was unsuccessful", "err"); 
+            this.events['close']( );  
             this.ready = false;
             return false;
         }
@@ -164,6 +170,7 @@ Socket.prototype = Socket.ns = (function( ) {
         
         /* set all of the other goodies */
         this.token = conf.token;
+        this.flag = conf.flag;
         this.extras = conf.extras || { };
         this.uid = U.uid( );
         this.raw = false;
@@ -218,8 +225,29 @@ User = function( conf ) { return new User.ns.rig(conf); };
 User.ns = User.prototype = (function( ) {
 
     var _ns = {
-        version : "1.0",
-        constructor : User    
+            version : "1.0",
+            constructor : User    
+        },
+        _defaults = {
+            "challenge_url" : "/game/challenge",
+            "add_url" : "/socket/addfriend", 
+        };
+    
+    /* _makeXHRData
+     * returns the data needed for ajax calls
+     * @param {string} usr The username of the user being targeted
+     * @returns an obj 
+    */
+    function _makeXHRData( usr ){
+        return {
+            csrf_token : _csrf,
+            target : usr,
+            token : _cusr.token
+        };
+    };
+    
+    function _receive( data ) {
+           
     };
 
     _ns.rig = function( conf ) {
@@ -230,6 +258,7 @@ User.ns = User.prototype = (function( ) {
         this.wins = ( U.pint( conf.wins ) ) ? U.pint( conf.wins ) : 0;
         this.losses = ( U.pint( conf.losses ) ) ? U.pint( conf.losses ) : 0;
         
+        this.hb_flag = conf.hb_flag || false;
         this.active = conf.active || false;
         
         if( this.active !== false )
@@ -237,6 +266,14 @@ User.ns = User.prototype = (function( ) {
             
         this.token  = conf.token || false; 
     
+    };
+    
+    _ns.addFriend = function( usr, fn ) {
+        $.post( _defaults['add_url'], _makeXHRData( usr ), fn || _receive );
+    };
+    
+    _ns.challengeUser = function( usr, fn ) {
+        $.post( _defaults['challenge_url'], _makeXHRData( usr ), fn || _receive );
     };
 
     return _ns;
@@ -440,11 +477,11 @@ Chat.ns = Chat.prototype = (function ( ) {
         /* if there weren't tokens, stop immediately */
         if( this.chat_token === false || this.user_token === false )
             return false;
-        
     
         /* open up the socket */
         this.socket = Socket({ 
-            url : "/chat/socket", 
+            flag : conf.flag,
+            url : "/socket/chat", 
             events : { 'update' : _.bind( this.receive, this ) },
             token : this.chat_token,
             extras : { chat_token : this.chat_token, user_token : this.user_token }
@@ -504,14 +541,14 @@ Chat.renderAll = (function ( ) {
     return function ( ) {
         
         _.each( _chatRooms, function ( room ) {
-        
             var ele = $chatroomZone.find('section.chatroom[data-uid="'+ room.uid +'"]'),
                 indx = Chat.openUIDs.indexOf( room.uid ),
                 bottom = ( indx !== -1 ) ? "0px" : "-800px",
+                dis = ( indx !== -1 ) ? "block" : "none",
                 left = ( indx < 1 ) ? "0px" : (indx * 320) + "px";
                 
             ele.css({
-                "display" : "block",
+                "display" : dis,
                 "opacity" : "1.0",
                 "left"    : left
             }).stop().animate({
@@ -858,13 +895,14 @@ Utils = U = {
      * @param {{string}} type The style of logging to use
     */
     l : (function ( hasConsole ) {
-        if ( hasConsole == false || !DEBUGGING ) { return _efn; }
+        if ( hasConsole == false ) { return _efn; }
         
         var _log = function( msg ) { return _w.console.log("[" + msg + "]"); },
             _dir = function( msg ) { return _w.console.dir(msg); },
             _err = function( msg ) { return _w.console.error("!! " + msg); };
         
         return function ( msg, type ) {
+            if( !DEBUGGING ){ return false; }
             if( !type ) { return _log( msg ); }
             switch( type ) {
                 case "log":
@@ -1024,7 +1062,7 @@ Geo = (function( able ) {
             lng = position.coords.longitude,
             latlng = new google.maps.LatLng(lat,lng); 
         
-        $.post( "/home/heartbeat", { lat : lat, lng : lng, csrf_token : _csrf }, _efn );
+        $.post( "/socket/heartbeat", { lat : lat, lng : lng, csrf_token : _csrf }, _efn );
         
         options.center = latlng;
         
@@ -1065,7 +1103,7 @@ Heartbeat = (function( ) {
     var _ns = { },
         _defaults = { 
             "menu_id" : "#heartbeat-menu",
-            "socket_url" : "/home/heartbeat",
+            "socket_url" : "/socket/heartbeat",
             "container" : "#notification-list"
         },
         /* vars: */
@@ -1120,6 +1158,7 @@ Heartbeat = (function( ) {
         _socket =  Socket({ 
             url : _defaults['socket_url'], 
             token : _cusr.token,
+            flag : _cusr.hb_flag,
             events : { 'update' : _.bind( _ns.update, _ns ) }
         });
         _socket.open( );
@@ -1228,9 +1267,9 @@ domReady = function ( ) {
     if( _doc.getElementById("geo-zone") !== null )
         Geo.init( );
     
-    if( _doc.getElementById("chatroom-pullout") !== null )
+    if( _doc.getElementById("chatist-menu") !== null )
         Chat.renderAll( );
-    
+
 };
 
 
@@ -1246,5 +1285,6 @@ _w.hexo = hexo;
 
 /* set the dom ready function */
 hexo.Entry( domReady );
+$.ajaxSetup({ dataType : "json" });
     
 })( window );

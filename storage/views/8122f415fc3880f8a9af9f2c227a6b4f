@@ -1,0 +1,41 @@
+<article class="quickmenu block f right">
+    <div class="inner">
+        <div class="top cf">
+            <h4>Quick<em>Menu</em></h4>
+        </div>
+        <div class="bottom">    
+            <a href="/game/start" class="slick big gr4 t">
+            <?php if( Auth::user()->game() !== false ): ?>
+                Resume Game
+            <?php else: ?> 
+                Quick Game
+            <?php endif; ?>
+            </a>
+            <button class="add-new dis slick big gr4 t" data-type="chat-room">New Chatroom</button>
+        </div>
+        <div class="top cf">
+            <h4>Online<em>now</em></h4>
+        </div>
+        <div class="bottom">
+            <div class="head cf">
+                <h4 class="f col">Name</h4>
+                <h4 class="r col">Losses</h4>
+                <h4 class="r col">Wins</h4>
+            </div>
+            <ul class="online-list listing" id="online-list">
+        <?php foreach( User::online() as $user ): ?>
+                <li class="user cf"> 
+                    <?php if( $user['busy'] ): ?>
+<span class="icon busy f"></span>
+                    <?php else: ?>
+<button class="t challenge slick f gr3" data-user="<?php echo  $user['username'] ; ?>" data-type="challenge">+</button>
+                    <?php endif; ?>
+                    <h1 class="name f"><?php echo  $user['username'] ; ?></h2>
+                    <h1 class="amount r"><?php echo  $user['losses'] ; ?></h2>
+                    <h1 class="amount r"><?php echo  $user['wins'] ; ?></h2>
+                </li>
+        <?php endforeach; ?>
+            </ul>
+        </div>
+    </div>
+</article>

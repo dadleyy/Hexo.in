@@ -1,9 +1,5 @@
 <?php
 
-/* do not allow anyone but me */
-Header("Location: http://beta.hexo.in");
-return;
- 
 /**
  * Laravel - A PHP Framework For Web Artisans
  *

@@ -6,19 +6,19 @@
     
 "use strict";
 
-var /* entry point */
+var // entry point
     domEntry,
 
-    /* public: */
+    // public:
     Game,
     Tile,
     GameMessageBox,
     
-    /* private: */
+    // private:
     U = hexo.Utils,
-    _games = { },      // hash of game instances
+    _active_game = null,      // private reference
     
-    /* dom info */
+    // dom info:
     _renderZone,       // the render zone
     _$indicator,       // the turn indicator
     _$cscore,
@@ -29,7 +29,30 @@ var /* entry point */
     _defaults, _d,     // default settings       
     _layerInits = { }, // layer prep functions
     _userTurn = 1,     // the turn associated with the current user
+    _cusr = null,
     _csrf = false,
+    
+    _addCheck = function ( evt ) {
+        var $btn = $(evt.target);
+        return (function ( data ) {
+            if( data.success )
+                $btn.addClass("dis"); 
+        });
+    },
+    
+    /* _addOpponent
+    */
+    _addOpponent = function ( evt ) {
+        if( _active_game.visitor == false )
+            return false;
+            
+        if( _userTurn == 2 )
+            _active_game.visitor.addFriend( _active_game.challenger.username, _addCheck( evt ) );
+        else
+            _active_game.challenger.addFriend( _active_game.visitor.username, _addCheck( evt ) );
+            
+        return evt.preventDefault && evt.preventDefault( ); 
+    },
     
     /* _prepDom
      * Gets some DOM references, creates the needed
@@ -50,6 +73,8 @@ var /* entry point */
         
         _hexo.attr( _d['hexo'] );
         _helper.attr( _d['helpersvg'] );
+        
+        $(document).on( "click", "section.ingame-menu a.add-friend", _addOpponent );
     },
     
     /* _set
@@ -62,12 +87,26 @@ var /* entry point */
         
         game.token = conf.token || (errors.push("no key") && false);  
         game.uid = U.uid( );
-                
+    
         /* save this game above */
-        _games[game.uid] = game;
+        _active_game = game;
             
         game.score = conf.score || { visitor : 0, challenger : 0 };
-            
+        
+        /* set the rest of the stuff */
+        game.state = conf.state;
+        game.tiles = conf.tiles;
+        game.turn  = conf.turn || 0;
+        
+        if( conf.no_live === true ){
+            game.no_live = true;
+            return true;
+        }
+        
+        /* create the chatroom */
+        var cevts = { events : {'update' : _.bind( game.updateChat, game ) } },
+            cconf = $.extend( {}, cevts, conf.chatroom );
+        
         /* set the two users */
         game.challenger = hexo.User(conf.challenger);
         game.visitor = ( conf.visitor ) ? hexo.User(conf.visitor) : false;
@@ -77,21 +116,13 @@ var /* entry point */
             
         else if ( !game.visitor || ( !game.visitor.active && game.challenger.active) )
             _userTurn = 1;
-
-        /* set the rest of the stuff */
-        game.state = conf.state;
-        game.tiles = conf.tiles;
-        game.turn  = conf.turn || 0;
         
-        /* create the chatroom */
-        var cevts = { events : {'update' : _.bind( game.updateChat, game ) } },
-            cconf = $.extend( {}, cevts, conf.chatroom );
-            
         game.chatroom = hexo.Chat( cconf, true );
         
         /* make a new socket */
         game.socket = hexo.Socket({ 
             url : _d['gameserver'].socket, 
+            flag : conf.flag,
             token : game.token,
             events : { 
                 'update' : _.bind( game.update, game ),
@@ -136,6 +167,23 @@ var /* entry point */
              
         }
                     
+        game.msgbox = GameMessageBox({"selector":"#game-message-box"});
+                    
+        svg.attr( _d.dimensions );
+        
+        dom.svg = svg;
+        dom.layers = layers;
+        
+        if( game.state == 3 )
+            game.resolve( );
+        
+        $("a.reset-game").click( _.bind( game.reset, game ) );
+        
+        game.draw( );
+        
+        if( game.no_live === true )
+            return true;
+        
         /* hook the chatroom form up */
         _chatInput = game.chatroom.registerForm({
             form : document.getElementById( "chat-input" ),
@@ -145,18 +193,6 @@ var /* entry point */
         game.socket.open( );
         game.chatroom.start( );
         
-        game.msgbox = GameMessageBox({"selector":"#game-message-box"});
-                    
-        svg.attr( _d.dimensions );
-        
-        dom.svg = svg;
-        dom.layers = layers;
-        
-        if( game.state == 3 ){
-            game.resolve( );
-        }
-        
-        game.draw( );
     };
 
 /* Unique layer initialization functions */
@@ -201,6 +237,7 @@ _layerInits = {
             ny = y + ( set * 60 );
             set ++;
             
+            info.indx = i;
             /* make the tile, render and push */    
             var t = Tile( info , this );
             _tiles[i] = t.render( layer, nx, ny );
@@ -226,7 +263,7 @@ _defaults = _d = {
         width : "540px",
         height : "440px"
     },
-    gameserver : { socket : "/game/socket", moves : "/game/move" },
+    gameserver : { socket : "/socket/game", moves : "/game/move" },
     helpersvg : {
         width : "0px",
         height : "0px",
@@ -367,6 +404,7 @@ Tile.ns = Tile.prototype = (function ( ){
         this.game = game;    
         
         this.uid = U.uid( );
+        this.indx = opts.indx;
         
         this.state = opts.state || 0;
         this.value = opts.value || 0;
@@ -471,7 +509,7 @@ Game.ns = Game.prototype =  (function ( ) {
     _ns.postMove = function ( data ) {
         
         if( !data.success )
-            return this.notify( data.msg );
+            return this.notify( data );
     
         this.tiles[data.update.key].setState( data.update.state );
         
@@ -482,8 +520,7 @@ Game.ns = Game.prototype =  (function ( ) {
     };
     
     /* Game.update
-     * The callback from the socket. deals with the data
-     * send back from the long poll
+     * The callback to handle data from the socket.
      * @param {{object}} data Data object returned from server
     */
     _ns.update = function( data ) {
@@ -564,11 +601,12 @@ Game.ns = Game.prototype =  (function ( ) {
             
         _isBusy = true;
         var data = _moveData.apply( this, [tile] );
+    
         $.post( _d['gameserver'].moves, {
             "csrf_token" : _csrf,   
             "token" : this.token,
             "tile" : { "value" : tile.value, "state" : _userTurn }
-        }, _.bind( this.postMove, this ) );
+        }, _.bind( this.postMove, this ),  "json" );
         
     };
     
@@ -600,6 +638,13 @@ Game.ns = Game.prototype =  (function ( ) {
         
         $( _chatZone ).scrollTop( $( _chatZone ).height( ) + 1000 );
     };
+    
+    _ns.resetCheck = function ( data ) { };
+    
+    _ns.reset = function ( evt ) {
+        $.post( "/game/reset", { csrf_token : _csrf, token : this.token }, _.bind( this.resetCheck, this ) );
+        return evt.preventDefault && evt.preventDefault( );  
+    };
 
     return _ns;
 
@@ -614,10 +659,9 @@ domEntry = function( cusr, csrf ) {
     /* prepare the needed dom stufff */
     _prepDom( );
     _csrf = csrf;
-    /* render the game(s) */
-    for( var uid in _games ){
-        _render( _games[uid] );
-    }
+    _cusr = cusr;
+    /* render the game */
+    _render( _active_game );
     
 };
 

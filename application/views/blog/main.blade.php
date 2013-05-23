@@ -1,3 +1,5 @@
+@layout('layouts.common')
+
 @section('styles')
 <link rel="stylesheet" type="text/css" href="/css/blog.css">
 @endsection

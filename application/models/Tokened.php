@@ -37,30 +37,7 @@ class Tokened extends Eloquent {
         
         return $decoded_token;
     }
-    
-    public function decodeTokenArray( $tokenArr ){
-        if ( !is_array($tokenArr) ){ return $tokenArr; } 
         
-        $decoded_array  = array();
-        $decoded_token  = "";
-        $returned_array = array(); 
-        
-        foreach( $tokenArr as $index=>$value ){
-            $based = base_convert( $index, 16, 10);
-            $order = (int)substr( $based, 0, 1 );
-            $decoded_array[ $order - 1 ] = $value;
-        }
-        for( $i = 0; $i < count($decoded_array); $i++ ) {
-            $decoded_token = $decoded_token . (string)$decoded_array[$i];
-        }
-        $returned_array['decoded_array'] = $decoded_array;
-        $returned_array['decoded_token'] = $decoded_token;
-        
-        
-        return $decoded_token;
-    }
-
-    
     protected function encodeToken( $token ) {
         /* the information to be sent out */
         $key_pieces = array( );

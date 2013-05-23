@@ -13,7 +13,7 @@
 </head>
 <body>
     
-    @include('layouts.header')
+    @include('globals.header')
     
     <section class="content whole cf">
     <section class="main-content spw middle cf single">
@@ -65,11 +65,7 @@
     </section>
     </section>
     
-    @render('layouts.footer')
-    
-    @if ( Auth::check() )
-    @render( "layouts.pulldowns" )
-    @endif    
+    @render('globals.footer')
    
     @render('globals.scripts')
     <div id="fb-root"></div>

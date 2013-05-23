@@ -10,9 +10,7 @@ class Session_Controller extends Base_Controller {
     }
     
     public function action_create( ) {
-        return $this->layout
-                    ->nest("content", "sessions.login")
-                    ->with("title", "login");
+        return View::make('sessions.login')->with('title', 'login');
     }
     
     public function action_end( ) {
@@ -29,9 +27,7 @@ class Session_Controller extends Base_Controller {
     }
         
     public function action_registrar( ) { 
-        return $this->layout
-                    ->nest("content", "sessions.registrar")
-                    ->with("title", "register");
+        return View::make('sessions.registrar')->with('title', 'register');
     }
         
     public function action_attempt( ) { 

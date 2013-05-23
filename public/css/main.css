@@ -17,6 +17,7 @@
 .lightg.c{ color: #a0a0a0; }
 .darkg.c{ color: #404040; }
 .rale{ font-family: 'Raleway', sans-serif; }
+.whole.pw{ width: 100%; min-width: 1080px; }
 .righteous{ font-family: 'Righteous', cursive; }
 .addt{ 
     font-size: 20px;
@@ -80,7 +81,9 @@ body > section.content{
     padding: 20px 0px 0px 0px;
     position: relative;
     z-index: 50;
+    min-width: 1080px;
 }
+body > section.content .main-content{ background-color: #f5f5ef; }
 header{ 
     height: 45px;
     box-shadow: 0px 0px 1px 1px rgba(0,0,0,0.2);
@@ -88,6 +91,7 @@ header{
     z-index: 1000;
     display: block;
     overflow: visible;
+    min-width: 1080px;
 }
 header div.left-menu{
     position: relative;
@@ -116,6 +120,7 @@ header div.left-menu div.home-link{
     position: relative;
     z-index: 1000;
 }
+.gads{ width: 730px; }
 
 header div.left-menu div.home-link > div.inner{
     width: 160px;
@@ -438,6 +443,9 @@ button.slick.big:hover{
                 0px 0px 3px #00ccff;
 }
 
+article.quickmenu a.slick.big,
+article.quickmenu button.slick.big{ width: 419px; }
+
 header div.left-menu div.chat-list ul,
 section.main-content section.basic article.block ul.listing{ list-style: none; }
 
@@ -591,8 +599,8 @@ section.main-content article.form-container article.success{
     position: absolute;
     left: 0px;
     width: 100%;
-    top: -64px;
-    height: 64px;
+    top: -84px;
+    height: 84px;
     z-index: 10;
     text-align: left;
     background-color: #f5f5ef;
@@ -604,13 +612,18 @@ section.main-content article.form-container article.success > h4{
     margin: 0 0 0 10px;
     font-family: 'Raleway', sans-serif;
     font-size: 20px;
-    font-weight: 800;   
-    text-transform: uppercase;
+    font-weight: 400;   
+    text-transform: none;
     line-height: 22px;
     height: 22px;
-    color: #454545;
+    color: #757575;
 }
-section.main-content article.form-container article.success > h1{ margin-top: 10px; }
+section.main-content article.form-container article.success > h1{ 
+    text-transform: uppercase; 
+    color: #555; 
+    margin-top: 10px; 
+    font-weight: 800;
+}
 
 section.main-content article.form-container form div.input span.placeholder,
 section.main-content article.form-container form input[type="password"],
@@ -684,11 +697,19 @@ footer{
                 inset 0px -1px  rgba(255,255,255,0.1);
                 
 }
+footer a{ text-decoration: none; color: white; font-weight: 700; text-shadow: 0px 0px 0px white; }
+footer a:hover{ text-shadow: 0px 0px 16px red; }
 footer p.cpy{
     font-size: 12px;
     font-family: 'Open Sans', sans-serif;
     font-weight: 300;
     text-transform: uppercase;
+}
+footer div.social{
+    height: 20px;
+    margin-top: 2px;
+    padding: 0px 0px;
+    margin-right: 5px;
 }
 article.other-contact{ margin-right: -1px; }
 article.other-contact > div.inner{ padding-left: 20px; padding-right: 0px; }

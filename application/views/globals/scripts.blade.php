@@ -8,6 +8,17 @@
 <script type="text/javascript" src="{{ asset("js/IV.min.js") }}"></script>
 <script type="text/javascript" src="{{ asset("js/global.min.js") }}"></script>
 
+<!-- google codes -->
+<script type="text/javascript">
+(function() {
+    var po = document.createElement('script'); 
+    po.type = 'text/javascript'; 
+    po.async = true;
+    po.src = 'https://apis.google.com/js/plusone.js';
+    var s = document.getElementsByTagName('script')[0]; 
+    s.parentNode.insertBefore(po, s);
+})( );
+</script>
 <script type="text/javascript">
 var _gaq = _gaq || [];
 _gaq.push(['_setAccount', 'UA-39532711-1']);
@@ -27,14 +38,31 @@ _gaq.push(['_trackPageview']);
     
 })( );
 </script>
+<div class="middle gads">
+<script type="text/javascript"><!--
+google_ad_client = "ca-pub-9507342242236137";
+/* First Ads */
+google_ad_slot = "5746189401";
+google_ad_width = 728;
+google_ad_height = 90;
+//-->
+</script>
+<script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"></script>
+</div>
+<!-- end google analytics and adSense -->
+
+
 @if( Auth::user() !== null )
 
+<!-- user info -->
 <script type="text/javascript">hexo.User({{ Auth::user()->publicJSON() }})</script>
+<!-- end user info -->
 
+<!-- chatroom infos -->
 @foreach( Auth::user()->publicChats( ) as $chatroom )
-<script type="text/javascript">hexo.Chat( {{ $chatroom->publicJSON( ) }}, false )</script>
+<script type="text/javascript">hexo.Chat( {{ $chatroom->publicJSON( ) }}, false );</script>
 @endforeach
-
+<!-- end chatroom infos -->
 @endif
 
 <script type="text/template" data-name="game-notification">

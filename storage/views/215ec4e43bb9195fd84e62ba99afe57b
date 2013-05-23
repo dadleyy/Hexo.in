@@ -1,0 +1,30 @@
+<?php \Laravel\Section::start('styles'); ?>
+<link rel="stylesheet" type="text/css" href="/css/blog.css">
+<?php \Laravel\Section::stop(); ?>
+
+<?php \Laravel\Section::start('scripts'); ?>
+
+<?php \Laravel\Section::stop(); ?>
+
+<?php \Laravel\Section::start('content'); ?>
+<section class="main-content spw middle">
+     
+     <section class="posts cf">
+     <?php $posts = Blogpost::order_by("created_at","desc")->get(); ?>
+     <?php foreach( $posts as $post ): ?>
+        <article class="post f">
+            <div class="inner">
+                <div class="cf">
+                    <h3 class="date f"><?php echo  $post->posted( ) ; ?></h3>
+                    <h3 class="author r"><?php echo  $post->author( )->username ; ?></h3>
+                </div>
+                <h1><?php echo  $post->title ; ?></h1>
+                <p><?php echo  substr( $post->content, 0, 140 ) ; ?>...</p>
+                <a href="/blog/post/<?php echo  $post->id ; ?>" class="t" title="">read more</a>
+            </div>
+        </article>
+     <?php endforeach; ?>
+     </section>
+     
+</section>
+<?php \Laravel\Section::stop(); ?>

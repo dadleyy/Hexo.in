@@ -6,9 +6,19 @@ class Backupchats_Task {
         echo "====================".NL;
         echo "Running chat backup".NL.NL;
         foreach( Chatroom::all( ) as $chatroom ){
-            echo "moving: " . $chatroom->name.NL;
             
             $chat_location = $chatroom->chatFile( );
+            if( !file_exists( $chat_location ) ) {
+                echo "file not found: ".$chatroom->name."\r\n";
+                continue;
+            }
+            
+            if( intval( $chatroom->game_id ) !== -1 ) {
+                echo "skipping game chat: ".$chatroom->name.NL;
+                continue;
+            }
+            
+            echo "moving: " . $chatroom->name.NL;
             $chat_contents = json_decode( File::get( $chat_location ), true );
             $messages_ref  = $chat_contents['messages'];
             /* clear it out */
@@ -19,7 +29,7 @@ class Backupchats_Task {
             $b_path = path('storage').'backups/chats/';
             $b_name = $b_path.$f_name.'-'.time().".json";
             echo "original: " . $chat_location.NL;
-            echo "backup: " . $b_name.NL;
+            echo "backup: " . $b_name.NL.NL;
             
             $chat_contents['room_name'] = $chatroom->name;
             $chat_contents['messages'] = $messages_ref;

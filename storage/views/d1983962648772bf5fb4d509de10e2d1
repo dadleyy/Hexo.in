@@ -1,0 +1,12 @@
+<?php \Laravel\Section::start('styles'); ?>
+<link rel="stylesheet" type="text/css" href="/css/about.css">
+<?php \Laravel\Section::stop(); ?>
+
+<?php \Laravel\Section::start('scripts'); ?>
+<?php \Laravel\Section::stop(); ?>
+
+<?php \Laravel\Section::start('content'); ?>
+    <section class="main-content spw middle">
+        <h1>Coming<br><em class="righteous">soon</em></h1>
+    </section>
+<?php \Laravel\Section::stop(); ?>

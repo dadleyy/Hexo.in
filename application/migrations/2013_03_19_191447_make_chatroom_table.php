@@ -7,7 +7,7 @@ class Make_Chatroom_Table {
             $table->increments('id');
             
             $table->string('token');
-            $table->integer('game_id')->default(0);
+            $table->integer('game_id')->default(-1);
             
             $table->string('name');
             $table->unique('name');

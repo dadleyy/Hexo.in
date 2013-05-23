@@ -17,9 +17,8 @@ class User extends Tokened {
         
         foreach( $all_users as $user ) {
             
-            if ( $user->id === Auth::user()->id ) {
+            if ( $user->id === Auth::user()->id || $user->dummy_user == true )
                 continue;
-            }
         
             $last_time = strtotime( $user->last_update );
             $time_diff = $current_time - $last_time;
@@ -28,7 +27,7 @@ class User extends Tokened {
                 $user_info = json_decode( $user->publicJSON( ), true );
                 $user_info['busy'] = ( $user->game( ) !== false ) ? true : false; 
                 $online[] = $user_info;
-            }
+            } 
         }
            
         return $online;
@@ -38,8 +37,35 @@ class User extends Tokened {
      * Gets all of the user's friends
      * @returns [query] the query getting all the user's friends
     */
-    public function friends( ) { return Friend::where( "friender", "=", $this->id ); }
+    public function friends( ) { 
+        $friends = Friend::where( "friender", "=", $this->id )->get( ); 
+        $output = array( );
+        foreach( $friends as $friend ){
+            $output[] = User::find( $friend->friendee );
+        }
+        return $output;
+    }
     
+    /* user->addFriend
+    */
+    public function addFriend( $target ) {
+        $dups = Friend::where( "friender", "=", $this->id )->where( "friendee", "=", $target->id )->get( );
+        if( count( $dups ) > 0 )
+            return false;
+        
+        $friend = new Friend( );
+        $friend->friender = $this->id;
+        $friend->friendee = $target->id;
+        $friend->save( );
+    }
+    /* user->removeFriend
+    */
+    public function removeFriend( $target ) {
+        $matches = Friend::where( "friender", "=", $this->id )->where( "friendee", "=", $target->id )->get( );
+        foreach( $matches as $match ){
+            $match->delete( );
+        }
+    }
     
     /* user->chatrooms 
      * Queries all chatrooms that belong to the user.
@@ -52,7 +78,7 @@ class User extends Tokened {
      * @returns {string} A clean string for user join date
     */
     public function joined( ) { return date( 'M j, Y H:i', strtotime($this->created_at) ); }
-    
+        
     /* user->checkToken
      * Attempts to validate a token array sent in from a request
      * to see if it is in the proper format
@@ -79,7 +105,7 @@ class User extends Tokened {
         $chatrooms = $this->chatrooms( )->get( );
         $output    = array( );
         foreach( $chatrooms as $chat ) {
-            if( (int)$chat->game_id !== 0 ) { continue; }
+            if( (int)$chat->game_id !== -1 ) { continue; }
             $output[] = $chat;
         }
         return $output;
@@ -118,10 +144,14 @@ class User extends Tokened {
      * @return {boolean|Game} False if no game, the game if there is one
     */
     public function game( ) {
-        $current_game = Game::where("challenger_id", "=", $this->id )->take(1)->first( );
+        $current_game = Game::where( "challenger_id", "=", $this->id )
+                            ->where( "complete", "=", false )
+                            ->take(1)->first( );
         
         if( $current_game == null ) {
-            $current_game = Game::where("visitor_id", "=", $this->id )->take(1)->first( );
+            $current_game = Game::where("visitor_id", "=", $this->id )
+                                ->where( "complete", "=", false )
+                                ->take(1)->first( );
         }
         
         if( $current_game == null ) {
@@ -187,6 +217,7 @@ class User extends Tokened {
         if( Auth::check() && $this->id === Auth::user()->id ){ 
             $public['active'] = true;
             $public['token'] = $this->encodeToken( $token );
+            $public['hb_flag'] = sha1( count( $this->getUpdates( ) ) );
         }
         
         $public['wins'] = $this->wins;
