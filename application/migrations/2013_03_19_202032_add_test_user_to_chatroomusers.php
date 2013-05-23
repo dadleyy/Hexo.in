@@ -5,7 +5,7 @@ class Add_Test_User_To_Chatroomusers {
 	public function up( ) { 
         $chat = new Chatroom;
         
-        $chat->game_id = 0;
+        $chat->game_id = -1;
         $chat->token = sha1( "generalchat" );
         $chat->name = "General Chat";
         

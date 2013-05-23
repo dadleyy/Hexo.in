@@ -5,7 +5,7 @@ class Chatroom extends Tokened {
     public static $table = 'chatrooms';
     
     public static function publicRooms( ) {
-        $rooms = Chatroom::where("game_id","=","0")->get( ); 
+        $rooms = Chatroom::where( "game_id", "=", -1 )->get( ); 
         $output = array( );
         foreach( $rooms as $room ) {
             $output[] = json_decode( $room->publicJSON( ), true );
@@ -105,6 +105,7 @@ class Chatroom extends Tokened {
                             ? $active_user->getChatToken( $this->id ) 
                             : false;
         
+        $public['flag'] = $this->getFlag( );
         $public['name'] = $this->name;
         $public['messages'] = $this->mostRecentMessages( );
         $public['count'] = count( $this->users()->get() );

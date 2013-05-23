@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    
+    <title>Oddball | <?php echo  $title ; ?></title>
+    <meta name="author" content="Danny Hadley">
+    <meta name="application-name" content="prxx">
+    
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+        
+    <link rel="stylesheet" type="text/css" href="/css/global.css">
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+    <?php echo \Laravel\Section::yield('styles'); ?>
+    
+</head>
+<body>
+    
+    <?php echo render('layouts.header'); ?>
+    
+    <section class="content whole cf">
+    <?php echo \Laravel\Section::yield('content'); ?>
+    </section>
+    
+    <?php echo render('layouts.footer'); ?>
+   
+    <script type="text/javascript" src="/js/d3.js"></script>
+    <script type="text/javascript" src="/js/jquery.js"></script>
+    <script type="text/javascript" src="/js/global.js"></script>
+    <?php echo \Laravel\Section::yield('scripts'); ?>
+</body>
+</html>

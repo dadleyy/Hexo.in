@@ -12,16 +12,16 @@
 </head>
 <body>
     
-    @include('layouts.header')
+    @include('globals.header')
     
-    <section class="content whole cf">
+    <section class="content pw whole cf">
     @yield('content')
     </section>
     
-    @render('layouts.footer')
+    @render('globals.footer')
     
     @if ( Auth::check() )
-    @render( "layouts.pulldowns" )
+    @render( 'partials.pulldowns' )
     @endif    
    
     @render('globals.scripts')

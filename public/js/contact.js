@@ -6,48 +6,48 @@
 
 "use strict";
 
-var /* private entry point */
-    domReady,
-    
-    /* form-handlers */
-    errored,
-    success,
-    acallback,
-    
-    /* form-variables */
-    _container,
+var // entry point
+    domEntry,
+    // private vars
+    _csrf = null,
+    _sent = false,
+    // form-functions
+    _formSubmit,
+    _receiver,
+    // form-variables
+    _$container,
     _form,
     _validator;
     
-errored = function ( ) { };
-
-acallback = function ( data ) {
-    if( !data ) { return false; }   
-    data = JSON.parse( data );
-    if( !data.success ){ return false; }
-
-    _container
-        .stop().animate({ "height" : "66px" }, 600)
+_receiver = function ( data ) {
+    if( !data || !data.success ) { return false; }
+    
+    _$container
+        .stop().animate({ "height" : "86px" }, 600)
         .find("article.success")
         .stop().animate({ "top" : "0px"}, 600);
         
     $(_form).stop().animate({ "opacity" : "0.0" }, 200);
 };
 
-success = function ( hashed ) {
-    $.get( "/contact/send", hashed, acallback );
+_formSubmit = function ( iv ) {
+    if( _sent === true ){ return false; }
+    var d = { csrf_token : _csrf };
+    _.each( iv, function (val,key) { d[key] = val; });
+    $.post( "/contact/send", d, _receiver );
+    _sent = true;
 };
 
-domReady = function( ) {
-    _container = $("article.form-container");
-    _form = document.getElementById( "#contact-form" );
-    _validator = new IV({
+domEntry = function ( usr, csrf ) {
+    _csrf = csrf;
+    _$container = $("article.form-container");
+    _form = document.getElementById( "contact-form" );
+    return new IV({
         form : _form,
-        ecallback : errored,
-        callback : success 
+        callback : _formSubmit
     });
 };
     
-hexo.Entry( domReady );
+hexo.Entry( domEntry );
     
 })( );

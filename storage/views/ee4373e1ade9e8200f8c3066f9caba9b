@@ -1,0 +1,9 @@
+<?php \Laravel\Section::start('scripts'); ?>
+    
+<?php \Laravel\Section::stop(); ?>
+
+<?php \Laravel\Section::start('content'); ?>
+    <section class="main-content pw middle cf">
+        <h1 class="r">Login</h1>
+    </section>
+<?php \Laravel\Section::stop(); ?>

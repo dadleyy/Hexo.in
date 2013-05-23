@@ -60,10 +60,14 @@ class Game extends Tokened {
      * if none are open
     */
     public static function getOpen( ) {
-        $open = Game::where("visitor_id", "=", 0)->where("is_private","!=",true)->take(1)->first( );
+        $open = Game::where( "visitor_id", "=", 0 )
+                    ->where( "is_private", "!=", true )
+                    ->where( "complete", "=", false )
+                    ->first( );
+                    
         return ( $open === NULL ) ? false : $open;
     }
-    
+        
     /* Game::open
      * creates a new game with the challenger and target 
      * passed in as args 
@@ -78,6 +82,7 @@ class Game extends Tokened {
         
         $game->visitor_id = 0; 
         $game->challenger_id = $user->id;
+        $game->complete = false;
         
         if( $target !== 0 ) {
             $game->is_private = true;
@@ -140,6 +145,35 @@ class Game extends Tokened {
             }
         }
         return -1;
+    }
+    
+    /* game->restart
+     * clears out the json file and 
+     * restarts the game
+    */
+    public function restart( ) {
+        $challenger = $this->challenger( );
+        $visitor = $this->visitor( );
+        
+        $this->complete = false;   
+        $this->turn = 1;
+        $this->createJSON( );
+        $this->save( );
+        
+        if( $visitor == null )
+            return true;
+        
+        $file_location = $this->gameFile( );
+        $file_contents = File::get( $file_location );
+        $game_info = json_decode( $file_contents, true );
+        
+        /* add this user into that game and set state to 1 (playing) */
+        $game_info['visitor_id'] = $visitor->id;
+        $game_info['state'] = 1;
+        
+        /* save the json */
+        File::put( $file_location, json_encode( $game_info ) );
+        return true;
     }
     
     private function setTileState( $tile_value, $tile_state, $flip_turn = false ) {
@@ -304,25 +338,32 @@ class Game extends Tokened {
         return $info['flag'];
     }
     
-    public function resolve( ) { 
+    public function resolve( $winner = null ) { 
         $scores = $this->getScore( );
-        if( (int)$scores['visitor'] > (int)$scores['challenger'] ){
+        if( $this->visitor( ) === null ){ 
+            // do nothing  
+        } else if( (int)$scores['visitor'] > (int)$scores['challenger'] ){
             $this->visitor( )->addWin( );
             $this->challenger( )->addLoss( );
         } else {
             $this->challenger( )->addWin( );
             $this->visitor( )->addLoss( );
         }
+        $this->complete = true;
+        $this->save( );
     }
     
     /* game->updateFlag
      * Updates the game file with a new random flag to 
      * trigger any needed socket updates
     */
-    public function updateFlag( ) {
+    public function updateFlag( $p_flag = "", $p_state = -1 ) {
         $info = json_decode( File::get( $this->gameFile() ), true );    
-
-        if( $this->isComplete( ) === true && (int)$info['state'] !== 3 ){
+        
+        if( $p_flag !== "" && $p_state !== -1 ){
+            $info['flag'] = $p_flag;
+            $info['state'] = $p_state;
+        } else if( $this->isComplete( ) === true && (int)$info['state'] !== 3 ){
             $info['flag'] = "complete";
             $info['state'] = 3;
             $this->resolve( );
@@ -354,13 +395,16 @@ class Game extends Tokened {
         $public['token'] = $this->encodeToken( $this->token );
         $public['is_private'] = $this->is_private;
         
+        if( $this->is_tutorial )
+            $public['no_live'] = true;
+        
         /* output the two users */
         $public['challenger'] = json_decode( $this->challenger()->publicJSON( ), true );
         $public['visitor'] = ( $this->visitor() !== null ) 
                                     ? json_decode( $this->visitor()->publicJSON( ), true )
                                     : false;
         
-        if( $this->chatroom( ) !== null ){
+        if( $this->chatroom( ) !== null && !$this->is_tutorial ){
             $public['chatroom'] = json_decode( $this->chatroom( )->publicJSON( ), true );
         }
         

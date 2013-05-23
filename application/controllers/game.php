@@ -47,42 +47,35 @@ class Game_Controller extends Base_Controller {
     public function action_quit( ){
         $current_user = Auth::user( );
         $current_game = $current_user->game( );
+        
+        if( $current_game === false ) {
+            return Redirect::to( '/home' );
+        }
     
-        if( $current_game !== false ) {
-            
-            /* get the chatroom for this game */
-            $current_chat = $current_game->chatroom( );
-            
-            /* if there was an invite associated with this game - delete it */
-            $notification = Notification::where( "item_id", "=", $current_game->id )->first( );
-            if( $notification !== null ) {
-                $notification->delete( );
-            }
-            
-            if( $current_game->visitor() !== null && !$current_game->isComplete( ) ) {
-            
-                $current_user->addLoss( );
-                
-                /* if the quitter was the visitor - give the win to the challenger */
-                if( $current_game->visitor()->id === $current_user->id ){
-                    $current_game->challenger()->addWin( );
-                } 
-                /* if not - give the win to the visitor */
-                else {
-                    $current_game->visitor()->addWin( );
-                }
-            
-            }
-            
-            /* delete everything else */
-            File::delete( $current_game->gameFile( ) );
-            File::delete( $current_chat->chatfile( ) );
-            DB::table('chatroom_user')->where( 'chatroom_id', '=', $current_chat->id )->delete( );
-            
-            $current_game->delete( );
-            $current_chat->delete( );
+        /* if there was an invite associated with this game - delete it */
+        $notification = Notification::where( "item_id", "=", $current_game->id )->first( );
+        if( $notification !== null ) {
+            $notification->delete( );
         }
         
+        if( $current_game->visitor() !== null ) {
+            $current_user->addLoss( );
+            /* if the quitter was the visitor - give the win to the challenger */
+            if( $current_game->visitor()->id === $current_user->id ){
+                $current_game->challenger()->addWin( );
+            }
+            /* if not - give the win to the visitor */
+            else {
+                $current_game->visitor()->addWin( );
+            }
+        
+        }
+        
+        /* flag this game as over */
+        $current_game->updateFlag( "dead", 3 );
+        $current_game->complete = true;
+        $current_game->save( );
+    
         return Redirect::to( '/home' );
     }
     
@@ -140,112 +133,12 @@ class Game_Controller extends Base_Controller {
         return Response::make( json_encode($output), 200, $headers );
     }
     
-    public function action_socket( ) {
-                
-        $current_user = Auth::user( );
-        $current_game = $current_user->game( );
-        $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
-        $output = array( "success" => false, "code" => 4, "type"=>"game" );
-        
-        if( Request::forged( ) ) {
-            $output['success'] = false;
-            $output['code'] = 4;
-            return Response::make( json_encode( $output ), 200, $headers );
-        }
-                
-        if( $current_game == null || !Input::get("token") ){ 
-            $output['success'] = false;
-            $output['code'] = 4;
-            return Response::make( json_encode( $output ), 200, $headers );
-        }   
-        
-        $game_token = $current_game->token; 
-        $param_token = Input::get("token");
-        $decoded_param = $current_game->decodeTokenArray( $param_token );
-        
-        if( $game_token !== $decoded_param ) {
-            $output['success'] = false;
-            $output['code'] = 4;
-            return Response::make( json_encode( $output ), 200, $headers );
-        }
-        
-        /* at this point - the game is definitely legitimate */
-        $current_user->ping( );
-        
-        /* ************************************************** *
-         * SOCKET STATE - raw update required                 *
-         * The client has specifically asked for an update    *
-         * ************************************************** */
-        if( Input::get("raw") && Input::get("raw") == "raw" ) {  
-            $package = json_decode( $current_game->publicJSON( ), true );        
-            $output["success"] = true;
-            $output["code"] = 1;
-            $output["flag"] = $current_game->getFlag( );
-            $output["package"] = $package;
-            return Response::make( json_encode($output), 200, $headers );
-        }
-        
-        
-        $changed = false;
-        $loops   = 0;
-        $s_time  = time( );
-        $c_time  = time( );
-        
-        $original_flag = $current_game->getFlag( );
-        
-        while ( !$changed ) {
-            $c_time = time( );
-            
-            /* ************************************************** *
-             * SOCKET STATE - game over                           *
-             * The game is over if the game reference is null, or *
-             * the file for it doesnt exist anymore               *
-             * ************************************************** */
-            if( $current_game == null || $current_game->isDead( ) ) {
-                $output["success"] = false;
-                $output["code"]    = 4;
-                $output["flag"]    = "dead";
-                return Response::make( json_encode($output), 200, $headers );
-            }
-            
-            /* ************************************************** *
-             * SOCKET STATE - socket timeout                      *
-             * This socket loop has been going on for too long,   *
-             * it is time to let the client know to make a new rq *
-             * ************************************************** */
-            if( ($c_time - $s_time) >  15 || $loops > 20000 ){     
-                $output["success"] = true;
-                $output["code"]    = 2;
-                return Response::make( json_encode($output), 200, $headers );
-            }
-            
-            /* ************************************************** *
-             * SOCKET STATE - updated needed                      *
-             * There has been a change since the last time the    *
-             * socket hit this iteration, send the update to the  *
-             * client.                                            *
-             * ************************************************** */
-            if( $current_game->getFlag( ) !== $original_flag ){
-                $package = json_decode( $current_game->publicJSON( ), true );
-                $output["success"] = true;
-                $output["code"]    = 1;
-                $output["package"] = $package;
-                return Response::make( json_encode($output), 200, array() );
-            }
-            
-            /* loop and sleep */
-            $loops++;
-            usleep( 500000 );
-        }
-        
-        return Response::make( json_encode( array("success"=>false,"csrf"=>true) ), 404, array() );
-    }
-    
     public function action_start( $specific = -1 ){
         
         /* try to find the game the current user is playing (if any) */
         $current_user = Auth::user( );
         $current_game = $current_user->game( );
+
         // Chatroom::find(1)->removeUser( $current_user );
         if( $current_game !== false ) {
             return Redirect::to( '/game/play' );
@@ -285,8 +178,39 @@ class Game_Controller extends Base_Controller {
         
     }
     
-    public function action_challenge( ) {
+    public function action_reset( ) {
+        $output = array( 'success' => false, 'code' => 4 );
+        $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
         
+        if( Request::forged( ) ) {
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $current_user = Auth::user( );
+        $current_game = $current_user->game( );
+    
+        if( $current_game == null || Request::forged( ) ){ 
+            $output['msg'] = "invalid request";
+            return Response::make( json_encode($output), 200, $headers );
+        }   
+        
+        /* get the two tokens */
+        $g_token = Input::get("token");
+        $r_token = $current_game->token;
+      
+        if( Game::decodeToken($g_token) !== $r_token ){
+            $output['msg'] = "invalid token";
+            return Response::make( json_encode($output), 200, $headers );
+        }
+        
+        $current_game->restart( );
+        
+        $output['success'] = true;
+        $output['code'] = 1;        
+        return Response::make( json_encode($output), 200, $headers );
+    }
+    
+    public function action_challenge( ) {
         $output = array( 'success' => false, 'code' => 4 );
         $headers = array( 'Content-type' => 'application/json', 'X-Powered-By' => 'Dadleyy' );
         

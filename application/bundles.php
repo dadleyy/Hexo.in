@@ -34,5 +34,5 @@
 */
 
 return array(
-    'closure-compiler'
+    'sitemap' => array('auto' => true)
 );
