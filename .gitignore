@@ -4,3 +4,6 @@ application/config/database.phpi
 application/config/database.php
 
 application/config/*
+
+storage/
+error_log

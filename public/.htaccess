@@ -7,6 +7,7 @@
 
 # Turning on the rewrite engine is necessary for the following rules and
 # features. "+FollowSymLinks" must be enabled for this to work symbolically.
+AddHandler application/x-httpd-php54 .php
 
 <IfModule mod_rewrite.c>
 	Options +FollowSymLinks
